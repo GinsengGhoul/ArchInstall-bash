@@ -1,7 +1,7 @@
 #!/bin/bash
 # kernel could be any of the ones in official arch repos or
 # cachyOS repos
-kernel=linux-cachyos
+kernel=linux-cachyos-bore
 headers=$kernel-headers
 # microcode override, the script will try to do it automatically
 # options are intel-ucode and amd-ucode
