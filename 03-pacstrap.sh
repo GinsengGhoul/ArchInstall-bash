@@ -101,8 +101,8 @@ run() {
   detect_microcode
   install="pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode snapper neovim nano grub grub-btrfs efibootmgr git curl wget rsync ccache cachyos-mirrorlist cachyos-keyring"
   echo $install
-  # ${install}
-  pacstrap -PK /mnt base linux
+  ${install}
+  # pacstrap -PK /mnt base linux
   # generate /etc/fstab
   genfstab -U /mnt >> /mnt/etc/fstab
   # add pri=0 to physical swap partition if swap exist
