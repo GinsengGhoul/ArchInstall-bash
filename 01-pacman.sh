@@ -1,6 +1,6 @@
 #! /bin/bash
 # Gordon Teh 3/21/23
-#
+# 
 
 mirror_url="https://mirror.cachyos.org/repo/x86_64/cachyos"
 
@@ -153,6 +153,9 @@ run() {
       sed -i '/Color/s/^#//g' /etc/pacman.conf
       # uncomment Parallel Downloads
       sed -i '/ParallelDownloads/s/^#//g' /etc/pacman.conf
+      # uncomment multilib(32bit binaries)
+      sed -i '/#\[multilib\]/s/^#//' /etc/pacman.d/mirrorlist
+      sed -i '/#Include = \/etc\/pacman\.d\/mirrorlist/s/^#//' /etc/pacman.d/mirrorlist
       # update mirrorlists for faster update
       echo "updating for fastest mirrors"
       reflector -c "US" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist
