@@ -18,7 +18,7 @@ keymap=us
 timezone="America/Los-Angeles"
 
 setup_nvim(){
-  pacman -Sy nvim --needed
+  pacman -Sy --root /mnt neovim --needed
   # link nvim as vi and vim
   ln -s /usr/bin/nvim /mnt/usr/bin/vim
   ln -s /usr/bin/nvim /mnt/usr/bin/vi
