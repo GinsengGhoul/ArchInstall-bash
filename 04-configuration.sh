@@ -42,9 +42,6 @@ setup_nvim(){
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
   half_mem=$((total_mem / 2))
-  if ((total_mem % 2 == 1)); then
-    ((half_mem++))
-  fi
   echo "${half_mem}M"
   # override zram size here
 }
