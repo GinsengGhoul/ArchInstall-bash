@@ -17,6 +17,27 @@ keymap=us
 # # sunt5-cz-us
 timezone="America/Los-Angeles"
 
+setup_nvim(){
+  pacman -Sy nvim --needed
+  # link nvim as vi and vim
+  ln -s /usr/bin/nvim /mnt/usr/bin/vim
+  ln -s /usr/bin/nvim /mnt/usr/bin/vi
+  # create vimrc
+  echo 'set number
+ set wrap
+ syntax on
+ set mouse=
+ set expandtab
+ set shiftwidth=2
+ set softtabstop=2
+ set tabstop=2
+ set autoindent
+ set smartindent
+ set cc=80,90,100
+ map <F4> :nohl<CR>' > /mnt/etc/vimrc
+  # create a copy into nvim's config
+  cat /etc/vimrc >> /mnt/etc/xdg/nvim/sysinit.vim
+}
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
@@ -88,6 +109,21 @@ run() {
   echo "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >> /mnt/etc/fstab
   echo "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >> /mnt/etc/fstab
   echo  "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >> /mnt/etc/fstab
+  # Create Directories
+  dirs=(
+    /mnt/etc/modules-load.d
+    /mnt/etc/snapper/configs
+    /mnt/etc/default
+    /mnt/etc/conf.d
+    /mnt/etc/sysctl.d/
+    /etc/udev/rules.d
+    /mnt/etc/NetworkManager/conf.d
+    /etc/xdg/nvim/
+  )
+  for dir in "${dirs[@]}"; do
+    mkdir -p "$dir"
+  done
+
   echo $locale >> /mnt/etc/locale.gen
   echo "LANG="$locale"" > /mnt/etc/locale.conf
   echo "LANG="$locale"" > /mnt/etc/default/locale
@@ -105,8 +141,9 @@ run() {
 ::1         $hostname.localdomain   $hostname
 EOF
 
+  setup_nvim
+
   # configure snapper cleanup
-  mkdir -p /mnt/etc/snapper/configs/config
   cat >> /mnt/etc/snapper/configs/config <<EOF
 TIMELINE_MIN_AGE="1800"
 TIMELINE_LIMIT_HOURLY="5"
@@ -119,23 +156,23 @@ EOF
   # enable zram
   echo 'zram' > /mnt/etc/modules-load.d/zram.conf
   echo 'options zram num_devices=1' > /mnt/etc/modprobe.d/zram.conf
-  echo 'KERNEL=="zram0", ATTR{disksize}="$(half_memory)" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' > /mnt/etc/udev/rules.d/99-zram.rules
+  echo 'KERNEL=="zram0", ATTR{disksize}="'$(half_memory)'" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' > /mnt/etc/udev/rules.d/99-zram.rules
 
   # Blacklisting kernel modules
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
   chmod 600 /mnt/etc/modprobe.d/*
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /bin/disabled-bluetooth-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /bin/disabled-cdrom-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >> /bin/disabled-filesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >> /bin/disabled-firewire-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >> /bin/disabled-intelme-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >> /bin/disabled-msr-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >> /bin/disabled-netfilesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >> /bin/disabled-network-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >> /bin/disabled-thunderbolt-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /bin/disabled-vivid-by-security-misc
-  chmod 755 /bin/disabled*
-  chmod +x /bin/disabled*
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /mnt/bin/disabled-bluetooth-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /mnt/bin/disabled-cdrom-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >> /mnt/bin/disabled-filesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >> /mnt/bin/disabled-firewire-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >> /mnt/bin/disabled-intelme-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >> /mnt/bin/disabled-msr-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >> /mnt/bin/disabled-netfilesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >> /mnt/bin/disabled-network-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >> /mnt/bin/disabled-thunderbolt-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /mnt/bin/disabled-vivid-by-security-misc
+  chmod 755 /mnt/bin/disabled*
+  chmod +x /mnt/bin/disabled*
 
   # Security kernel settings.
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_security-misc.conf >> /mnt/etc/sysctl.d/30_security-misc.conf
@@ -147,12 +184,11 @@ EOF
   chmod 600 /mnt/etc/sysctl.d/*
 
 # IO udev rules, enables bpq scheduler for all disks
-  curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules > /etc/udev/rules.d/60-ioschedulers.rules
+  curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules > /mnt/etc/udev/rules.d/60-ioschedulers.rules
   chmod 600 /mnt/etc/udev/rules.d/*
 
   # Randomize Mac Address.
   # disable if random address is not wanted
-  mkdir -p /mnt/etc/NetworkManager/conf.d/
   cat > /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
 [device]
 wifi.scan-rand-mac-address=yes
