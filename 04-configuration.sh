@@ -199,3 +199,5 @@ EOF
 
   chmod 600 /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf
 }
+
+run
