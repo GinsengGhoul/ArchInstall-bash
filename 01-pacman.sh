@@ -154,8 +154,8 @@ run() {
       # uncomment Parallel Downloads
       sed -i '/ParallelDownloads/s/^#//g' /etc/pacman.conf
       # uncomment multilib(32bit binaries)
-      sed -i '/#\[multilib\]/s/^#//' /etc/pacman.d/mirrorlist
-      sed -i '/#Include = \/etc\/pacman\.d\/mirrorlist/s/^#//' /etc/pacman.d/mirrorlist
+      sed -i '/#\[multilib\]/s/^#//' /etc/pacman.conf
+      sed -i '/#Include = \/etc\/pacman\.d\/mirrorlist/s/^#//' /etc/pacman.conf
       # update mirrorlists for faster update
       echo "updating for fastest mirrors"
       reflector -c "US" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist
