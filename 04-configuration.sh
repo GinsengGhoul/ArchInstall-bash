@@ -17,27 +17,54 @@ keymap=us
 # # sunt5-cz-us
 timezone="America/Los-Angeles"
 
-setup_nvim(){
-  pacman -Sy --root /mnt neovim --needed
-  # link nvim as vi and vim
-  ln -s /usr/bin/nvim /mnt/usr/bin/vim
-  ln -s /usr/bin/nvim /mnt/usr/bin/vi
-  # create vimrc
-  echo 'set number
- set wrap
- syntax on
- set mouse=
- set expandtab
- set shiftwidth=2
- set softtabstop=2
- set tabstop=2
- set autoindent
- set smartindent
- set cc=80,90,100
- map <F4> :nohl<CR>' > /mnt/etc/vimrc
-  # create a copy into nvim's config
-  cat /etc/vimrc >> /mnt/etc/xdg/nvim/sysinit.vim
-}
+# user info
+# usernames can contain only
+# lowercase letters (a-z)
+# uppercase letters (A-Z)
+# digits (0-9)
+# underscores (_)
+# hyphens (-).
+
+users=(
+  "user1"
+  "user2"
+)
+
+adminusers=(
+  "user1"
+  "user2"
+)
+# user that will be used for installation of powerpill
+admin="user1"
+
+passwords=(
+  "password"
+  "password"
+)
+
+# corresponds with user
+shell=(
+  "/bin/bash"
+)
+
+usergroups=(
+  "games"   # some software needs this group
+)
+
+admingroups=(
+  "adm"             # full read access to journal files
+  "log"             # access to /var/log
+  "systemd-journal" # read only access to systemd logs
+  "ftp"             # acess to ftp server files
+  "http"            # acess to http server files
+  "rfkill"          # turn on and off wifi
+  "sys"             # configure cups without root
+  #"uucp"            # access to serial ports
+  #"lp"              # access to parallel ports
+  "wheel"           # can run any root command with password
+  "libvirt"         # virtual machine
+  "kvm"             # virtual machine
+)
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
@@ -96,6 +123,60 @@ reenable_features() {
   sed -i 's/^blacklist sr_mod/#&/' "$file"
 }
 
+setup_nvim(){
+  pacman -Sy --root /mnt neovim --needed
+  # link nvim as vi and vim
+  ln -s /usr/bin/nvim /mnt/usr/bin/vim
+  ln -s /usr/bin/nvim /mnt/usr/bin/vi
+  # create vimrc
+  echo 'set number
+ set wrap
+ syntax on
+ set mouse=
+ set expandtab
+ set shiftwidth=2
+ set softtabstop=2
+ set tabstop=2
+ set autoindent
+ set smartindent
+ set cc=80,90,100
+ map <F4> :nohl<CR>' > /mnt/etc/vimrc
+  # create a copy into nvim's config
+  cat /etc/vimrc >> /mnt/etc/xdg/nvim/sysinit.vim
+}
+
+create_users() {
+  for ((i=0; i<${#users[@]}; i++)); do
+    username=${users[$i]}
+    password=${passwords[$i]:-password} # If no password is set, set password to "password"
+    usergroups_arr=(${usergroups[$i]}) # Split usergroups string into an array
+    admingroups_arr=(${admingroups[$i]}) # Split admingroups string into an array
+    shell=${shell[$i]}
+
+    # Create the user
+    echo "Creating user: $username"
+    useradd -m -s "$shell" "$username"
+
+    # Set the password
+    echo "$username:$password" | chpasswd
+
+    # Add user to usergroups
+    for group in "${usergroups_arr[@]}"; do
+      echo "Adding $username to $group"
+      usermod -a -G "$group" "$username"
+    done
+
+    # Check if user is also in adminusers list
+    if [[ " ${adminusers[@]} " =~ " $username " ]]; then
+      # Add user to admingroups
+      for group in "${admingroups_arr[@]}"; do
+        echo "Adding $username to $group"
+        usermod -a -G "$group" "$username"
+      done
+    fi
+  done
+}
+
 run() {
   # generate /etc/fstab
   genfstab -U /mnt >> /mnt/etc/fstab
@@ -106,6 +187,7 @@ run() {
   echo "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >> /mnt/etc/fstab
   echo "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >> /mnt/etc/fstab
   echo  "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >> /mnt/etc/fstab
+
   # Create Directories
   dirs=(
     /mnt/etc/modules-load.d
@@ -113,17 +195,23 @@ run() {
     /mnt/etc/default
     /mnt/etc/conf.d
     /mnt/etc/sysctl.d/
-    /etc/udev/rules.d
+    /mnt/etc/udev/rules.d
     /mnt/etc/NetworkManager/conf.d
-    /etc/xdg/nvim/
+    /mnt/etc/xdg/nvim/
+    /mnt/etc/tmpfiles.d/
   )
   for dir in "${dirs[@]}"; do
     mkdir -p "$dir"
   done
 
+  # setup tmpfiles.d
+  echo "d /var/cache/pacman - - -" > /mnt/etc/tmpfiles.d/pacman-cache.conf
+  arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+
   echo $locale >> /mnt/etc/locale.gen
   echo "LANG="$locale"" > /mnt/etc/locale.conf
   echo "LANG="$locale"" > /mnt/etc/default/locale
+  arch-chroot /mnt locale-gen
   # Setting hostname.
   echo "$hostname" >> /mnt/etc/hostname
   echo "hostname=$hostname" >> /mnt/etc/conf.d/hostname
@@ -139,6 +227,10 @@ run() {
 EOF
 
   setup_nvim
+  create_users
+  arch-chroot /mnt su - $admin <<EOF
+paru -S powerpill --noconfirm
+EOF
 
   # configure snapper cleanup
   cat >> /mnt/etc/snapper/configs/config <<EOF
