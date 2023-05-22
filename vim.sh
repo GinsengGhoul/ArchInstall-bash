@@ -12,6 +12,8 @@ syntax on
 set mouse=
 set expandtab
 set shiftwidth=2
+set softtabstop=2
+set tabstop=2
 set autoindent
 set smartindent' > /etc/vimrc
 # create a copy into nvim's config
