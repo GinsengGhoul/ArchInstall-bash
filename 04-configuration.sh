@@ -157,10 +157,12 @@ create_users() {
 
     # Check if user is also in adminusers list
     if [[ " ${adminusers[@]} " =~ " $username " ]]; then
-      if ! getent group "$group" >/dev/null; then
-      echo "Creating group: $group"
-      arch-chroot /mnt groupadd "$group"
-      fi
+      for group in "${admingroups_arr[@]}"; do
+        if ! getent group "$group" >/dev/null; then
+          echo "Creating group: $group"
+          arch-chroot /mnt groupadd "$group"
+    fi
+    done
       # Add user to admingroups
       for group in "${admingroups_arr[@]}"; do
         echo "Adding $username to $group"
