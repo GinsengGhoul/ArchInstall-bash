@@ -1,10 +1,8 @@
 #!/bin/bash
-# basic install
-# pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode neovim cachyos-mirrorlist cachyos-keyring
-# other packages
-
-# leave empty for false
-ArchServer=
+# AUR helper, either aura, paru, or yay
+AUR="paru"
+# laptop, desktop, server
+ArchInstallType="laptop"
 DE=KDE
 # this script allows for the following DEs
 # Deepin
@@ -57,7 +55,6 @@ DE=KDE
 #  in terminal however if you want a GUI there’s blueman or blueberry.  Blueberry comes from cinnamon so
 #  if you want to choose cinnamon as your DE you don’t need to install either of these, KDE and gnome also
 #  come with one installed
-AUR="paru"
 bootloader="grub grub-btrfs efibootmgr"
 snapper="snapper snap-pac snap-sync"
 optimizations="ccahe irqbalance ananicy-cpp chrony"

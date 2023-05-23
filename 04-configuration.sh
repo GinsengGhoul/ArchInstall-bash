@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# AUR helper, either aura, paru, or yay
+AUR="paru"
 hostname=Workstation11 #set hostname before run
 # common nomenclature is all lowercase however archlinux doesn't
 # # stop you from setting one in caps, make sure it doesn't contain
@@ -172,6 +173,22 @@ create_users() {
   done
 }
 
+install_powerpill() {
+  if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
+    arch-chroot /mnt pacman -S --noconfirm $AUR
+    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
+  elif [[ $AUR == "aura" ]]; then
+    arch-chroot /mnt pacman -S --noconfirm $AUR
+    arch-chroot /mnt su - $admin -c "$AUR -A powerpill --noconfirm"
+  else
+    echo "Unknown AUR helper: $AUR, defaulting to paru"
+    AUR=paru
+    arch-chroot /mnt pacman -S --noconfirm $AUR
+    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
+    # Handle the case when an unknown AUR helper is provided
+  fi
+}
+
 run() {
   # generate /etc/fstab
   genfstab -U /mnt >> /mnt/etc/fstab
@@ -223,9 +240,7 @@ EOF
 
   setup_nvim
   create_users
-  arch-chroot /mnt su - $admin <<EOF
-paru -S powerpill --noconfirm
-EOF
+  install_powerpill
 
   # configure snapper cleanup
   cat >> /mnt/etc/snapper/configs/config <<EOF
