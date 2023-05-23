@@ -159,13 +159,9 @@ create_users() {
     # Check if user is also in adminusers list
     if [[ " ${adminusers[@]} " =~ " $username " ]]; then
       for group in "${admingroups_arr[@]}"; do
-        if ! getent group "$group" >/dev/null; then
-          echo "Creating group: $group"
-          arch-chroot /mnt groupadd "$group"
-    fi
-    done
-      # Add user to admingroups
-      for group in "${admingroups_arr[@]}"; do
+      # create the groups if they don't exist
+          arch-chroot /mnt groupadd -r "$group"
+        fi
         echo "Adding $username to $group"
         arch-chroot /mnt usermod -a -G "$group" "$username"
       done
@@ -174,6 +170,7 @@ create_users() {
 }
 
 install_powerpill() {
+  echo "Installing $AUR and powerpill"
   if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
     arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
@@ -185,7 +182,6 @@ install_powerpill() {
     AUR=paru
     arch-chroot /mnt pacman -S --noconfirm $AUR
     arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
-    # Handle the case when an unknown AUR helper is provided
   fi
 }
 
