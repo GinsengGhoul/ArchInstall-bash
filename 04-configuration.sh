@@ -25,14 +25,8 @@ timezone="America/Los-Angeles"
 # underscores (_)
 # hyphens (-).
 
-users=(
-  "user1"
-  "user2"
-)
-
-adminusers=(
-  "user2"
-)
+users=("user1" "user2")
+adminusers=("user2")
 # user that will be used for installation of powerpill
 admin="user2"
 
@@ -42,13 +36,8 @@ passwords=(
 )
 
 # corresponds with user
-shell=(
-  "/bin/bash"
-)
+shell=("/bin/bash")
 
-usergroups=(
-  "games"   # some software needs this group
-)
 #  "games"   # some software needs this group
 #  "adm"             # full read access to journal files
 #  "log"             # access to /var/log
@@ -62,18 +51,8 @@ usergroups=(
 #  "wheel"           # can run any root command with password
 #  "libvirt"         # virtual machine
 #  "kvm"             # virtual machine
-admingroups=(
-  "adm"
-  "log"
-  "systemd-journal"
-  "ftp"
-  "http"
-  "rfkill"
-  "sys"
-  "wheel"
-  "libvirt"
-  "kvm"
-)
+usergroups=("games")
+admingroups=("adm" "log" "systemd-journal" "ftp" "http" "rfkill" "sys" "wheel" "libvirt" "kvm")
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
@@ -114,42 +93,43 @@ update_swappiness() {
 }
 
 reenable_features() {
-  file="/mnt/etc/modprobe.d/30_security-misc.conf"
   # Use sed to comment out the lines to the specific modules
   # comment out the specific modules that don't neeed to be disabled
   # UDF if you want to
-  sed -i 's/^install udf \/bin\/disabled-filesys-by-security-misc/#&/' "$file"
+  sed -i 's/^install udf \/bin\/disabled-filesys-by-security-misc/#&/' $1
   # intel-me leave disabled(comment these lines) if on AMD
   # or not using intel wireless
-  sed -i 's/^install mei-me \/bin\/disabled-intelme-by-security-misc/#&/' "$file"
-  sed -i 's/^install mei \/bin\/disabled-intelme-by-security-misc/#&/' "$file"
+  sed -i 's/^install mei-me \/bin\/disabled-intelme-by-security-misc/#&/' $1
+  sed -i 's/^install mei \/bin\/disabled-intelme-by-security-misc/#&/' $1
   # enable bluetooth
-  sed -i 's/^install bluetooth \/bin\/disabled-bluetooth-by-security-misc/#&/' "$file"
-  sed -i 's/^install btusb \/bin\/disabled-bluetooth-by-security-misc/#&/' "$file"
+  sed -i 's/^install bluetooth \/bin\/disabled-bluetooth-by-security-misc/#&/' $1
+  sed -i 's/^install btusb \/bin\/disabled-bluetooth-by-security-misc/#&/' $1
   # cdrom support
-  sed -i 's/^blacklist cdrom/#&/' "$file"
+  sed -i 's/^blacklist cdrom/#&/' $1
   # scsi cdrom
-  sed -i 's/^blacklist sr_mod/#&/' "$file"
+  sed -i 's/^blacklist sr_mod/#&/' $1
 }
 
 setup_nvim(){
   pacman -Sy --root /mnt neovim --needed
   # link nvim as vi and vim
-  ln -s /usr/bin/nvim /mnt/usr/bin/vim
-  ln -s /usr/bin/nvim /mnt/usr/bin/vi
+  arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vim
+  arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
   # create vimrc
-  echo 'set number
- set wrap
- syntax on
- set mouse=
- set expandtab
- set shiftwidth=2
- set softtabstop=2
- set tabstop=2
- set autoindent
- set smartindent
- set cc=80,90,100
- map <F4> :nohl<CR>' > /mnt/etc/vimrc
+  cat <<EOF > /mnt/etc/vimrc
+set number
+set wrap
+syntax on
+set mouse=
+set expandtab
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
+set autoindent
+set smartindent
+set cc=80,90,100
+map <F4> :nohl<CR>
+EOF
   # create a copy into nvim's config
   cat /etc/vimrc >> /mnt/etc/xdg/nvim/sysinit.vim
 }
@@ -164,23 +144,27 @@ create_users() {
 
     # Create the user
     echo "Creating user: $username"
-    useradd -m -s "$shell" "$username"
+    arch-chroot /mnt useradd -m -s "$shell" "$username"
 
     # Set the password
-    echo "$username:$password" | chpasswd
+    arch-chroot /mnt chpasswd <<< "$username:$password"
 
     # Add user to usergroups
     for group in "${usergroups_arr[@]}"; do
       echo "Adding $username to $group"
-      usermod -a -G "$group" "$username"
+      arch-chroot /mnt usermod -a -G "$group" "$username"
     done
 
     # Check if user is also in adminusers list
     if [[ " ${adminusers[@]} " =~ " $username " ]]; then
+      if ! getent group "$group" >/dev/null; then
+      echo "Creating group: $group"
+      arch-chroot /mnt groupadd "$group"
+      fi
       # Add user to admingroups
       for group in "${admingroups_arr[@]}"; do
         echo "Adding $username to $group"
-        usermod -a -G "$group" "$username"
+        arch-chroot /mnt usermod -a -G "$group" "$username"
       done
     fi
   done
@@ -258,6 +242,7 @@ EOF
 
   # Blacklisting kernel modules
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
+  reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
   chmod 600 /mnt/etc/modprobe.d/*
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /mnt/bin/disabled-bluetooth-by-security-misc
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /mnt/bin/disabled-cdrom-by-security-misc
