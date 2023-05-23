@@ -31,11 +31,10 @@ users=(
 )
 
 adminusers=(
-  "user1"
   "user2"
 )
 # user that will be used for installation of powerpill
-admin="user1"
+admin="user2"
 
 passwords=(
   "password"
@@ -50,20 +49,30 @@ shell=(
 usergroups=(
   "games"   # some software needs this group
 )
-
+#  "games"   # some software needs this group
+#  "adm"             # full read access to journal files
+#  "log"             # access to /var/log
+#  "systemd-journal" # read only access to systemd logs
+#  "ftp"             # acess to ftp server files
+#  "http"            # acess to http server files
+#  "rfkill"          # turn on and off wifi
+#  "sys"             # configure cups without root
+#  #"uucp"            # access to serial ports
+#  #"lp"              # access to parallel ports
+#  "wheel"           # can run any root command with password
+#  "libvirt"         # virtual machine
+#  "kvm"             # virtual machine
 admingroups=(
-  "adm"             # full read access to journal files
-  "log"             # access to /var/log
-  "systemd-journal" # read only access to systemd logs
-  "ftp"             # acess to ftp server files
-  "http"            # acess to http server files
-  "rfkill"          # turn on and off wifi
-  "sys"             # configure cups without root
-  #"uucp"            # access to serial ports
-  #"lp"              # access to parallel ports
-  "wheel"           # can run any root command with password
-  "libvirt"         # virtual machine
-  "kvm"             # virtual machine
+  "adm"
+  "log"
+  "systemd-journal"
+  "ftp"
+  "http"
+  "rfkill"
+  "sys"
+  "wheel"
+  "libvirt"
+  "kvm"
 )
 
 half_memory() {
@@ -184,8 +193,8 @@ run() {
   sed -i '/^\S.*swap/s/\(^\S*\s\+\S\+\s\+\S\+\s\+\)\(\S\+\)\(\s\+.*\)/\1\2,pri=0\3/' /mnt/etc/fstab
   #add tmpfs and zram
   # set limits accordingly
-  echo "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >> /mnt/etc/fstab
-  echo "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >> /mnt/etc/fstab
+  echo  "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >> /mnt/etc/fstab
+  echo  "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >> /mnt/etc/fstab
   echo  "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >> /mnt/etc/fstab
 
   # Create Directories
@@ -208,9 +217,9 @@ run() {
   echo "d /var/cache/pacman - - -" > /mnt/etc/tmpfiles.d/pacman-cache.conf
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 
-  echo $locale >> /mnt/etc/locale.gen
-  echo "LANG="$locale"" > /mnt/etc/locale.conf
-  echo "LANG="$locale"" > /mnt/etc/default/locale
+  echo "$locale UTF-8">> /mnt/etc/locale.gen
+  echo "LANG=$locale" > /mnt/etc/locale.conf
+  echo "LANG=$locale" > /mnt/etc/default/locale
   arch-chroot /mnt locale-gen
   # Setting hostname.
   echo "$hostname" >> /mnt/etc/hostname
