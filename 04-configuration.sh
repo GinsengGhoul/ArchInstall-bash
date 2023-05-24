@@ -159,9 +159,8 @@ create_users() {
     # Check if user is also in adminusers list
     if [[ " ${adminusers[@]} " =~ " $username " ]]; then
       for group in "${admingroups_arr[@]}"; do
-      # create the groups if they don't exist
-          arch-chroot /mnt groupadd -r "$group"
-        fi
+        # Create the groups if they don't exist
+        arch-chroot /mnt groupadd -r "$group"
         echo "Adding $username to $group"
         arch-chroot /mnt usermod -a -G "$group" "$username"
       done
