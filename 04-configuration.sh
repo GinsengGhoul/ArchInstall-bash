@@ -170,8 +170,8 @@ create_users() {
 
 install_powerpill() {
   # install expect to the livecd environment to allow password inputs
-  pacman -S expect
-  
+  pacman -S --noconfirm expect
+
   for i in "${!users[@]}"; do
     if [[ "${users[$i]}" == "$admin" ]]; then
       adminpassword="${passwords[$i]}"
