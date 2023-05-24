@@ -169,18 +169,43 @@ create_users() {
 }
 
 install_powerpill() {
+  # install expect to the livecd environment to allow password inputs
+  pacman -S expect
+  
+  for i in "${!users[@]}"; do
+    if [[ "${users[$i]}" == "$admin" ]]; then
+      adminpassword="${passwords[$i]}"
+      break
+    fi
+  done
+
   echo "Installing $AUR and powerpill"
   if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
+    expect -c "
+      spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
+      expect \"Password:\"
+      send \"$adminpassword\r\"
+      expect eof
+    "
   elif [[ $AUR == "aura" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -A powerpill --noconfirm"
+    expect -c "
+      spawn arch-chroot /mnt su - $admin -c \"$AUR -A powerpill --noconfirm\"
+      expect \"Password:\"
+      send \"$adminpassword\r\"
+      expect eof
+    "
   else
     echo "Unknown AUR helper: $AUR, defaulting to paru"
     AUR=paru
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
+    expect -c "
+      spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
+      expect \"Password:\"
+      send \"$adminpassword\r\"
+      expect eof
+    "
   fi
 }
 
