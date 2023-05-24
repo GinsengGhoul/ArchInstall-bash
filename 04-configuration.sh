@@ -169,51 +169,12 @@ create_users() {
 }
 
 install_powerpill() {
-  # install expect to the livecd environment to allow password inputs
-  pacman -S --noconfirm expect
-
-  for i in "${!users[@]}"; do
-    if [[ "${users[$i]}" == "$admin" ]]; then
-      adminpassword="${passwords[$i]}"
-      break
-    fi
-  done
-
-  echo "Installing $AUR and powerpill"
-  if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    expect -c "
-      spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
-      expect \":: Proceed with installation? \[Y/n\]\"
-      send \"Y\r\"
-      expect \"Password:\"
-      send \"$adminpassword\r\"
-      expect eof
-    "
-  elif [[ $AUR == "aura" ]]; then
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    expect -c "
-      spawn arch-chroot /mnt su - $admin -c \"$AUR -A powerpill --noconfirm\"
-      expect \":: Proceed with installation? \[Y/n\]\"
-      send \"Y\r\"
-      expect \"Password:\"
-      send \"$adminpassword\r\"
-      expect eof
-    "
-  else
-    echo "Unknown AUR helper: $AUR, defaulting to paru"
-    AUR=paru
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    expect -c "
-      spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
-      expect \":: Proceed with installation? \[Y/n\]\"
-      send \"Y\r\"
-      expect \"Password:\"
-      send \"$adminpassword\r\"
-      expect eof
-    "
-  fi
+  # prebuilt binaries (last compiled: 2023 May 23)
+  sudo mount --bind ./PowerPill /mnt/powerpill
+  arch-chroot /mnt pacman -U --noconfirm /powerpill/pm2ml-2021.11.20.1-4-any.pkg.tar.zst /powerpill/powerpill-2021.11-4-any.pkg.tar.zst /powerpill/python3-xcgf-2021-4-any.pkg.tar.zst /powerpill/python3-xcpf-2021.12-3-any.pkg.tar.zst
+  arch-chroot /mnt paru
 }
+
 blacklist_kernelmodules(){
   # Blacklisting kernel modules
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
