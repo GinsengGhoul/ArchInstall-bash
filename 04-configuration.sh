@@ -139,8 +139,8 @@ create_users() {
   for ((i=0; i<${#users[@]}; i++)); do
     username=${users[$i]}
     password=${passwords[$i]:-password} # If no password is set, set password to "password"
-    usergroups_arr=(${usergroups[$i]}) # Split usergroups string into an array
-    admingroups_arr=(${admingroups[$i]}) # Split admingroups string into an array
+    usergroups_arr=("${usergroups[@]}") # Split usergroups string into an array
+    admingroups_arr=("${admingroups[@]}") # Split admingroups string into an array
     shell=${shell[$i]}
 
     # Create the user
