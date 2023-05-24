@@ -184,6 +184,8 @@ install_powerpill() {
     arch-chroot /mnt pacman -S --noconfirm $AUR
     expect -c "
       spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
+      expect \":: Proceed with installation? \[Y/n\]\"
+      send \"Y\r\"
       expect \"Password:\"
       send \"$adminpassword\r\"
       expect eof
@@ -192,6 +194,8 @@ install_powerpill() {
     arch-chroot /mnt pacman -S --noconfirm $AUR
     expect -c "
       spawn arch-chroot /mnt su - $admin -c \"$AUR -A powerpill --noconfirm\"
+      expect \":: Proceed with installation? \[Y/n\]\"
+      send \"Y\r\"
       expect \"Password:\"
       send \"$adminpassword\r\"
       expect eof
@@ -202,15 +206,36 @@ install_powerpill() {
     arch-chroot /mnt pacman -S --noconfirm $AUR
     expect -c "
       spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
+      expect \":: Proceed with installation? \[Y/n\]\"
+      send \"Y\r\"
       expect \"Password:\"
       send \"$adminpassword\r\"
       expect eof
     "
   fi
 }
+blacklist_kernelmodules(){
+  # Blacklisting kernel modules
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
+  reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
+  chmod 600 /mnt/etc/modprobe.d/*
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /mnt/bin/disabled-bluetooth-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /mnt/bin/disabled-cdrom-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >> /mnt/bin/disabled-filesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >> /mnt/bin/disabled-firewire-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >> /mnt/bin/disabled-intelme-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >> /mnt/bin/disabled-msr-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >> /mnt/bin/disabled-netfilesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >> /mnt/bin/disabled-network-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >> /mnt/bin/disabled-thunderbolt-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /mnt/bin/disabled-vivid-by-security-misc
+  chmod 755 /mnt/bin/disabled*
+  chmod +x /mnt/bin/disabled*
+}
 
 run() {
   # generate /etc/fstab
+  echo "Generate fstab."
   genfstab -U /mnt >> /mnt/etc/fstab
   # add pri=0 to physical swap partition if swap exist
   sed -i '/^\S.*swap/s/\(^\S*\s\+\S\+\s\+\S\+\s\+\)\(\S\+\)\(\s\+.*\)/\1\2,pri=0\3/' /mnt/etc/fstab
@@ -237,13 +262,16 @@ run() {
   done
 
   # setup tmpfiles.d
+  echo "Setting up tmpfiles.d"
   echo "d /var/cache/pacman - - -" > /mnt/etc/tmpfiles.d/pacman-cache.conf
-  arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 
+  echo "setup locale"
+  arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
   echo "$locale UTF-8">> /mnt/etc/locale.gen
   echo "LANG=$locale" > /mnt/etc/locale.conf
   echo "LANG=$locale" > /mnt/etc/default/locale
   arch-chroot /mnt locale-gen
+
   # Setting hostname.
   echo "$hostname" >> /mnt/etc/hostname
   echo "hostname=$hostname" >> /mnt/etc/conf.d/hostname
@@ -277,22 +305,7 @@ EOF
   echo 'options zram num_devices=1' > /mnt/etc/modprobe.d/zram.conf
   echo 'KERNEL=="zram0", ATTR{disksize}="'$(half_memory)'" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' > /mnt/etc/udev/rules.d/99-zram.rules
 
-  # Blacklisting kernel modules
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
-  reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
-  chmod 600 /mnt/etc/modprobe.d/*
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /mnt/bin/disabled-bluetooth-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /mnt/bin/disabled-cdrom-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >> /mnt/bin/disabled-filesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >> /mnt/bin/disabled-firewire-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >> /mnt/bin/disabled-intelme-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >> /mnt/bin/disabled-msr-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >> /mnt/bin/disabled-netfilesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >> /mnt/bin/disabled-network-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >> /mnt/bin/disabled-thunderbolt-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /mnt/bin/disabled-vivid-by-security-misc
-  chmod 755 /mnt/bin/disabled*
-  chmod +x /mnt/bin/disabled*
+  blacklist_kernelmodules
 
   # Security kernel settings.
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_security-misc.conf >> /mnt/etc/sysctl.d/30_security-misc.conf
@@ -309,6 +322,7 @@ EOF
 
   # Randomize Mac Address.
   # disable if random address is not wanted
+  echo "Setup NetworkManager to randomize mac addresses"
   cat > /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
 [device]
 wifi.scan-rand-mac-address=yes
