@@ -174,11 +174,6 @@ jailbreak_admin(){
   sed -i 's/%wheel ALL=(ALL:ALL) ALL/# %wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
 }
 
-straighttojail_admin(){
-  sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
-  sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
-}
-
 install_powerpill() {
   jailbreak_admin
   echo "Installing $AUR and powerpill"
@@ -193,9 +188,28 @@ install_powerpill() {
     AUR=paru
     install_powerpill
   fi
-  straighttojail_admin
+  # the admin user will be used for any further AUR packages so set the proper wheel permissions later
+  export admin="$admin"
 }
 
+blacklist_kernelmodules(){
+  # Blacklisting kernel modules
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
+  reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
+  chmod 600 /mnt/etc/modprobe.d/*
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /mnt/bin/disabled-bluetooth-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /mnt/bin/disabled-cdrom-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >> /mnt/bin/disabled-filesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >> /mnt/bin/disabled-firewire-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >> /mnt/bin/disabled-intelme-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >> /mnt/bin/disabled-msr-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >> /mnt/bin/disabled-netfilesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >> /mnt/bin/disabled-network-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >> /mnt/bin/disabled-thunderbolt-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /mnt/bin/disabled-vivid-by-security-misc
+  chmod 755 /mnt/bin/disabled*
+  chmod +x /mnt/bin/disabled*
+}
 
 run() {
   # generate /etc/fstab
