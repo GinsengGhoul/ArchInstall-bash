@@ -119,7 +119,7 @@ esac
 packages="$snapper $video $3d_video $video_acceleration $networking $ssh $browser $bluetooth $editor $fstools $fonts $qemu"
 aurpkgs="update-grub"
 run() {  
-  cat 
+  arch-chroot /mnt su - $admin -c "$AUR -S powerpill shim-signed --noconfirm"
 }
 
 run
