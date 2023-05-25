@@ -1,7 +1,7 @@
 #!/bin/bash
 # kernel could be any of the ones in official arch repos or
 # cachyOS repos
-kernel=linux-cachyos-bore
+kernel=linux-cachyos
 headers=$kernel-headers
 editor=neovim
 
