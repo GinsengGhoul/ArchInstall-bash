@@ -3,6 +3,8 @@
 macrandomize=true
 use_bpq=true
 user_zram=true
+# time in seconds before grub chooses the boot option
+grub_timeout=1
 # AUR helper, either aura, paru, or yay
 AUR="paru"
 hostname=ComputerName #set hostname before run
@@ -91,10 +93,10 @@ half_memory() {
 # 536870912      512mb
 # 1073741824    1024mb
 update_swappiness() {
-  sudo sed -i '/^vm.swappiness=/s/=.*/=100/' $1
-  sudo sed -i '/^vm.swappiness=/a vm.dirty_background_bytes = 16777216' $1
-  sudo sed -i '/^vm.swappiness=/a vm.dirty_bytes = 67108864' $1
-  sudo sed -i '/^vm.swappiness=/a vm.vfs_cache_pressure=500' $1
+  sed -i '/^vm.swappiness=/s/=.*/=100/' $1
+  sed -i '/^vm.swappiness=/a vm.dirty_background_bytes = 16777216' $1
+  sed -i '/^vm.swappiness=/a vm.dirty_bytes = 67108864' $1
+  sed -i '/^vm.swappiness=/a vm.vfs_cache_pressure=500' $1
 }
 
 reenable_features() {
@@ -139,6 +141,33 @@ configure_mounts(){
   # setup tmpfiles.d
   echo "creating /var/cache/pacman tmpfs mountpoint"
   echo "d /var/cache/pacman - - -" > /mnt/etc/tmpfiles.d/pacman-cache.conf
+}
+
+setup_grub(){
+  echo "setup faster grub timeout"
+  sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
+  echo "setting up apparmor boot arguments, disabling zswap and enabling resume"
+  sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0/' /mnt/etc/default/grub
+  sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub
+}
+
+setup_mkinitcpio() {
+  local HooksOG="HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont block filesystems fsck)"
+  local HooksNW="HOOKS=(systemd autodetect modconf kms keyboard keymap consolefont block filesystems fsck resume)"
+
+  # Check if the line already exists in the file
+  if grep -Fxq "$HooksOG" "$conf_file"; then
+    # Replace the line with the new line and preserve comments
+    sed -i "s@^$HooksOG\$@$HooksNW@" "/mnt/etc/mkinitcpio.conf"
+    echo "mkinitcpio.conf has the systemd and resume hook"
+  else
+    echo "The line was not found in mkinitcpio.conf."
+  fi
+  
+  echo "set compression to zstd:15"
+  sed -i 's/^#\(COMPRESSION="zstd"\)/\1/' /mnt/etc/mkinitcpio.conf
+  sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v -15)/' /mnt/etc/mkinitcpio.conf
+  arch-chroot /mnt mkinitcpio -P
 }
 
 create_dirs(){
@@ -219,10 +248,10 @@ install_powerpill() {
   echo "Installing $AUR and powerpill"
   if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
+    arch-chroot /mnt su - $admin -c "$AUR -S powerpill shim-signed --noconfirm"
   elif [[ $AUR == "aura" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -A powerpill --noconfirm"
+    arch-chroot /mnt su - $admin -c "$AUR -A powerpill shim-signed --noconfirm"
   else
     echo "Unknown AUR helper: $AUR, defaulting to paru"
     AUR=paru
@@ -332,8 +361,33 @@ EOF
   fi
 }
 
+setup_snapper() {
+  arch-chroot /mnt umount "/.snapshots"
+  arch-chroot /mnt rm -r "/.snapshots"
+  arch-chroot /mnt snapper --no-dbus -c root create-config /
+  arch-chroot /mnt btrfs subvolume delete "/.snapshots"
+  arch-chroot /mnt mkdir "/.snapshots"
+  arch-chroot /mnt mount -a
+  arch-chroot /mnt chmod 750 "/.snapshots"
+}
+
+install_grub() {
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot" --bootloader-id=Arch --removable
+  arch-chroot /mnt grub-install --target=i386-pc "$disk"
+  arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg"
+}
+
+setup_secureboot() {
+  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi /boot/EFI/Arch/
+  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi /boot/EFI/Arch/
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --label "Shim" --loader /boot/EFI/Arch/shimx64.efi
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --label "MOKmanager" --loader /boot/EFI/Arch/mmx64.efi
+}
+
 run() {
   configure_mounts
+  setup_grub
+  setup_mkinitcpio
   create_dirs
   setup_locale
   setup_hosts
@@ -344,6 +398,9 @@ run() {
   enable_zram
   blacklist_kernelmodules
   randomize_mac
+  setup_snapper
+  install_grub
+  setup_secureboot
 }
 
 run
