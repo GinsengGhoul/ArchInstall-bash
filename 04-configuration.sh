@@ -168,72 +168,34 @@ create_users() {
   done
 }
 
-install_powerpill() {
-<<<<<<< HEAD
-  # prebuilt binaries (last compiled: 2023 May 23)
-  sudo mount --bind ./PowerPill /mnt/powerpill
-  arch-chroot /mnt pacman -U --noconfirm /powerpill/pm2ml-2021.11.20.1-4-any.pkg.tar.zst /powerpill/powerpill-2021.11-4-any.pkg.tar.zst /powerpill/python3-xcgf-2021-4-any.pkg.tar.zst /powerpill/python3-xcpf-2021.12-3-any.pkg.tar.zst
-  arch-chroot /mnt paru
+jailbreak_admin(){
+  echo "$admin will temporarly have all permissions without password"
+  sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
+  sed -i 's/%wheel ALL=(ALL:ALL) ALL/# %wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
 }
 
-blacklist_kernelmodules(){
-  # Blacklisting kernel modules
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
-  reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
-  chmod 600 /mnt/etc/modprobe.d/*
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /mnt/bin/disabled-bluetooth-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /mnt/bin/disabled-cdrom-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >> /mnt/bin/disabled-filesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >> /mnt/bin/disabled-firewire-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >> /mnt/bin/disabled-intelme-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >> /mnt/bin/disabled-msr-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >> /mnt/bin/disabled-netfilesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >> /mnt/bin/disabled-network-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >> /mnt/bin/disabled-thunderbolt-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /mnt/bin/disabled-vivid-by-security-misc
-  chmod 755 /mnt/bin/disabled*
-  chmod +x /mnt/bin/disabled*
-=======
-  # install expect to the livecd environment to allow password inputs
-  pacman -S expect
-  
-  for i in "${!users[@]}"; do
-    if [[ "${users[$i]}" == "$admin" ]]; then
-      adminpassword="${passwords[$i]}"
-      break
-    fi
-  done
+straighttojail_admin(){
+  sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
+  sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
+}
 
+install_powerpill() {
+  jailbreak_admin
   echo "Installing $AUR and powerpill"
   if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    expect -c "
-      spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
-      expect \"Password:\"
-      send \"$adminpassword\r\"
-      expect eof
-    "
+    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
   elif [[ $AUR == "aura" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    expect -c "
-      spawn arch-chroot /mnt su - $admin -c \"$AUR -A powerpill --noconfirm\"
-      expect \"Password:\"
-      send \"$adminpassword\r\"
-      expect eof
-    "
+    arch-chroot /mnt su - $admin -c "$AUR -A powerpill --noconfirm"
   else
     echo "Unknown AUR helper: $AUR, defaulting to paru"
     AUR=paru
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    expect -c "
-      spawn arch-chroot /mnt su - $admin -c \"$AUR -S powerpill --noconfirm\"
-      expect \"Password:\"
-      send \"$adminpassword\r\"
-      expect eof
-    "
+    install_powerpill
   fi
->>>>>>> parent of 02749b1 (--noconfirm is needed to make sure it doesn't ask for input)
+  straighttojail_admin
 }
+
 
 run() {
   # generate /etc/fstab
