@@ -1,7 +1,11 @@
 #!/bin/bash
+# empty for false
+macrandomize=true
+use_bpq=true
+user_zram=true
 # AUR helper, either aura, paru, or yay
 AUR="paru"
-hostname=Workstation11 #set hostname before run
+hostname=ComputerName #set hostname before run
 # common nomenclature is all lowercase however archlinux doesn't
 # # stop you from setting one in caps, make sure it doesn't contain
 # # special characters
@@ -32,8 +36,8 @@ adminusers=("user2")
 admin="user2"
 
 passwords=(
-  "password"
-  "password"
+  "password1"
+  "password2"
 )
 
 # corresponds with user
@@ -111,6 +115,75 @@ reenable_features() {
   sed -i 's/^blacklist sr_mod/#&/' $1
 }
 
+setup_ioudev(){
+  if [ -n "$use_bpq" ]; then
+    echo "setup disks to use bpq scheduler"
+    # IO udev rules, enables bpq scheduler for all disks
+    curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules > /mnt/etc/udev/rules.d/60-ioschedulers.rules
+    chmod 600 /mnt/etc/udev/rules.d/*
+  fi
+}
+
+configure_mounts(){
+  # generate /etc/fstab
+  echo "Generate fstab."
+  genfstab -U /mnt >> /mnt/etc/fstab
+  # add pri=0 to physical swap partition if swap exist
+  sed -i '/^\S.*swap/s/\(^\S*\s\+\S\+\s\+\S\+\s\+\)\(\S\+\)\(\s\+.*\)/\1\2,pri=0\3/' /mnt/etc/fstab
+  #add tmpfs and zram
+  # set limits accordingly
+  echo "adding tmpfs and zram mounts"
+  echo  "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >> /mnt/etc/fstab
+  echo  "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >> /mnt/etc/fstab
+  echo  "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >> /mnt/etc/fstab
+  # setup tmpfiles.d
+  echo "creating /var/cache/pacman tmpfs mountpoint"
+  echo "d /var/cache/pacman - - -" > /mnt/etc/tmpfiles.d/pacman-cache.conf
+}
+
+create_dirs(){
+  # Create Directories
+  dirs=(
+    /mnt/etc/modules-load.d
+    /mnt/etc/snapper/configs
+    /mnt/etc/default
+    /mnt/etc/conf.d
+    /mnt/etc/sysctl.d/
+    /mnt/etc/udev/rules.d
+    /mnt/etc/NetworkManager/conf.d
+    /mnt/etc/xdg/nvim/
+    /mnt/etc/tmpfiles.d/
+  )
+  for dir in "${dirs[@]}"; do
+    echo "creating $dir"
+    mkdir -p "$dir"
+  done
+}
+
+setup_locale(){
+  echo "setup locale"
+  arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+  echo "$locale UTF-8">> /mnt/etc/locale.gen
+  echo "LANG=$locale" > /mnt/etc/locale.conf
+  echo "LANG=$locale" > /mnt/etc/default/locale
+  arch-chroot /mnt locale-gen
+}
+
+setup_hosts(){
+  # Setting hostname.
+  echo "Setting Hostname"
+  echo "$hostname" >> /mnt/etc/hostname
+  echo "hostname=$hostname" >> /mnt/etc/conf.d/hostname
+  # Setting hosts file.
+  echo "creating hosts file."
+  cat >> /mnt/etc/hosts <<EOF
+127.0.0.1   localhost
+::1         localhost
+127.0.1.1   $hostname.localdomain   $hostname
+::1         $hostname.localdomain   $hostname
+EOF
+}
+
 setup_nvim(){
   pacman -Sy --root /mnt neovim --needed
   # link nvim as vi and vim
@@ -132,7 +205,31 @@ set cc=80,90,100
 map <F4> :nohl<CR>
 EOF
   # create a copy into nvim's config
-  cat /etc/vimrc >> /mnt/etc/xdg/nvim/sysinit.vim
+  cat /mnt/etc/vimrc >> /mnt/etc/xdg/nvim/sysinit.vim
+}
+
+jailbreak_admin(){
+  echo "$admin will temporarly have all permissions without password"
+  sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
+  sed -i 's/%wheel ALL=(ALL:ALL) ALL/# %wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
+}
+
+install_powerpill() {
+  jailbreak_admin
+  echo "Installing $AUR and powerpill"
+  if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
+    arch-chroot /mnt pacman -S --noconfirm $AUR
+    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
+  elif [[ $AUR == "aura" ]]; then
+    arch-chroot /mnt pacman -S --noconfirm $AUR
+    arch-chroot /mnt su - $admin -c "$AUR -A powerpill --noconfirm"
+  else
+    echo "Unknown AUR helper: $AUR, defaulting to paru"
+    AUR=paru
+    install_powerpill
+  fi
+  # the admin user will be used for any further AUR packages so set the proper wheel permissions later
+  export admin="$admin"
 }
 
 create_users() {
@@ -168,31 +265,29 @@ create_users() {
   done
 }
 
-jailbreak_admin(){
-  echo "$admin will temporarly have all permissions without password"
-  sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
-  sed -i 's/%wheel ALL=(ALL:ALL) ALL/# %wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
+snapper_config(){
+    # configure snapper cleanup
+  cat >> /mnt/etc/snapper/configs/config <<EOF
+TIMELINE_MIN_AGE="1800"
+TIMELINE_LIMIT_HOURLY="5"
+TIMELINE_LIMIT_DAILY="7"
+TIMELINE_LIMIT_WEEKLY="0"
+TIMELINE_LIMIT_MONTHLY="0"
+TIMELINE_LIMIT_YEARLY="0"
+EOF
 }
 
-install_powerpill() {
-  jailbreak_admin
-  echo "Installing $AUR and powerpill"
-  if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -S powerpill --noconfirm"
-  elif [[ $AUR == "aura" ]]; then
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -A powerpill --noconfirm"
-  else
-    echo "Unknown AUR helper: $AUR, defaulting to paru"
-    AUR=paru
-    install_powerpill
+enable_zram(){
+  if [ -n "$use_zram" ]; then
+    # enable zram
+    echo 'zram' > /mnt/etc/modules-load.d/zram.conf
+    echo 'options zram num_devices=1' > /mnt/etc/modprobe.d/zram.conf
+    echo 'KERNEL=="zram0", ATTR{disksize}="'$(half_memory)'" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' > /mnt/etc/udev/rules.d/99-zram.rules
   fi
-  # the admin user will be used for any further AUR packages so set the proper wheel permissions later
-  export admin="$admin"
 }
 
 blacklist_kernelmodules(){
+  echo "disable unused kernel modules for better security"
   # Blacklisting kernel modules
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
   reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
@@ -209,81 +304,6 @@ blacklist_kernelmodules(){
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /mnt/bin/disabled-vivid-by-security-misc
   chmod 755 /mnt/bin/disabled*
   chmod +x /mnt/bin/disabled*
-}
-
-run() {
-  # generate /etc/fstab
-  echo "Generate fstab."
-  genfstab -U /mnt >> /mnt/etc/fstab
-  # add pri=0 to physical swap partition if swap exist
-  sed -i '/^\S.*swap/s/\(^\S*\s\+\S\+\s\+\S\+\s\+\)\(\S\+\)\(\s\+.*\)/\1\2,pri=0\3/' /mnt/etc/fstab
-  #add tmpfs and zram
-  # set limits accordingly
-  echo  "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >> /mnt/etc/fstab
-  echo  "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >> /mnt/etc/fstab
-  echo  "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >> /mnt/etc/fstab
-
-  # Create Directories
-  dirs=(
-    /mnt/etc/modules-load.d
-    /mnt/etc/snapper/configs
-    /mnt/etc/default
-    /mnt/etc/conf.d
-    /mnt/etc/sysctl.d/
-    /mnt/etc/udev/rules.d
-    /mnt/etc/NetworkManager/conf.d
-    /mnt/etc/xdg/nvim/
-    /mnt/etc/tmpfiles.d/
-  )
-  for dir in "${dirs[@]}"; do
-    mkdir -p "$dir"
-  done
-
-  # setup tmpfiles.d
-  echo "Setting up tmpfiles.d"
-  echo "d /var/cache/pacman - - -" > /mnt/etc/tmpfiles.d/pacman-cache.conf
-
-  echo "setup locale"
-  arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
-  echo "$locale UTF-8">> /mnt/etc/locale.gen
-  echo "LANG=$locale" > /mnt/etc/locale.conf
-  echo "LANG=$locale" > /mnt/etc/default/locale
-  arch-chroot /mnt locale-gen
-
-  # Setting hostname.
-  echo "$hostname" >> /mnt/etc/hostname
-  echo "hostname=$hostname" >> /mnt/etc/conf.d/hostname
- 
-
-  # Setting hosts file.
-  echo "Setting hosts file."
-  cat >> /mnt/etc/hosts <<EOF
-127.0.0.1   localhost
-::1         localhost
-127.0.1.1   $hostname.localdomain   $hostname
-::1         $hostname.localdomain   $hostname
-EOF
-
-  setup_nvim
-  create_users
-  install_powerpill
-
-  # configure snapper cleanup
-  cat >> /mnt/etc/snapper/configs/config <<EOF
-TIMELINE_MIN_AGE="1800"
-TIMELINE_LIMIT_HOURLY="5"
-TIMELINE_LIMIT_DAILY="7"
-TIMELINE_LIMIT_WEEKLY="0"
-TIMELINE_LIMIT_MONTHLY="0"
-TIMELINE_LIMIT_YEARLY="0"
-EOF
-
-  # enable zram
-  echo 'zram' > /mnt/etc/modules-load.d/zram.conf
-  echo 'options zram num_devices=1' > /mnt/etc/modprobe.d/zram.conf
-  echo 'KERNEL=="zram0", ATTR{disksize}="'$(half_memory)'" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' > /mnt/etc/udev/rules.d/99-zram.rules
-
-  blacklist_kernelmodules
 
   # Security kernel settings.
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_security-misc.conf >> /mnt/etc/sysctl.d/30_security-misc.conf
@@ -293,13 +313,12 @@ EOF
   update_swappiness "/mnt/etc/sysctl.d/30_security-misc.conf"
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_silent-kernel-printk.conf >> /mnt/etc/sysctl.d/30_silent-kernel-printk.conf
   chmod 600 /mnt/etc/sysctl.d/*
+}
 
-# IO udev rules, enables bpq scheduler for all disks
-  curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules > /mnt/etc/udev/rules.d/60-ioschedulers.rules
-  chmod 600 /mnt/etc/udev/rules.d/*
-
+randomize_mac(){
   # Randomize Mac Address.
   # disable if random address is not wanted
+  if [ -n "$macrandomize" ]; then
   echo "Setup NetworkManager to randomize mac addresses"
   cat > /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
 [device]
@@ -310,6 +329,21 @@ ethernet.cloned-mac-address=random
 EOF
 
   chmod 600 /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf
+  fi
+}
+
+run() {
+  configure_mounts
+  create_dirs
+  setup_locale
+  setup_hosts
+  setup_nvim
+  create_users
+  install_powerpill
+  snapper_config
+  enable_zram
+  blacklist_kernelmodules
+  randomize_mac
 }
 
 run

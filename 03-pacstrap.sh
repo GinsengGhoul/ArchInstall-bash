@@ -26,7 +26,7 @@ detect_microcode() {
 run() {
   # pacstrap
   detect_microcode
-  pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist cachyos-keyring
+  pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist cachyos-keyring grub grub-btrfs efibootmgr
 }
 
 run
