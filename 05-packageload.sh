@@ -55,7 +55,6 @@ DE=KDE
 #  in terminal however if you want a GUI there’s blueman or blueberry.  Blueberry comes from cinnamon so
 #  if you want to choose cinnamon as your DE you don’t need to install either of these, KDE and gnome also
 #  come with one installed
-bootloader="grub grub-btrfs efibootmgr"
 snapper="snapper snap-pac snap-sync"
 optimizations="ccahe irqbalance ananicy-cpp chrony"
 computer_signals="acpid tlp"
@@ -117,8 +116,8 @@ esac
 }
 
 # use powerpill for multithreaded downloads
-packages="$bootloader $snapper $video $3d_video $video_acceleration $networking $ssh $browser $bluetooth $editor $fstools $fonts $qemu"
-aurpkgs="powerpill update-grub"
+packages="$snapper $video $3d_video $video_acceleration $networking $ssh $browser $bluetooth $editor $fstools $fonts $qemu"
+aurpkgs="update-grub"
 run() {  
   cat 
 }
