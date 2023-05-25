@@ -156,7 +156,7 @@ setup_mkinitcpio() {
   local HooksNW="HOOKS=(systemd autodetect modconf kms keyboard keymap consolefont block filesystems fsck resume)"
 
   # Check if the line already exists in the file
-  if grep -Fxq "$HooksOG" "$/mnt/etc/mkinitcpio.conf"; then
+  if grep -Fxq "$HooksOG" "/mnt/etc/mkinitcpio.conf"; then
     # Replace the line with the new line and preserve comments
     sed -i "s@^$HooksOG\$@$HooksNW@" "/mnt/etc/mkinitcpio.conf"
     echo "mkinitcpio.conf has the systemd and resume hook"
