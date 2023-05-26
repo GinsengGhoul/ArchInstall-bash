@@ -1,65 +1,4 @@
 #!/bin/bash
-# empty for false
-macrandomize=true
-use_bpq=true
-user_zram=true
-# time in seconds before grub chooses the boot option
-grub_timeout=1
-# AUR helper, either aura, paru, or yay
-AUR="paru"
-hostname=ComputerName #set hostname before run
-# common nomenclature is all lowercase however archlinux doesn't
-# # stop you from setting one in caps, make sure it doesn't contain
-# # special characters
-
-locale=en_US.UTF-8
-keymap=us
-# # all US keymaps provided by ArchLinux
-# # amiga-us
-# # atari-us
-# # br-latin1-us
-# # is-latin1-us
-# # us
-# # mac-us
-# # sunt5-cz-us
-timezone="America/Los-Angeles"
-
-# user info
-# usernames can contain only
-# lowercase letters (a-z)
-# uppercase letters (A-Z)
-# digits (0-9)
-# underscores (_)
-# hyphens (-).
-
-users=("user1" "user2")
-adminusers=("user2")
-# user that will be used for installation of powerpill
-admin="user2"
-
-passwords=(
-  "password1"
-  "password2"
-)
-
-# corresponds with user
-shell=("/bin/bash")
-
-#  "games"   # some software needs this group
-#  "adm"             # full read access to journal files
-#  "log"             # access to /var/log
-#  "systemd-journal" # read only access to systemd logs
-#  "ftp"             # acess to ftp server files
-#  "http"            # acess to http server files
-#  "rfkill"          # turn on and off wifi
-#  "sys"             # configure cups without root
-#  #"uucp"            # access to serial ports
-#  #"lp"              # access to parallel ports
-#  "wheel"           # can run any root command with password
-#  "libvirt"         # virtual machine
-#  "kvm"             # virtual machine
-usergroups=("games")
-admingroups=("adm" "log" "systemd-journal" "ftp" "http" "rfkill" "sys" "wheel" "libvirt" "kvm")
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
@@ -118,7 +57,7 @@ reenable_features() {
 }
 
 setup_ioudev(){
-  if [ -n "$use_bpq" ]; then
+  if [ -n "$bpq" ]; then
     echo "setup disks to use bpq scheduler"
     # IO udev rules, enables bpq scheduler for all disks
     curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules > /mnt/etc/udev/rules.d/60-ioschedulers.rules
@@ -257,8 +196,6 @@ install_powerpill() {
     AUR=paru
     install_powerpill
   fi
-  # the admin user will be used for any further AUR packages so set the proper wheel permissions later
-  export admin="$admin"
 }
 
 create_users() {
@@ -295,7 +232,7 @@ create_users() {
 }
 
 snapper_config(){
-    # configure snapper cleanup
+  # configure snapper cleanup
   cat >> /mnt/etc/snapper/configs/config <<EOF
 TIMELINE_MIN_AGE="1800"
 TIMELINE_LIMIT_HOURLY="5"
@@ -307,7 +244,7 @@ EOF
 }
 
 enable_zram(){
-  if [ -n "$use_zram" ]; then
+  if [ -n "$zram" ]; then
     # enable zram
     echo 'zram' > /mnt/etc/modules-load.d/zram.conf
     echo 'options zram num_devices=1' > /mnt/etc/modprobe.d/zram.conf
@@ -347,7 +284,7 @@ blacklist_kernelmodules(){
 randomize_mac(){
   # Randomize Mac Address.
   # disable if random address is not wanted
-  if [ -n "$macrandomize" ]; then
+  if [ -n "$randomize_mac" ]; then
   echo "Setup NetworkManager to randomize mac addresses"
   cat > /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
 [device]
@@ -361,27 +298,17 @@ EOF
   fi
 }
 
-setup_snapper() {
-  arch-chroot /mnt umount "/.snapshots"
-  arch-chroot /mnt rm -r "/.snapshots"
-  arch-chroot /mnt snapper --no-dbus -c root create-config /
-  arch-chroot /mnt btrfs subvolume delete "/.snapshots"
-  arch-chroot /mnt mkdir "/.snapshots"
-  arch-chroot /mnt mount -a
-  arch-chroot /mnt chmod 750 "/.snapshots"
-}
-
 install_grub() {
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot" --bootloader-id=Arch --removable
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot/efi" --bootloader-id=Arch --removable
   arch-chroot /mnt grub-install --target=i386-pc "$disk"
   arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg"
 }
 
 setup_secureboot() {
-  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi /boot/EFI/Arch/
-  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi /boot/EFI/Arch/
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --label "Shim" --loader /boot/EFI/Arch/shimx64.efi
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --label "MOKmanager" --loader /boot/EFI/Arch/mmx64.efi
+  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi /boot/efi/EFI/Arch/
+  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi /boot/efi/EFI/Arch/
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "Shim" --loader /boot/efi/EFI/BOOT/shimx64.efi
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "MOKmanager" --loader /boot/efi/EFI/BOOT/mmx64.efi
 }
 
 run() {
@@ -391,6 +318,7 @@ run() {
   create_dirs
   setup_locale
   setup_hosts
+  snapper_config
   setup_nvim
   create_users
   install_powerpill
@@ -398,9 +326,9 @@ run() {
   enable_zram
   blacklist_kernelmodules
   randomize_mac
-  setup_snapper
   install_grub
   setup_secureboot
 }
 
+source Configuration.cfg
 run
