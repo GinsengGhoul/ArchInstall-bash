@@ -372,7 +372,7 @@ setup_snapper() {
 }
 
 install_grub() {
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot" --bootloader-id=Arch --removable
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot/efi" --bootloader-id=Arch --removable
   arch-chroot /mnt grub-install --target=i386-pc "$disk"
   arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg"
 }
@@ -380,24 +380,24 @@ install_grub() {
 setup_secureboot() {
   arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi /boot/EFI/Arch/
   arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi /boot/EFI/Arch/
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --label "Shim" --loader /boot/EFI/Arch/shimx64.efi
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --label "MOKmanager" --loader /boot/EFI/Arch/mmx64.efi
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "Shim" --loader /boot/EFI/Arch/shimx64.efi
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "MOKmanager" --loader /boot/EFI/Arch/mmx64.efi
 }
 
 run() {
   configure_mounts
   setup_grub
-  #setup_mkinitcpio
-  #create_dirs
-  #setup_locale
-  #setup_hosts
-  #setup_nvim
-  #create_users
-  #install_powerpill
-  #snapper_config
-  #enable_zram
-  #blacklist_kernelmodules
-  #randomize_mac
+  setup_mkinitcpio
+  create_dirs
+  setup_locale
+  setup_hosts
+  setup_nvim
+  create_users
+  install_powerpill
+  snapper_config
+  enable_zram
+  blacklist_kernelmodules
+  randomize_mac
   setup_snapper
   install_grub
   setup_secureboot
