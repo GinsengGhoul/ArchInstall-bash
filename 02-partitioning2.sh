@@ -213,7 +213,7 @@ mksubvol(){
   for vol in "${SUBVOLS[@]}"
   do
     btrfs subvolume create "/mnt/@/$vol"
-    #echo "this is "$vol"" > /mnt/@/"$vol"/info
+    echo "this is "$vol"" > /mnt/@/"$vol"/info
   done
   if [ $home -eq 0 ]; then
     btrfs subvol create /mnt/@/home
@@ -225,6 +225,7 @@ mksubvol(){
   fi
   # create snapshot subvol
   btrfs subvolume create /mnt/@/.snapshots
+  echo "this is /.snapshots" > /mnt/@/.snapshots/info
   mkdir -p /mnt/@/.snapshots/1
   btrfs subvolume create /mnt/@/.snapshots/1/snapshot
   echo "This is /@/.snapshots/1/snapshot" > /mnt/@/.snapshots/1/snapshot/info
@@ -282,6 +283,10 @@ EOF
     mkdir -p "/mnt/$vol"
     mount -o "$mountargs,subvol=@/$vol" "$rootpath" "/mnt/$vol"
   done
+  
+  echo "trying to mount .snapshots on $rootpath, with these flags: $mountargs"
+  mkdir -p "/mnt/.snapshots"
+  mount -o "$mountargs,subvol=@/.snapshots" "$rootpath" "/mnt/.snapshots"
 
   mkdir -p /mnt/home
   mkdir -p /mnt/var/lib/libvirt
