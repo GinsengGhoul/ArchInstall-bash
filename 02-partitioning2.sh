@@ -1,14 +1,12 @@
 #! /bin/bash
 # public variables
-disk=/dev/sda
 make_recovery=true
 increment=1024
-ssd=true
 # compression levels
 min_level=1
 max_level=15
 ram_path=/ram
-# size in Mib
+# test size in Mib
 size=16
 
 # testing overrides
@@ -187,7 +185,6 @@ format_drive(){
   else
     Swap_UUID=""
   fi
-  export disk=$disk
 }
 
 mksubvol(){
@@ -482,4 +479,5 @@ else
 }
 
 # the program itself
+source Configuration
 run

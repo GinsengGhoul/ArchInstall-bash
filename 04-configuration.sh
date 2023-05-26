@@ -1,65 +1,4 @@
 #!/bin/bash
-# empty for false
-macrandomize=true
-use_bpq=true
-user_zram=true
-# time in seconds before grub chooses the boot option
-grub_timeout=1
-# AUR helper, either aura, paru, or yay
-AUR="paru"
-hostname=ComputerName #set hostname before run
-# common nomenclature is all lowercase however archlinux doesn't
-# # stop you from setting one in caps, make sure it doesn't contain
-# # special characters
-
-locale=en_US.UTF-8
-keymap=us
-# # all US keymaps provided by ArchLinux
-# # amiga-us
-# # atari-us
-# # br-latin1-us
-# # is-latin1-us
-# # us
-# # mac-us
-# # sunt5-cz-us
-timezone="America/Los-Angeles"
-
-# user info
-# usernames can contain only
-# lowercase letters (a-z)
-# uppercase letters (A-Z)
-# digits (0-9)
-# underscores (_)
-# hyphens (-).
-
-users=("user1" "user2")
-adminusers=("user2")
-# user that will be used for installation of powerpill
-admin="user2"
-
-passwords=(
-  "password1"
-  "password2"
-)
-
-# corresponds with user
-shell=("/bin/bash")
-
-#  "games"   # some software needs this group
-#  "adm"             # full read access to journal files
-#  "log"             # access to /var/log
-#  "systemd-journal" # read only access to systemd logs
-#  "ftp"             # acess to ftp server files
-#  "http"            # acess to http server files
-#  "rfkill"          # turn on and off wifi
-#  "sys"             # configure cups without root
-#  #"uucp"            # access to serial ports
-#  #"lp"              # access to parallel ports
-#  "wheel"           # can run any root command with password
-#  "libvirt"         # virtual machine
-#  "kvm"             # virtual machine
-usergroups=("games")
-admingroups=("adm" "log" "systemd-journal" "ftp" "http" "rfkill" "sys" "wheel" "libvirt" "kvm")
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
@@ -257,8 +196,6 @@ install_powerpill() {
     AUR=paru
     install_powerpill
   fi
-  # the admin user will be used for any further AUR packages so set the proper wheel permissions later
-  export admin="$admin"
 }
 
 create_users() {
@@ -361,16 +298,6 @@ EOF
   fi
 }
 
-setup_snapper() {
-  arch-chroot /mnt umount "/.snapshots"
-  arch-chroot /mnt rm -r "/.snapshots"
-  arch-chroot /mnt snapper --no-dbus -c root create-config /
-  arch-chroot /mnt btrfs subvolume delete "/.snapshots"
-  arch-chroot /mnt mkdir "/.snapshots"
-  arch-chroot /mnt mount -a
-  arch-chroot /mnt chmod 750 "/.snapshots"
-}
-
 install_grub() {
   arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot/efi" --bootloader-id=Arch --removable
   arch-chroot /mnt grub-install --target=i386-pc "$disk"
@@ -398,9 +325,9 @@ run() {
   enable_zram
   blacklist_kernelmodules
   randomize_mac
-  setup_snapper
   install_grub
   setup_secureboot
 }
 
+source Configuration
 run
