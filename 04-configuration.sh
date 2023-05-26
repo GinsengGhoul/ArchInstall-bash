@@ -387,17 +387,17 @@ setup_secureboot() {
 run() {
   configure_mounts
   setup_grub
-  setup_mkinitcpio
-  create_dirs
-  setup_locale
-  setup_hosts
-  setup_nvim
-  create_users
-  install_powerpill
-  snapper_config
-  enable_zram
-  blacklist_kernelmodules
-  randomize_mac
+  #setup_mkinitcpio
+  #create_dirs
+  #setup_locale
+  #setup_hosts
+  #setup_nvim
+  #create_users
+  #install_powerpill
+  #snapper_config
+  #enable_zram
+  #blacklist_kernelmodules
+  #randomize_mac
   setup_snapper
   install_grub
   setup_secureboot
