@@ -232,7 +232,7 @@ create_users() {
 }
 
 snapper_config(){
-    # configure snapper cleanup
+  # configure snapper cleanup
   cat >> /mnt/etc/snapper/configs/config <<EOF
 TIMELINE_MIN_AGE="1800"
 TIMELINE_LIMIT_HOURLY="5"
@@ -318,6 +318,7 @@ run() {
   create_dirs
   setup_locale
   setup_hosts
+  snapper_config
   setup_nvim
   create_users
   install_powerpill
@@ -329,5 +330,5 @@ run() {
   setup_secureboot
 }
 
-source Configuration
+source Configuration.cfg
 run

@@ -479,5 +479,5 @@ else
 }
 
 # the program itself
-source Configuration
+source Configuration.cfg
 run
