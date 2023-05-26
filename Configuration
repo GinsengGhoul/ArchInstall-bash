@@ -1,0 +1,73 @@
+disk="/dev/sda"
+ssd=true
+
+# kernel could be any of the ones in official arch repos or
+# cachyOS repos
+kernel=linux-cachyos
+editor=neovim
+
+# microcode override, if left emtpy the script will try to install the correct one automatically
+# use this for instance to install both microcode packages for a general system
+# options are intel-ucode and amd-ucode
+microcode=
+
+macrandomize=true
+use_bpq=true
+user_zram=true
+# time in seconds before grub chooses the boot option
+grub_timeout=1
+# AUR helper, either aura, paru, or yay
+AUR="paru"
+hostname=ComputerName #set hostname before run
+# common nomenclature is all lowercase however archlinux doesn't
+# # stop you from setting one in caps, make sure it doesn't contain
+# # special characters
+
+locale=en_US.UTF-8
+keymap=us
+# # all US keymaps provided by ArchLinux
+# # amiga-us
+# # atari-us
+# # br-latin1-us
+# # is-latin1-us
+# # us
+# # mac-us
+# # sunt5-cz-us
+timezone="America/Los-Angeles"
+
+# user info
+# usernames can contain only
+# lowercase letters (a-z)
+# uppercase letters (A-Z)
+# digits (0-9)
+# underscores (_)
+# hyphens (-).
+
+users=("user1" "user2")
+adminusers=("user2")
+# user that will be used for installation of powerpill
+export admin="user2"
+
+passwords=(
+  "password1"
+  "password2"
+)
+
+# corresponds with user
+shell=("/bin/bash")
+
+#  "games"   # some software needs this group
+#  "adm"             # full read access to journal files
+#  "log"             # access to /var/log
+#  "systemd-journal" # read only access to systemd logs
+#  "ftp"             # acess to ftp server files
+#  "http"            # acess to http server files
+#  "rfkill"          # turn on and off wifi
+#  "sys"             # configure cups without root
+#  #"uucp"            # access to serial ports
+#  #"lp"              # access to parallel ports
+#  "wheel"           # can run any root command with password
+#  "libvirt"         # virtual machine
+#  "kvm"             # virtual machine
+usergroups=("games")
+admingroups=("adm" "log" "systemd-journal" "ftp" "http" "rfkill" "sys" "wheel" "libvirt" "kvm")
