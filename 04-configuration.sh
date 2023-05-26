@@ -57,7 +57,7 @@ reenable_features() {
 }
 
 setup_ioudev(){
-  if [ -n "$use_bpq" ]; then
+  if [ -n "$bpq" ]; then
     echo "setup disks to use bpq scheduler"
     # IO udev rules, enables bpq scheduler for all disks
     curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules > /mnt/etc/udev/rules.d/60-ioschedulers.rules
@@ -244,7 +244,7 @@ EOF
 }
 
 enable_zram(){
-  if [ -n "$use_zram" ]; then
+  if [ -n "$zram" ]; then
     # enable zram
     echo 'zram' > /mnt/etc/modules-load.d/zram.conf
     echo 'options zram num_devices=1' > /mnt/etc/modprobe.d/zram.conf
@@ -284,7 +284,7 @@ blacklist_kernelmodules(){
 randomize_mac(){
   # Randomize Mac Address.
   # disable if random address is not wanted
-  if [ -n "$macrandomize" ]; then
+  if [ -n "$randomize_mac" ]; then
   echo "Setup NetworkManager to randomize mac addresses"
   cat > /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
 [device]
