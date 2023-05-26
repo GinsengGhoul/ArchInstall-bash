@@ -23,5 +23,5 @@ run() {
   pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist cachyos-keyring grub grub-btrfs efibootmgr
 }
 
-source Configuration
+source Configuration.cfg
 run
