@@ -187,10 +187,10 @@ install_powerpill() {
   echo "Installing $AUR and powerpill"
   if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -S powerpill shim-signed --noconfirm"
+    eval "$AUR_command powerpill shim-signed"
   elif [[ $AUR == "aura" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
-    arch-chroot /mnt su - $admin -c "$AUR -A powerpill shim-signed --noconfirm"
+    eval "$AUR_command powerpill shim-signed"
   else
     echo "Unknown AUR helper: $AUR, defaulting to paru"
     AUR=paru
@@ -298,6 +298,26 @@ EOF
   fi
 }
 
+systemd_networkd_confs(){
+    # Find network adapter names
+    adapter_names=$(ip link | awk -F': ' '/^[0-9]+:/{print $2}')
+
+    # Create systemd-networkd configuration files
+    for adapter_name in $adapter_names; do
+      # Generate configuration file path
+      conf_file="/etc/systemd/network/20-${adapter_name}.network"
+
+      # Create the configuration file
+      echo "[Match]" > "$conf_file"
+      echo "Name=${adapter_name}" >> "$conf_file"
+      echo "" >> "$conf_file"
+      echo "[Network]" >> "$conf_file"
+      echo "DHCP=yes" >> "$conf_file"
+
+      echo "Created configuration file for ${adapter_name}: $conf_file"
+  done
+}
+
 install_grub() {
   arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot/efi" --bootloader-id=Arch --removable
   arch-chroot /mnt grub-install --target=i386-pc "$disk"
@@ -326,6 +346,7 @@ run() {
   enable_zram
   blacklist_kernelmodules
   randomize_mac
+  systemd_networkd_confs
   install_grub
   setup_secureboot
 }
