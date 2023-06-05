@@ -56,33 +56,33 @@ reenable_features() {
   sed -i 's/^blacklist sr_mod/#&/' $1
 }
 
-setup_ioudev(){
+setup_ioudev() {
   if [ -n "$bpq" ]; then
     echo "setup disks to use bpq scheduler"
     # IO udev rules, enables bpq scheduler for all disks
-    curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules > /mnt/etc/udev/rules.d/60-ioschedulers.rules
+    curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules >/mnt/etc/udev/rules.d/60-ioschedulers.rules
     chmod 600 /mnt/etc/udev/rules.d/*
   fi
 }
 
-configure_mounts(){
+configure_mounts() {
   # generate /etc/fstab
   echo "Generate fstab."
-  genfstab -U /mnt >> /mnt/etc/fstab
+  genfstab -U /mnt >>/mnt/etc/fstab
   # add pri=0 to physical swap partition if swap exist
   sed -i '/^\S.*swap/s/\(^\S*\s\+\S\+\s\+\S\+\s\+\)\(\S\+\)\(\s\+.*\)/\1\2,pri=0\3/' /mnt/etc/fstab
   #add tmpfs and zram
   # set limits accordingly
   echo "adding tmpfs and zram mounts"
-  echo  "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >> /mnt/etc/fstab
-  echo  "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >> /mnt/etc/fstab
-  echo  "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >> /mnt/etc/fstab
+  echo "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >>/mnt/etc/fstab
+  echo "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >>/mnt/etc/fstab
+  echo "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >>/mnt/etc/fstab
   # setup tmpfiles.d
   echo "creating /var/cache/pacman tmpfs mountpoint"
-  echo "d /var/cache/pacman - - -" > /mnt/etc/tmpfiles.d/pacman-cache.conf
+  echo "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
 }
 
-setup_grub(){
+setup_grub() {
   echo "setup faster grub timeout"
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
   echo "setting up apparmor boot arguments, disabling zswap and enabling resume"
@@ -102,14 +102,14 @@ setup_mkinitcpio() {
   else
     echo "The line was not found in mkinitcpio.conf."
   fi
-  
+
   echo "set compression to zstd:15"
   sed -i 's/^#\(COMPRESSION="zstd"\)/\1/' /mnt/etc/mkinitcpio.conf
   sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v -15)/' /mnt/etc/mkinitcpio.conf
   arch-chroot /mnt mkinitcpio -P
 }
 
-create_dirs(){
+create_dirs() {
   # Create Directories
   dirs=(
     /mnt/etc/modules-load.d
@@ -128,23 +128,23 @@ create_dirs(){
   done
 }
 
-setup_locale(){
+setup_locale() {
   echo "setup locale"
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
-  echo "$locale UTF-8">> /mnt/etc/locale.gen
-  echo "LANG=$locale" > /mnt/etc/locale.conf
-  echo "LANG=$locale" > /mnt/etc/default/locale
+  echo "$locale UTF-8" >>/mnt/etc/locale.gen
+  echo "LANG=$locale" >/mnt/etc/locale.conf
+  echo "LANG=$locale" >/mnt/etc/default/locale
   arch-chroot /mnt locale-gen
 }
 
-setup_hosts(){
+setup_hosts() {
   # Setting hostname.
   echo "Setting Hostname"
-  echo "$hostname" >> /mnt/etc/hostname
-  echo "hostname=$hostname" >> /mnt/etc/conf.d/hostname
+  echo "$hostname" >>/mnt/etc/hostname
+  echo "hostname=$hostname" >>/mnt/etc/conf.d/hostname
   # Setting hosts file.
   echo "creating hosts file."
-  cat >> /mnt/etc/hosts <<EOF
+  cat >>/mnt/etc/hosts <<EOF
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   $hostname.localdomain   $hostname
@@ -152,13 +152,13 @@ setup_hosts(){
 EOF
 }
 
-setup_nvim(){
+setup_nvim() {
   pacman -Sy --root /mnt neovim --needed
   # link nvim as vi and vim
   arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vim
   arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
   # create vimrc
-  cat <<EOF > /mnt/etc/vimrc
+  cat <<EOF >/mnt/etc/vimrc
 set number
 set wrap
 syntax on
@@ -173,18 +173,15 @@ set cc=80,90,100
 map <F4> :nohl<CR>
 EOF
   # create a copy into nvim's config
-  cat /mnt/etc/vimrc >> /mnt/etc/xdg/nvim/sysinit.vim
-}
-
-jailbreak_admin(){
-  echo "$admin will temporarly have all permissions without password"
-  sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
-  sed -i 's/%wheel ALL=(ALL:ALL) ALL/# %wheel ALL=(ALL:ALL) ALL/' /mnt/etc/sudoers
+  cat /mnt/etc/vimrc >>/mnt/etc/xdg/nvim/sysinit.vim
 }
 
 install_powerpill() {
   jailbreak_admin
   echo "Installing $AUR and powerpill"
+  arch-chroot /mnt pacman -S --noconfirm $AUR
+  AUR_command powerpill update-grub shim-signed
+
   if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
     arch-chroot /mnt pacman -S --noconfirm $AUR
     eval "$AUR_command powerpill shim-signed"
@@ -199,10 +196,10 @@ install_powerpill() {
 }
 
 create_users() {
-  for ((i=0; i<${#users[@]}; i++)); do
+  for ((i = 0; i < ${#users[@]}; i++)); do
     username=${users[$i]}
-    password=${passwords[$i]:-password} # If no password is set, set password to "password"
-    usergroups_arr=("${usergroups[@]}") # Split usergroups string into an array
+    password=${passwords[$i]:-password}   # If no password is set, set password to "password"
+    usergroups_arr=("${usergroups[@]}")   # Split usergroups string into an array
     admingroups_arr=("${admingroups[@]}") # Split admingroups string into an array
     shell=${shell[$i]}
 
@@ -211,7 +208,7 @@ create_users() {
     arch-chroot /mnt useradd -m -s "$shell" "$username"
 
     # Set the password
-    arch-chroot /mnt chpasswd <<< "$username:$password"
+    arch-chroot /mnt chpasswd <<<"$username:$password"
 
     # Add user to usergroups
     for group in "${usergroups_arr[@]}"; do
@@ -231,9 +228,9 @@ create_users() {
   done
 }
 
-snapper_config(){
+snapper_config() {
   # configure snapper cleanup
-  cat >> /mnt/etc/snapper/configs/config <<EOF
+  cat >>/mnt/etc/snapper/configs/config <<EOF
 TIMELINE_MIN_AGE="1800"
 TIMELINE_LIMIT_HOURLY="5"
 TIMELINE_LIMIT_DAILY="7"
@@ -243,50 +240,50 @@ TIMELINE_LIMIT_YEARLY="0"
 EOF
 }
 
-enable_zram(){
+enable_zram() {
   if [ -n "$zram" ]; then
     # enable zram
-    echo 'zram' > /mnt/etc/modules-load.d/zram.conf
-    echo 'options zram num_devices=1' > /mnt/etc/modprobe.d/zram.conf
-    echo 'KERNEL=="zram0", ATTR{disksize}="'$(half_memory)'" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' > /mnt/etc/udev/rules.d/99-zram.rules
+    echo 'zram' >/mnt/etc/modules-load.d/zram.conf
+    echo 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
+    echo 'KERNEL=="zram0", ATTR{disksize}="'$(half_memory)'" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
   fi
 }
 
-blacklist_kernelmodules(){
+blacklist_kernelmodules() {
   echo "disable unused kernel modules for better security"
   # Blacklisting kernel modules
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >> /mnt/etc/modprobe.d/30_security-misc.conf
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >>/mnt/etc/modprobe.d/30_security-misc.conf
   reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
   chmod 600 /mnt/etc/modprobe.d/*
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >> /mnt/bin/disabled-bluetooth-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >> /mnt/bin/disabled-cdrom-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >> /mnt/bin/disabled-filesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >> /mnt/bin/disabled-firewire-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >> /mnt/bin/disabled-intelme-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >> /mnt/bin/disabled-msr-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >> /mnt/bin/disabled-netfilesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >> /mnt/bin/disabled-network-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >> /mnt/bin/disabled-thunderbolt-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >> /mnt/bin/disabled-vivid-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >>/mnt/bin/disabled-bluetooth-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >>/mnt/bin/disabled-cdrom-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >>/mnt/bin/disabled-filesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >>/mnt/bin/disabled-firewire-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >>/mnt/bin/disabled-intelme-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >>/mnt/bin/disabled-msr-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >>/mnt/bin/disabled-netfilesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >>/mnt/bin/disabled-network-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >>/mnt/bin/disabled-thunderbolt-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >>/mnt/bin/disabled-vivid-by-security-misc
   chmod 755 /mnt/bin/disabled*
   chmod +x /mnt/bin/disabled*
 
   # Security kernel settings.
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_security-misc.conf >> /mnt/etc/sysctl.d/30_security-misc.conf
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_security-misc.conf >>/mnt/etc/sysctl.d/30_security-misc.conf
   # This will completely disallow debugging change to lower or disable this if debugging is necessary
   # removing debugging is good or security
   sed -i 's/kernel.yama.ptrace_scope=2/kernel.yama.ptrace_scope=3/g' /mnt/etc/sysctl.d/30_security-misc.conf
   update_swappiness "/mnt/etc/sysctl.d/30_security-misc.conf"
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_silent-kernel-printk.conf >> /mnt/etc/sysctl.d/30_silent-kernel-printk.conf
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_silent-kernel-printk.conf >>/mnt/etc/sysctl.d/30_silent-kernel-printk.conf
   chmod 600 /mnt/etc/sysctl.d/*
 }
 
-randomize_mac(){
+randomize_mac() {
   # Randomize Mac Address.
   # disable if random address is not wanted
   if [ -n "$randomize_mac" ]; then
-  echo "Setup NetworkManager to randomize mac addresses"
-  cat > /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
+    echo "Setup NetworkManager to randomize mac addresses"
+    cat >/mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
 [device]
 wifi.scan-rand-mac-address=yes
 [connection]
@@ -294,27 +291,27 @@ wifi.cloned-mac-address=random
 ethernet.cloned-mac-address=random
 EOF
 
-  chmod 600 /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf
+    chmod 600 /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf
   fi
 }
 
-systemd_networkd_confs(){
-    # Find network adapter names
-    adapter_names=$(ip link | awk -F': ' '/^[0-9]+:/{print $2}')
+systemd_networkd_confs() {
+  # Find network adapter names
+  adapter_names=$(ip link | awk -F': ' '/^[0-9]+:/{print $2}')
 
-    # Create systemd-networkd configuration files
-    for adapter_name in $adapter_names; do
-      # Generate configuration file path
-      conf_file="/etc/systemd/network/20-${adapter_name}.network"
+  # Create systemd-networkd configuration files
+  for adapter_name in $adapter_names; do
+    # Generate configuration file path
+    conf_file="/etc/systemd/network/20-${adapter_name}.network"
 
-      # Create the configuration file
-      echo "[Match]" > "$conf_file"
-      echo "Name=${adapter_name}" >> "$conf_file"
-      echo "" >> "$conf_file"
-      echo "[Network]" >> "$conf_file"
-      echo "DHCP=yes" >> "$conf_file"
+    # Create the configuration file
+    echo "[Match]" >"$conf_file"
+    echo "Name=${adapter_name}" >>"$conf_file"
+    echo "" >>"$conf_file"
+    echo "[Network]" >>"$conf_file"
+    echo "DHCP=yes" >>"$conf_file"
 
-      echo "Created configuration file for ${adapter_name}: $conf_file"
+    echo "Created configuration file for ${adapter_name}: $conf_file"
   done
 }
 

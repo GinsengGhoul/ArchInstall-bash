@@ -256,12 +256,13 @@ set_packages() {
 
   # use powerpill for multithreaded downloads
   packages="$snapper $optimizations $compilier_optimizations $computer_signals $git $ssh $mesa $video_3d $video_acceleration $networking $wifi $browser $bluetooth $editor $fstools $fonts $KVM $pdf $java $java8 $java11 $java17 $javaJDK $java8JDK $java11JDK $java17JDK $java_management $openfonts $libreoffice"
-  aurpkgs="update-grub $openfontsAUR $libreofficeAUR"
+  aurpkgs="$openfontsAUR $libreofficeAUR"
 }
 
 run() {
+  set_packages
   arch-chroot /mnt powerpill -S --needed "$packages"
-  exec $AUR_command $aurpkgs
+  AUR_command $aurpkgs
 }
 
 source Configuration.cfg
