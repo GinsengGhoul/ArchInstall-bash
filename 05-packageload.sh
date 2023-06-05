@@ -73,6 +73,10 @@ libreofficeAUR="libreoffice-extension-languagetool $java8"
 nativeMS="fake-ms-fonts"
 MSfonts="ttf-ms-fonts ttf-tahoma ttf-vista-fonts"
 
+variables=(
+  snapper optimizations compilier_optimizations computer_signals git ssh mesa video_3d video_acceleration networking wifi browser bluetooth editor fstools fonts KVM pdf java java8 java11 java17 javaJDK java8JDK java11JDK java17JDK java_management openfonts openfontsAUR libreoffice libreofficeAUR nativeMS MSfonts
+)
+
 install_DE() {
   case "$DE" in
   "Deepin")
@@ -140,7 +144,7 @@ soft_set() {
   fi
 }
 
-set_packages() {
+set_template_packages() {
   case "$ArchInstallType" in
   "laptop")
     soft_set install_snapper "true"
@@ -253,16 +257,37 @@ set_packages() {
     ;;
   *) ;;
   esac
+}
 
-  # use powerpill for multithreaded downloads
-  packages="$snapper $optimizations $compilier_optimizations $computer_signals $git $ssh $mesa $video_3d $video_acceleration $networking $wifi $browser $bluetooth $editor $fstools $fonts $KVM $pdf $java $java8 $java11 $java17 $javaJDK $java8JDK $java11JDK $java17JDK $java_management $openfonts $libreoffice"
-  aurpkgs="$openfontsAUR $libreofficeAUR"
+set_packages() {
+  packages=""
+  AUR_packages=""
+
+  for variable in "${variables[@]}"; do
+    local install_variable="install_$variable"
+    local package_variable="$variable"
+
+    if [[ "${!install_variable}" == "true" ]]; then
+      if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" ]]; then
+        AUR_packages+=" ${!package_variable}"
+      else
+        packages+=" ${!package_variable}"
+      fi
+    fi
+  done
+
+  #echo "Packages: $packages"
+  #echo "AUR Packages: $AUR_packages"
 }
 
 run() {
+  set_template_packages
   set_packages
+  echo "Packages: $packages"
+  echo "AUR Packages: $AUR_packages"
   arch-chroot /mnt powerpill -S --needed "$packages"
   AUR_command $aurpkgs
+  install_DE
 }
 
 source Configuration.cfg
