@@ -43,7 +43,7 @@ computer_signals="acpid tlp"
 git="git curl wget rsync"
 ssh="dropbear samba"
 mesa="mesa-amber lib32-mesa-amber"
-3d_video="vulkan-intel vulkan-mesa-layers lib32-vulkan-mesa-layers"
+video_3d="vulkan-intel vulkan-mesa-layers lib32-vulkan-mesa-layers"
 video_acceleration="libva-intel-driver"
 networking="networkmanager dhcpcd dnsmasq firewalld"
 wifi="iw"
@@ -151,7 +151,7 @@ set_packages() {
     soft_set install_ssh "false"
     soft_set install_mesa "true"
     soft_set install_video "true"
-    soft_set install_3d_video "true"
+    soft_set install_video_3d "true"
     soft_set install_video_acceleration "true"
     soft_set install_networking "true"
     soft_set install_wifi "true"
@@ -187,7 +187,7 @@ set_packages() {
     soft_set install_ssh "false"
     soft_set install_mesa "true"
     soft_set install_video "true"
-    soft_set install_3d_video "true"
+    soft_set install_video_3d "true"
     soft_set install_video_acceleration "true"
     soft_set install_networking "true"
     soft_set install_wifi "true"
@@ -223,7 +223,7 @@ set_packages() {
     soft_set install_ssh "true"
     soft_set install_mesa "false"
     soft_set install_video "false"
-    soft_set install_3d_video "false"
+    soft_set install_video_3d "false"
     soft_set install_video_acceleration "false"
     soft_set install_networking "false"
     soft_set install_wifi "false"
@@ -255,7 +255,7 @@ set_packages() {
   esac
 
   # use powerpill for multithreaded downloads
-  packages="$snapper $optimizations $compilier_optimizations $computer_signals $git $ssh $mesa $3d_video $video_acceleration $networking $wifi $browser $bluetooth $editor $fstools $fonts $KVM $pdf $java $java8 $java11 $java17 $javaJDK $java8JDK $java11JDK $java17JDK $java_management $openfonts $libreoffice"
+  packages="$snapper $optimizations $compilier_optimizations $computer_signals $git $ssh $mesa $video_3d $video_acceleration $networking $wifi $browser $bluetooth $editor $fstools $fonts $KVM $pdf $java $java8 $java11 $java17 $javaJDK $java8JDK $java11JDK $java17JDK $java_management $openfonts $libreoffice"
   aurpkgs="update-grub $openfontsAUR $libreofficeAUR"
 }
 
