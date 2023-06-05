@@ -8,5 +8,27 @@ setup_snapper() {
   arch-chroot /mnt mkdir "/.snapshots"
   arch-chroot /mnt mount -a
   arch-chroot /mnt chmod 750 "/.snapshots"
+}`
+
+setup_ssh() {
+
 }
-setup_snapper
+
+enable_services() {
+  
+}
+
+run() {
+  case "$ArchInstallType" in
+  laptop|desktop)
+    setup_snapper
+    ;;
+  server)
+    setup_ssh
+    ;;
+  *)
+    ;;
+  esac
+
+  enable_services
+}
