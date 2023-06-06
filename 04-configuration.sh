@@ -197,18 +197,6 @@ install_powerpill() {
   echo "Installing $AUR and powerpill"
   arch-chroot /mnt pacman -S --noconfirm $AUR
   AUR_command powerpill update-grub shim-signed
-
-  if [[ $AUR == "yay" ]] || [[ $AUR == "paru" ]]; then
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    eval "$AUR_command powerpill shim-signed"
-  elif [[ $AUR == "aura" ]]; then
-    arch-chroot /mnt pacman -S --noconfirm $AUR
-    eval "$AUR_command powerpill shim-signed"
-  else
-    echo "Unknown AUR helper: $AUR, defaulting to paru"
-    AUR=paru
-    install_powerpill
-  fi
 }
 
 create_users() {
@@ -218,9 +206,9 @@ create_users() {
 
   for ((i = 0; i < ${#users[@]}; i++)); do
     username=${users[$i]}
-    password=${passwords[$i]:-password}   # If no password is set, set password to "password"
-    usergroups_arr=("${usergroups[@]}")   # Split usergroups string into an array
-    admingroups_arr=("${admingroups[@]}") # Split admingroups string into an array
+    password=${passwords[$i]:-password}         # If no password is set, set password to "password"
+    nonadmingroups_arr=("${nonadmingroups[@]}") # Split nonadmingroups string into an array
+    admingroups_arr=("${admingroups[@]}")       # Split admingroups string into an array
     shell=${shell[$i]}
 
     # Create the user
@@ -237,8 +225,8 @@ create_users() {
     # Set the password
     arch-chroot /mnt chpasswd <<<"$username:$password"
 
-    # Add user to usergroups
-    for group in "${usergroups_arr[@]}"; do
+    # Add user to nonadmingroups
+    for group in "${nonadmingroups_arr[@]}"; do
       echo "Adding $username to $group"
       arch-chroot /mnt usermod -a -G "$group" "$username"
     done
@@ -284,7 +272,7 @@ EOF
 setup_ccache() {
   cat <<EOF >/mnt/etc/profile.d/ccache.sh
 export USE_CCACHE=1
-export CCACHE_EXEC=/usr/bin/ccache"
+export CCACHE_EXEC=/usr/bin/ccache
 if ! ccache -p | grep -q "^compression = true$"; then
   ccache -o compression=true
 fi
