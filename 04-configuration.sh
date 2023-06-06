@@ -119,7 +119,9 @@ create_dirs() {
     /mnt/etc/sysctl.d/
     /mnt/etc/udev/rules.d
     /mnt/etc/NetworkManager/conf.d
+    /mnt/etc/NetworkManager/dnsmasq.d/
     /mnt/etc/xdg/nvim/
+    /etc/xdg/reflector/
     /mnt/etc/tmpfiles.d/
   )
   for dir in "${dirs[@]}"; do
@@ -144,7 +146,7 @@ setup_hosts() {
   echo "hostname=$hostname" >>/mnt/etc/conf.d/hostname
   # Setting hosts file.
   echo "creating hosts file."
-  cat >>/mnt/etc/hosts <<EOF
+  cat <<EOF >>/mnt/etc/hosts
 127.0.0.1   localhost
 ::1         localhost
 127.0.1.1   $hostname.localdomain   $hostname
@@ -174,6 +176,9 @@ map <F4> :nohl<CR>
 EOF
   # create a copy into nvim's config
   cat /mnt/etc/vimrc >>/mnt/etc/xdg/nvim/sysinit.vim
+  # set permissions
+  chmod 644 /mnt/etc/vimrc
+  chmod 644 /mnt/etc/xdg/nvim/sysinit.vim
 }
 
 install_powerpill() {
@@ -230,14 +235,28 @@ create_users() {
 
 snapper_config() {
   # configure snapper cleanup
-  cat >>/mnt/etc/snapper/configs/config <<EOF
+  cat <<EOF >/mnt/etc/snapper/configs/config
 TIMELINE_MIN_AGE="1800"
 TIMELINE_LIMIT_HOURLY="5"
-TIMELINE_LIMIT_DAILY="7"
+TIMELINE_LIMIT_DAILY="5"
 TIMELINE_LIMIT_WEEKLY="0"
 TIMELINE_LIMIT_MONTHLY="0"
 TIMELINE_LIMIT_YEARLY="0"
+NUMBER_LIMIT="10"
 EOF
+  chmod 644 /mnt/etc/snapper/configs/config
+}
+
+reflector_config() {
+  cat <<EOF >/etc/xdg/reflector/reflector.conf
+--save /etc/pacman.d/mirrorlist
+--protocol rsync,https
+--country US,CA,MX
+--fastest 12
+--latest 10
+--number 12
+EOF
+  chmod 644 /etc/xdg/reflector/reflector.conf
 }
 
 enable_zram() {
@@ -246,6 +265,11 @@ enable_zram() {
     echo 'zram' >/mnt/etc/modules-load.d/zram.conf
     echo 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
     echo 'KERNEL=="zram0", ATTR{disksize}="'$(half_memory)'" RUN="/usr/bin/mkswap /dev/zram0", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
+
+    chmod 644 /mnt/etc/modules-load.d/zram.conf
+    chmod 644 /mnt/etc/modprobe.d/zram.conf
+    chmod 644 /mnt/etc/udev/rules.d/99-zram.rules
+
   fi
 }
 
@@ -283,7 +307,7 @@ randomize_mac() {
   # disable if random address is not wanted
   if [ -n "$randomize_mac" ]; then
     echo "Setup NetworkManager to randomize mac addresses"
-    cat >/mnt/etc/NetworkManager/conf.d/00-macrandomize.conf <<EOF
+    cat <<EOF >/mnt/etc/NetworkManager/conf.d/00-macrandomize.conf
 [device]
 wifi.scan-rand-mac-address=yes
 [connection]
@@ -295,24 +319,21 @@ EOF
   fi
 }
 
-systemd_networkd_confs() {
-  # Find network adapter names
-  adapter_names=$(ip link | awk -F': ' '/^[0-9]+:/{print $2}')
+setupNetworkManager_DHCP_DNS() {
+  cat <<EOF >/mnt/etc/NetworkManager/conf.d/dhcp-client.conf
+[main]
+dhcp=dhcpcd
+EOF
 
-  # Create systemd-networkd configuration files
-  for adapter_name in $adapter_names; do
-    # Generate configuration file path
-    conf_file="/etc/systemd/network/20-${adapter_name}.network"
+  cat <<EOF >/mnt/etc/NetworkManager/conf.d/dns.conf
+[main]
+dns=dnsmasq
+EOF
 
-    # Create the configuration file
-    echo "[Match]" >"$conf_file"
-    echo "Name=${adapter_name}" >>"$conf_file"
-    echo "" >>"$conf_file"
-    echo "[Network]" >>"$conf_file"
-    echo "DHCP=yes" >>"$conf_file"
+  echo "cache-size=1000" >>/mnt/etc/NetworkManager/dnsmasq.d/cache.conf
 
-    echo "Created configuration file for ${adapter_name}: $conf_file"
-  done
+  chmod 644 /mnt/etc/NetworkManager/dnsmasq.d/*
+  chmod 644 /mnt/etc/NetworkManager/conf.d/*
 }
 
 install_grub() {
@@ -336,14 +357,13 @@ run() {
   setup_locale
   setup_hosts
   snapper_config
+  reflector_config
   setup_nvim
   create_users
   install_powerpill
-  snapper_config
   enable_zram
   blacklist_kernelmodules
   randomize_mac
-  systemd_networkd_confs
   install_grub
   setup_secureboot
 }
