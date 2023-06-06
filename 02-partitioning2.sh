@@ -16,13 +16,13 @@ testing=false
 #functions
 # used to find GB number of ram rather then the
 # exact number so calculations for swap follow base 2
-find_closest(){
+find_closest() {
   local mem=$1
   # use int division to get a rough estimate
   gib=$((mem / 1024))
 
   # Check if the input value is slightly above a GiB
-  if (( mem % 1024 > 768 )); then
+  if ((mem % 1024 > 768)); then
     # If so, round up to the next GiB
     gib=$((gib + 1))
   fi
@@ -36,17 +36,14 @@ find_closest(){
 # 1/3 disk size, if it is, it'll try
 # 1.25x and 1x, if none of them fit
 # it'll go to making no swap partition
-set_swap(){
-  local third=$(($disksize/3))
-  local ramMib=$(($1*$increment))
-  if [ $(($ramMib*2)) -le $third ]
-  then
-    swap=$(($ramMib*2))
-  elif [ $(($ramMib*5/4)) -le $third ]
-  then
-    swap=$(($ramMib*5/4))
-  elif [ $ramMib -le $third ]
-  then
+set_swap() {
+  local third=$(($disksize / 3))
+  local ramMib=$(($1 * $increment))
+  if [ $(($ramMib * 2)) -le $third ]; then
+    swap=$(($ramMib * 2))
+  elif [ $(($ramMib * 5 / 4)) -le $third ]; then
+    swap=$(($ramMib * 5 / 4))
+  elif [ $ramMib -le $third ]; then
     swap=$ramMib
   else
     swap=0
@@ -59,24 +56,20 @@ set_swap(){
 # partition ends up being less than 8gb large
 # it'll opt to not make a home partition
 # in the even the
-create_partitiontable(){
+create_partitiontable() {
 
-  if [ $make_recovery = false ]
-  then
-    if [ $(($disksize - $BB - $EFI - (80*$increment) - $swap)) -lt $((200*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $swap)) -ge $((8*$increment)) ] && [ $(($disksize - $BB - $EFI - (80*$increment) - $swap)) -gt 0 ]
-    then
+  if [ $make_recovery = false ]; then
+    if [ $(($disksize - $BB - $EFI - (80 * $increment) - $swap)) -lt $((200 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $swap)) -ge $((8 * $increment)) ] && [ $(($disksize - $BB - $EFI - (80 * $increment) - $swap)) -gt 0 ]; then
       echo "80gb root"
-      root=$((80*$increment))
+      root=$((80 * $increment))
       home=$(($disksize - $BB - $EFI - $root - $swap))
-    elif [ $(($disksize - $EFI - (40*$increment) - $swap)) -lt $((20*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $swap)) -ge $((8*$increment)) ] && [ $(($disksize - $BB - $EFI - (40*$increment) - $swap)) -gt 0 ]
-    then
+    elif [ $(($disksize - $EFI - (40 * $increment) - $swap)) -lt $((20 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $swap)) -ge $((8 * $increment)) ] && [ $(($disksize - $BB - $EFI - (40 * $increment) - $swap)) -gt 0 ]; then
       echo "40gb root"
-      root=$((40*$increment))
+      root=$((40 * $increment))
       home=$(($disksize - $BB - $EFI - $root - $swap))
-    elif [ $(($disksize - $EFI - (20*$increment) - $swap)) -lt $((20*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $swap)) -ge $((8*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $swap)) -gt 0 ]
-    then
+    elif [ $(($disksize - $EFI - (20 * $increment) - $swap)) -lt $((20 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $swap)) -ge $((8 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $swap)) -gt 0 ]; then
       echo "20gb root"
-      root=$((20*$increment))
+      root=$((20 * $increment))
       home=$(($disksize - $BB - $EFI - $root - $swap))
     else
       echo "no home"
@@ -84,26 +77,22 @@ create_partitiontable(){
       home=0
     fi
   # with recovery
-  elif [ $make_recovery = true ]
-  then
-    if [ $(($disksize - $BB - $EFI - (80*$increment) - $recovery - $swap)) -lt $((200*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $recovery - $swap)) -ge $((8*$increment)) ] && [ $(($disksize - $BB - $EFI - (80*$increment) - $recovery - $swap)) -gt 0 ]
-    then
+  elif [ $make_recovery = true ]; then
+    if [ $(($disksize - $BB - $EFI - (80 * $increment) - $recovery - $swap)) -lt $((200 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $recovery - $swap)) -ge $((8 * $increment)) ] && [ $(($disksize - $BB - $EFI - (80 * $increment) - $recovery - $swap)) -gt 0 ]; then
       echo "80gb root"
-      root=$((80*$increment))
+      root=$((80 * $increment))
       home=$(($disksize - $BB - $EFI - $root - $recovery - $swap))
-    elif [ $(($disksize - $EFI - (40*$increment) - $swap)) -lt $((20*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $swap)) -ge $((8*$increment)) ] && [ $(($disksize - $BB - $EFI - (40*$increment) - $recovery - $swap)) -gt 0 ]
-    then
+    elif [ $(($disksize - $EFI - (40 * $increment) - $swap)) -lt $((20 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $swap)) -ge $((8 * $increment)) ] && [ $(($disksize - $BB - $EFI - (40 * $increment) - $recovery - $swap)) -gt 0 ]; then
       echo "40gb root"
-      root=$((40*$increment))
+      root=$((40 * $increment))
       home=$(($disksize - $BB - $EFI - $root - $recovery - $swap))
-    elif [ $(($disksize - $EFI - (20*$increment) - $recovery - $swap)) -lt $((20*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $recovery - $swap)) -ge $((8*$increment)) ] && [ $(($disksize - $BB - $EFI - (20*$increment) - $recovery - $swap)) -gt 0 ]
-    then
+    elif [ $(($disksize - $EFI - (20 * $increment) - $recovery - $swap)) -lt $((20 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $recovery - $swap)) -ge $((8 * $increment)) ] && [ $(($disksize - $BB - $EFI - (20 * $increment) - $recovery - $swap)) -gt 0 ]; then
       echo "20gb root"
-      root=$((20*$increment))
+      root=$((20 * $increment))
       home=$(($disksize - $BB - $EFI - $root - $recovery - $swap))
     else
       echo "no home"
-      root=$(($disksize - $BB - $recovery - $EFI -$swap))
+      root=$(($disksize - $BB - $recovery - $EFI - $swap))
       home=0
     fi
   fi
@@ -127,7 +116,7 @@ create_partitiontable(){
 # n\n\n\n+"$swap"M\n\n8200\n            make swap partition
 # w\ny\n"                               write table
 #
-partition_drive(){
+partition_drive() {
   gptstr='o\ny\n'
   bbstr='n\n\n\n+'$BB'M\nef02\n'
   efistr='n\n\n\n+'$EFI'M\nef00\n'
@@ -161,12 +150,12 @@ partition_drive(){
   return
 }
 
-format_drive(){
-  cp=2                 # dynamic numbers to build partition table
-  mkfs.fat -F32 $disk$cp  # efi partition
+format_drive() {
+  cp=2                   # dynamic numbers to build partition table
+  mkfs.fat -F32 $disk$cp # efi partition
   efipath=$disk$cp
   ((cp++))
-  mkfs.btrfs -f -L Arch_Root $disk$cp  # root partition
+  mkfs.btrfs -f -L Arch_Root $disk$cp # root partition
   rootpath=$disk$cp
   ((cp++))
   if [ $home -gt 0 ]; then
@@ -187,7 +176,7 @@ format_drive(){
   fi
 }
 
-mksubvol(){
+mksubvol() {
   SUBVOLS=(
     var/log
     var/crash
@@ -198,7 +187,7 @@ mksubvol(){
     srv
     root
     opt
-    .swap  # If you need Swapfile, create in this folder
+    .swap # If you need Swapfile, create in this folder
   )
   #the "home" partition is used to store files that will for sure be bigger
   ## don't make a home subvolume if there won't be a home subvolume
@@ -207,28 +196,27 @@ mksubvol(){
   mkdir -p /mnt/@/var/lib
   mkdir -p /mnt/@/var/cache/
   mkdir -p /mnt/@/usr/
-  for vol in "${SUBVOLS[@]}"
-  do
+  for vol in "${SUBVOLS[@]}"; do
     btrfs subvolume create "/mnt/@/$vol"
-    echo "this is "$vol"" > /mnt/@/"$vol"/info
+    echo "this is "$vol"" >/mnt/@/"$vol"/info
   done
   if [ $home -eq 0 ]; then
     btrfs subvol create /mnt/@/home
     btrfs subvol create /mnt/@/var/lib/libvirt
-    echo "this is /var/lib/libvirt" > /mnt/@/var/lib/libvirt/info
+    echo "this is /var/lib/libvirt" >/mnt/@/var/lib/libvirt/info
     mkdir /mnt/@/var/lib/libvirt/images
     # don't compress or copy on write vm images
     chattr +C /mnt/@/var/lib/libvirt
   fi
   # create snapshot subvol
   btrfs subvolume create /mnt/@/.snapshots
-  echo "this is /.snapshots" > /mnt/@/.snapshots/info
+  echo "this is /.snapshots" >/mnt/@/.snapshots/info
   mkdir -p /mnt/@/.snapshots/1
   btrfs subvolume create /mnt/@/.snapshots/1/snapshot
-  echo "This is /@/.snapshots/1/snapshot" > /mnt/@/.snapshots/1/snapshot/info
+  echo "This is /@/.snapshots/1/snapshot" >/mnt/@/.snapshots/1/snapshot/info
   btrfs subvolume set-default "$(btrfs subvolume list /mnt | grep "@/.snapshots/1/snapshot" | grep -oP '(?<=ID )[0-9]+')" /mnt
 
-cat << EOF >> /mnt/@/.snapshots/1/info.xml
+  cat <<EOF >>/mnt/@/.snapshots/1/info.xml
 <?xml version="1.0"?>
 <snapshot>
     <type>single</type>
@@ -246,10 +234,10 @@ EOF
     mount "$homepath" /mnt
     btrfs subvol create /mnt/@
     btrfs subvol create /mnt/@/home
-    echo "this is /home  there is a home partition" > /mnt/@/home/info
+    echo "this is /home  there is a home partition" >/mnt/@/home/info
     mkdir -p /mnt/@/var/lib
     btrfs subvol create /mnt/@/var/lib/libvirt
-    echo "this is /var/lib/libvirt  there is a home partition" > /mnt/@/var/lib/libvirt/info
+    echo "this is /var/lib/libvirt  there is a home partition" >/mnt/@/var/lib/libvirt/info
     mkdir /mnt/@/var/lib/libvirt/images
     # don't compress or copy on write vm images
     chattr +C /mnt/@/var/lib/libvirt/images
@@ -274,13 +262,12 @@ EOF
   mkdir -p /mnt/boot/efi
   mount $efipath /mnt/boot/efi
 
-  for vol in "${SUBVOLS[@]}"
-  do
+  for vol in "${SUBVOLS[@]}"; do
     echo "trying to mount $vol on $rootpath, with these flags: $mountargs"
     mkdir -p "/mnt/$vol"
     mount -o "$mountargs,subvol=@/$vol" "$rootpath" "/mnt/$vol"
   done
-  
+
   echo "trying to mount .snapshots on $rootpath, with these flags: $mountargs"
   mkdir -p "/mnt/.snapshots"
   mount -o "$mountargs,subvol=@/.snapshots" "$rootpath" "/mnt/.snapshots"
@@ -297,27 +284,27 @@ EOF
 }
 
 kib_to_mib() {
-    # Check if input ends with " KiB/s"
-    if [[ "$1" == *KiB/s ]]; then
-        # Remove " KiB/s" and convert to MiB/s
-        echo "$(echo $1 | sed 's/KiB\/s//') / 1024" | bc -l
-    else
-        echo "$1"
-    fi
+  # Check if input ends with " KiB/s"
+  if [[ "$1" == *KiB/s ]]; then
+    # Remove " KiB/s" and convert to MiB/s
+    echo "$(echo $1 | sed 's/KiB\/s//') / 1024" | bc -l
+  else
+    echo "$1"
+  fi
 }
 
 get_random_rw_iops() {
-    #local output=$(fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename="$drivepath"random_read_write.fio --bs=4k --iodepth=64 --size="$size"M --readwrite=randrw --rwmixread=80)
-    local output=$(fio --randrepeat=1 --ioengine=libaio --gtod_reduce=1 --name=test --filename=/mnt/random_read_write.fio --bs=4k --iodepth=64 --size="$size"M --readwrite=randrw --rwmixread=80)
-    local read_iops=$(echo "$output" | grep "read:" | awk '{print $3}' | cut -d"," -f1)
-    local write_iops=$(echo "$output" | grep "write:" | awk '{print $3}' | cut -d"," -f1)
-    read_speed=$(echo $read_iops | sed 's/BW=//; s/MiB\/s//')
-    write_speed=$(echo $write_iops | sed 's/BW=//; s/MiB\/s//')
-    read_speed=$(kib_to_mib $read_speed)
-    write_speed=$(kib_to_mib $write_speed)
-    echo "Random Read : $read_speed"
-    echo "Random Write : $write_speed"
-    rm /mnt/random_read_write.fio
+  #local output=$(fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename="$drivepath"random_read_write.fio --bs=4k --iodepth=64 --size="$size"M --readwrite=randrw --rwmixread=80)
+  local output=$(fio --randrepeat=1 --ioengine=libaio --gtod_reduce=1 --name=test --filename=/mnt/random_read_write.fio --bs=4k --iodepth=64 --size="$size"M --readwrite=randrw --rwmixread=80)
+  local read_iops=$(echo "$output" | grep "read:" | awk '{print $3}' | cut -d"," -f1)
+  local write_iops=$(echo "$output" | grep "write:" | awk '{print $3}' | cut -d"," -f1)
+  read_speed=$(echo $read_iops | sed 's/BW=//; s/MiB\/s//')
+  write_speed=$(echo $write_iops | sed 's/BW=//; s/MiB\/s//')
+  read_speed=$(kib_to_mib $read_speed)
+  write_speed=$(kib_to_mib $write_speed)
+  echo "Random Read : $read_speed"
+  echo "Random Write : $write_speed"
+  rm /mnt/random_read_write.fio
 }
 
 zstd_benchmark() {
@@ -331,8 +318,7 @@ zstd_benchmark() {
   #dd if=/dev/urandom of=$input_file bs=1G count=1 iflag=fullblock status=none
   fio --name=test --ioengine=sync --rw=write --bs=1M --numjobs=1 --size="$size"M --buffer_compress_percentage=50 --refill_buffers --buffer_pattern=0xdeadbeef --filename=$input_file
   # Loop through compression levels 1 to 15
-  for ((level=$min_level; level<=$max_level; level++))
-  do
+  for ((level = $min_level; level <= $max_level; level++)); do
     # Compress the file with the current compression level
     output_file="$ram_path"/output_file.zstd
     compression_start=$(date +%s.%N)
@@ -351,7 +337,6 @@ zstd_benchmark() {
     decompression_end=$(date +%s.%N)
     decompression_time=$(echo "$decompression_end - $decompression_start" | bc)
     decompression_speed=$(echo "scale=2; $input_size / ($decompression_time * 1024 * 1024)" | bc)
-
 
     # Print the results to the console
     printf "Compression level: %s\n" $level
@@ -373,108 +358,104 @@ zstd_benchmark() {
 
   rm $input_file
   # Print the results to a file
-  for ((level=$min_level; level<=$max_level; level++))
-  do
+  for ((level = $min_level; level <= $max_level; level++)); do
     printf "%s %s %s\n" ${compression_level[$level]} ${compression_speed[$level]} ${decompression_speed[$level]}
-  done > /zstd_speeds
+  done >/zstd_speeds
   # umount ramfs
   umount $ram_path
   rm -r $ram_path
 }
 
 find_best_compression_level() {
-    # Parse the zstd_speeds file and find the highest compression level that is faster than the disk speeds
-    best_level=0
-    while read level com_speed decom_speed; do
-      echo "$level $com_speed $decom_speed compare $write_speed $read_speed"
-        if (( $(echo "$com_speed > $write_speed" | bc -l) )) && (( $(echo "$decom_speed > $read_speed" | bc -l) )); then
-            best_level=$level
-        else
-            break
-        fi
-    done < /zstd_speeds
-
-    # Print the result
-    echo $best_level
-    if [ $best_level -eq 0 ] ; then
-      best_level=1;
+  # Parse the zstd_speeds file and find the highest compression level that is faster than the disk speeds
+  best_level=0
+  while read level com_speed decom_speed; do
+    echo "$level $com_speed $decom_speed compare $write_speed $read_speed"
+    if (($(echo "$com_speed > $write_speed" | bc -l))) && (($(echo "$decom_speed > $read_speed" | bc -l))); then
+      best_level=$level
+    else
+      break
     fi
-    echo "compression level $best_level"
+  done </zstd_speeds
+
+  # Print the result
+  echo $best_level
+  if [ $best_level -eq 0 ]; then
+    best_level=1
+  fi
+  echo "compression level $best_level"
 }
 
-run(){
+run() {
   if [ $testing = false ]; then
-  # returns kibibytes
-  # convert to Mb
-  ram=$(awk '/MemTotal/{print $2}' /proc/meminfo)
-  ram=$(($ram/1000))
-  #returns bytes so convert to Mib
-  disksize=$(lsblk -b --output SIZE -n -d $disk)
-  disksize=$(($disksize/1048576))
+    # returns kibibytes
+    # convert to Mb
+    ram=$(awk '/MemTotal/{print $2}' /proc/meminfo)
+    ram=$(($ram / 1000))
+    #returns bytes so convert to Mib
+    disksize=$(lsblk -b --output SIZE -n -d $disk)
+    disksize=$(($disksize / 1048576))
 
-  # testing overrides
-  #ram=$((1*$increment))
-  #disksize=$((8*$increment))
+    # testing overrides
+    #ram=$((1*$increment))
+    #disksize=$((8*$increment))
 
-  echo "ram(Mib): $ram"
-  echo "diskSize(Mib): $disksize"
-  local ramGib=$(find_closest $ram)
-  # create the partition table sizes in Mib
-  # try for 80Gib system, if there isn't
-  # more than 200gb for home
-  # try for 40Gib system, if the drive isn't
-  # large enough space for at least 20Gib home
-  # don't make a home partition
-  # if the root partition is not at least
-  # 10gb of space
-  BB=1
-  # these are thought of in Gib so convert to Mib
-  EFI=$((1*$increment))
-  if [ $make_recovery = false ]
-  then
-    recovery=0
-  fi
-  if [ $make_recovery = true ]
-  then
-    recovery=$((1*$increment))
-  fi
-  # try for 2x swap, if that's more than a third of the
-  # disk size, make try smaller sizes till it is less
-  # than or equal to a third of it's size
-  set_swap $ramGib
-  create_partitiontable
-  # print partition table
-  echo "Bios Boot:      $BB"
-  echo "EFI:            $EFI"
-  echo "Root:           $root"
-  echo "Home:           $home"
-  echo "Recovery:       $recovery"
-  echo "Swap:           $swap"
-  echo "------------------------------------"
-  echo "Total           $(($BB+$EFI+$root+$home+$swap+$recovery))"
-  echo "lets do it!"
-  if [ $(($BB+$EFI+$root+$home+$swap+$recovery)) -eq $disksize ]
-  then
-    echo "these values seem correct"
-    partition_drive
+    echo "ram(Mib): $ram"
+    echo "diskSize(Mib): $disksize"
+    local ramGib=$(find_closest $ram)
+    # create the partition table sizes in Mib
+    # try for 80Gib system, if there isn't
+    # more than 200gb for home
+    # try for 40Gib system, if the drive isn't
+    # large enough space for at least 20Gib home
+    # don't make a home partition
+    # if the root partition is not at least
+    # 10gb of space
+    BB=1
+    # these are thought of in Gib so convert to Mib
+    EFI=$((1 * $increment))
+    if [ $make_recovery = false ]; then
+      recovery=0
+    fi
+    if [ $make_recovery = true ]; then
+      recovery=$((1 * $increment))
+    fi
+    # try for 2x swap, if that's more than a third of the
+    # disk size, make try smaller sizes till it is less
+    # than or equal to a third of it's size
+    set_swap $ramGib
+    create_partitiontable
+    # print partition table
+    echo "Bios Boot:      $BB"
+    echo "EFI:            $EFI"
+    echo "Root:           $root"
+    echo "Home:           $home"
+    echo "Recovery:       $recovery"
+    echo "Swap:           $swap"
+    echo "------------------------------------"
+    echo "Total           $(($BB + $EFI + $root + $home + $swap + $recovery))"
+    echo "lets do it!"
+    if [ $(($BB + $EFI + $root + $home + $swap + $recovery)) -eq $disksize ]; then
+      echo "these values seem correct"
+      partition_drive
+    else
+      echo "the numbers aren't numbering"
+      return 0
+    fi
+    fdisk -l $disk
+    format_drive
+    umount -l /mnt
+    mount $rootpath /mnt
+    mksubvol
+
   else
-    echo "the numbers aren't numbering"
-    return 0
-  fi
-  fdisk -l $disk
-  format_drive
-  umount -l /mnt
-  mount $rootpath /mnt
-  mksubvol
-
-else
-  umount -l /mnt
-  mount -o subvol=@/.swap "$rootpath" "/mnt"
-  #pacman -Sy fio --noconfirm --needed
-  get_random_rw_iops
-  umount -l /mnt
-  #zstd_benchmark
-  find_best_compression_level
+    umount -l /mnt
+    mount -o subvol=@/.swap "$rootpath" "/mnt"
+    #pacman -Sy fio --noconfirm --needed
+    get_random_rw_iops
+    umount -l /mnt
+    #zstd_benchmark
+    find_best_compression_level
   fi
 }
 
