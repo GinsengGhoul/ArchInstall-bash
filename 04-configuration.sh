@@ -227,10 +227,10 @@ create_users() {
     echo "Creating user: $username"
     arch-chroot /mnt useradd -m -s "$shell" "$username"
     mkdir -p /mnt/home/$username/.config/alacritty
-    arch-chroot /mnt cp /usr/share/goodies/scripts /home/$username/
-    arch-chroot /mnt cp /usr/share/goodies/i3 /home/$username/.config
-    arch-chroot /mnt cp /usr/share/goodies/i3status /home/$username/.config
-    arch-chroot /mnt cp /usr/share/goodies/sway /home/$username/.config
+    arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
+    arch-chroot /mnt cp -r /usr/share/goodies/i3 /home/$username/.config
+    arch-chroot /mnt cp -r /usr/share/goodies/i3status /home/$username/.config
+    arch-chroot /mnt cp -r /usr/share/goodies/sway /home/$username/.config
     arch-chroot /mnt cp /usr/share/goodies/alacritty.yml /home/$username/.config/alacritty
     arch-chroot /mnt chown -R $username /home/$username
 
