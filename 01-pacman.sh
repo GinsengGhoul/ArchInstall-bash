@@ -62,6 +62,17 @@ add_repos() {
   fi
 }
 
+add_xyne_repo() {
+  # Download the mirrorlist file
+  wget -O /etc/pacman.d/xyne-mirrorlist https://xyne.dev/projects/xyne-mirrorlist/xyne-mirrorlist
+  cat <<EOF >>/etc/pacman.conf
+
+[xyne-x86_64]
+SigLevel = Required
+Include = /etc/pacman.d/xyne-mirrorlist
+EOF
+}
+
 install_mirrorlists() {
   if [ $SupportLevel -eq 4 ]; then
     pacman -U "${mirror_url}/cachyos-keyring-2-1-any.pkg.tar.zst" \
@@ -130,6 +141,8 @@ run() {
     install_mirrorlists
     echo "Adding CachyOS repos ..."
     add_repos
+    echo "Adding xyne repos ..."
+    add_xyne_repo
     echo "finish setting up pacman.conf"
     # uncomment colors
     sed -i '/Color/s/^#//g' /etc/pacman.conf
