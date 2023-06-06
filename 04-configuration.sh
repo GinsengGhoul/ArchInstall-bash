@@ -195,8 +195,8 @@ EOF
 install_powerpill() {
   jailbreak_admin
   echo "Installing $AUR and powerpill"
-  arch-chroot /mnt pacman -S --noconfirm $AUR
-  AUR_command powerpill update-grub shim-signed
+  arch-chroot /mnt pacman -S --noconfirm $AUR powerpill
+  AUR_command update-grub shim-signed
 }
 
 create_users() {
