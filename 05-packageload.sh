@@ -94,7 +94,7 @@ install_DE() {
     ;;
   "Cinnamon")
     arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-slick-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc
-    eval "$AUR_command xviewer pix mint-artwork lightdm-settings"
+    AUR_command xviewer pix mint-artwork lightdm-settings
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "Mate")
@@ -107,12 +107,12 @@ install_DE() {
     ;;
   "LXDE")
     arch-chroot /mnt powerpill -S --noconfirm --needed xorg lxde xdg-utils libpulse libstatgrab libsysstat breeze-icons pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller picom
-    eval "$AUR_command nm-tray"
+    AUR_command nm-tray
     arch-chroot /mnt systemctl enable lxdm.service
     ;;
   "LXQT")
     arch-chroot /mnt powerpill -S --noconfirm --needed xorg sddm lxqt xdg-utils libpulse libstatgrab libsysstat breeze-icons pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller picom
-    eval "$AUR_command nm-tray opensnap"
+    AUR_command nm-tray opensnap
     arch-chroot /mnt systemctl enable sddm.service
     ;;
   "icewm")
