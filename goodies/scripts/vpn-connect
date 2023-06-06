@@ -1,0 +1,1 @@
+sudo openconnect -b -u gteh --protocol=gp vpn.csus.edu

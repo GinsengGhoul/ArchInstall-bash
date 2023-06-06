@@ -37,6 +37,7 @@
 #  if you want to choose cinnamon as your DE you don’t need to install either of these, KDE and gnome also
 #  come with one installed
 snapper="snapper snap-pac snap-sync"
+security="apparmor"
 optimizations="irqbalance ananicy-cpp chrony"
 compilier_optimizations="ccahe"
 computer_signals="acpid tlp"
@@ -74,7 +75,7 @@ nativeMS="fake-ms-fonts"
 MSfonts="ttf-ms-fonts ttf-tahoma ttf-vista-fonts"
 
 variables=(
-  snapper optimizations compilier_optimizations computer_signals git ssh mesa video_3d video_acceleration networking wifi browser bluetooth editor fstools fonts KVM pdf java java8 java11 java17 javaJDK java8JDK java11JDK java17JDK java_management openfonts openfontsAUR libreoffice libreofficeAUR nativeMS MSfonts
+  snapper security optimizations compilier_optimizations computer_signals git ssh mesa video_3d video_acceleration networking wifi browser bluetooth editor fstools fonts KVM pdf java java8 java11 java17 javaJDK java8JDK java11JDK java17JDK java_management openfonts openfontsAUR libreoffice libreofficeAUR nativeMS MSfonts
 )
 
 install_DE() {
@@ -119,12 +120,20 @@ install_DE() {
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "i3")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-gtk-greeter I3-wm rofi feh alacritty deadd-notification-center-git playerctl breeze qt5tc
+    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-gtk-greeter I3-wm rofi feh alacritty deadd-notification-center-git playerctl breeze qt5tc xclip
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "sway")
     arch-chroot /mnt powerpill -S --noconfirm --needed sway polkit wofi swaylock-effects swayidle swaybg alacritty mako sddm okular grim wl-clipboard thunar gvfs gvfs-afc gvfs-gphoto2 gvfs-mtp man brightnessctl pipewire pipewire-alsa pipewire-pulse wireplumber pavucontrol adapta-gtk-theme papirus-icon-theme qt6-wayland qt5-wayland slurp file-roller p7zip unrar unace lrzip squashfs-tools qt5ct lxappearance gnome-font-viewer mpv
     arch-chroot /mnt systemctl enable sddm.service
+    cat <<EOF >/mnt/etc/profile.d/qt5ct.sh
+#export QT_QPA_PLATFORMTHEME=qt5ct
+export QT_QPA_PLATFORMTHEME=qt6ct
+#export QT_STYLE_OVERRIDE=qt6ct qtapp
+#export QT_QPA_PLATFORMTHEME=adwaita-dark
+export QT_STYLE_OVERRIDE=adwaita-dark qtapp
+EOF
+    chmod 755 /mnt/etc/profile.d/qt5ct.sh
     ;;
   *)
     echo "no Desktop Enviroment will be installed"
@@ -148,6 +157,7 @@ set_template_packages() {
   case "$ArchInstallType" in
   "laptop")
     soft_set install_snapper "true"
+    soft_set install_security "true"
     soft_set install_optimizations "true"
     soft_set install_compilier_optimizations "true"
     soft_set install_computer_signals "true"
@@ -184,6 +194,7 @@ set_template_packages() {
     ;;
   "desktop")
     soft_set install_snapper "true"
+    soft_set install_security "true"
     soft_set install_optimizations "true"
     soft_set install_compilier_optimizations "true"
     soft_set install_computer_signals "false"
@@ -220,6 +231,7 @@ set_template_packages() {
     ;;
   "server")
     soft_set install_snapper "false"
+    soft_set install_security "true"
     soft_set install_optimizations "false"
     soft_set install_compilier_optimizations "true"
     soft_set install_computer_signals "false"

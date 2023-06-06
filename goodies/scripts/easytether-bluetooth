@@ -1,0 +1,3 @@
+sudo easytether-bluetooth 48:74:12:A0:74:E8
+sudo dhcpcd tap-easytether -x
+sudo dhcpcd tap-easytether

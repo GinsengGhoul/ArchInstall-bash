@@ -109,6 +109,16 @@ setup_mkinitcpio() {
   arch-chroot /mnt mkinitcpio -P
 }
 
+update_service_timeout() {
+  local timeout_seconds=30
+  # Update service startup timeout
+  sudo sed -i "/^# TimeoutStartSec=/s/^#//" "/etc/systemd/system.conf"
+  sudo sed -i "s/^TimeoutStartSec=.*/TimeoutStartSec=$timeout_seconds/" "/etc/systemd/system.conf"
+  # Update service shutdown timeout
+  sudo sed -i "/^# TimeoutStopSec=/s/^#//" "/etc/systemd/system.conf"
+  sudo sed -i "s/^TimeoutStopSec=.*/TimeoutStopSec=$timeout_seconds/" "/etc/systemd/system.conf"
+}
+
 create_dirs() {
   # Create Directories
   dirs=(
@@ -117,6 +127,7 @@ create_dirs() {
     /mnt/etc/default
     /mnt/etc/conf.d
     /mnt/etc/sysctl.d/
+    /mnt/etc/profile.d/
     /mnt/etc/udev/rules.d
     /mnt/etc/NetworkManager/conf.d
     /mnt/etc/NetworkManager/dnsmasq.d/
@@ -201,6 +212,10 @@ install_powerpill() {
 }
 
 create_users() {
+  # copy goodies to /usr/share
+  cp -r goodies /mnt/usr/share
+  chmod -R 644 /mnt/usr/share
+
   for ((i = 0; i < ${#users[@]}; i++)); do
     username=${users[$i]}
     password=${passwords[$i]:-password}   # If no password is set, set password to "password"
@@ -211,6 +226,13 @@ create_users() {
     # Create the user
     echo "Creating user: $username"
     arch-chroot /mnt useradd -m -s "$shell" "$username"
+    mkdir -p /mnt/home/$username/.config/alacritty
+    arch-chroot /mnt cp /usr/share/goodies/scripts /home/$username/
+    arch-chroot /mnt cp /usr/share/goodies/i3 /home/$username/.config
+    arch-chroot /mnt cp /usr/share/goodies/i3status /home/$username/.config
+    arch-chroot /mnt cp /usr/share/goodies/sway /home/$username/.config
+    arch-chroot /mnt cp /usr/share/goodies/alacritty.yml /home/$username/.config/alacritty
+    arch-chroot /mnt chown -R $username /home/$username
 
     # Set the password
     arch-chroot /mnt chpasswd <<<"$username:$password"
@@ -257,6 +279,17 @@ reflector_config() {
 --number 12
 EOF
   chmod 644 /etc/xdg/reflector/reflector.conf
+}
+
+setup_ccache() {
+  cat <<EOF >/mnt/etc/profile.d/ccache.sh
+export USE_CCACHE=1
+export CCACHE_EXEC=/usr/bin/ccache"
+if ! ccache -p | grep -q "^compression = true$"; then
+  ccache -o compression=true
+fi
+EOF
+  chmod 755 /mnt/etc/profile.d/ccache.sh
 }
 
 enable_zram() {
@@ -358,6 +391,7 @@ run() {
   setup_hosts
   snapper_config
   reflector_config
+  setup_ccache
   setup_nvim
   create_users
   install_powerpill
