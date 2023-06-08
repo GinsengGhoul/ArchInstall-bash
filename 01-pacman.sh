@@ -64,7 +64,7 @@ add_repos() {
 
 add_xyne_repo() {
   # Download the mirrorlist file
-  wget -O /etc/pacman.d/xyne-mirrorlist https://xyne.dev/projects/xyne-mirrorlist/xyne-mirrorlist
+  curl -o /etc/pacman.d/xyne-mirrorlist https://xyne.dev/projects/xyne-mirrorlist/xyne-mirrorlist
   cat <<EOF >>/etc/pacman.conf
 
 [xyne-x86_64]
