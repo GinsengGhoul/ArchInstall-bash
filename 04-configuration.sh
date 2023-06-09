@@ -79,14 +79,13 @@ package() {
   ln -s /usr/bin/nvim "$pkgdir/usr/bin/vi"
 }
 
-pkgdesc="$pkgdesc"
 EOM
 
   chown "$admin" /VTI/PKGBUILD
   # Change to the build directory
   cd /VTI
   # Build and install the package
-  su - "\$admin" -c "makepkg -si --noconfirm"
+  su "\$admin" -c "makepkg -si --noconfirm"
 EOF
 }
 
