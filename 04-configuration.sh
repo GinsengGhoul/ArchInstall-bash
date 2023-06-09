@@ -416,8 +416,8 @@ install_grub() {
 }
 
 setup_secureboot() {
-  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi /boot/efi/EFI/Arch/
-  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi /boot/efi/EFI/Arch/
+  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi /boot/efi/EFI/BOOT/
+  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi /boot/efi/EFI/BOOT/
   arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "Shim" --loader /boot/efi/EFI/BOOT/shimx64.efi
   arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "MOKmanager" --loader /boot/efi/EFI/BOOT/mmx64.efi
 }
