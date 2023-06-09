@@ -56,15 +56,6 @@ reenable_features() {
   sed -i 's/^blacklist sr_mod/#&/' $1
 }
 
-setup_ioudev() {
-  if [ -n "$bpq" ]; then
-    echo "setup disks to use bpq scheduler"
-    # IO udev rules, enables bpq scheduler for all disks
-    curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules >/mnt/etc/udev/rules.d/60-ioschedulers.rules
-    chmod 600 /mnt/etc/udev/rules.d/*
-  fi
-}
-
 configure_mounts() {
   # generate /etc/fstab
   echo "Generate fstab."
@@ -80,6 +71,25 @@ configure_mounts() {
   # setup tmpfiles.d
   echo "creating /var/cache/pacman tmpfs mountpoint"
   echo "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
+}
+
+setup_ioudev() {
+  if [ -n "$bpq" ]; then
+    echo "setup disks to use bpq scheduler"
+    # IO udev rules, enables bpq scheduler for all disks
+    # curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules >/mnt/etc/udev/rules.d/60-ioschedulers.rules
+    cat << EOF > /mnt/etc/udev/rules.d/60-ioschedulers.rules
+# Set I/O scheduler for spinning disks (SATA/SCSI)
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+
+# Set I/O scheduler for NVMe devices
+ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="none"
+
+# Set I/O scheduler for other devices (non-spinning disks, non-NVMe)
+ACTION=="add|change", KERNEL=="sd[a-z]|hd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
+EOF
+    chmod 600 /mnt/etc/udev/rules.d/*
+  fi
 }
 
 setup_grub() {
@@ -107,16 +117,6 @@ setup_mkinitcpio() {
   sed -i 's/^#\(COMPRESSION="zstd"\)/\1/' /mnt/etc/mkinitcpio.conf
   sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v -15)/' /mnt/etc/mkinitcpio.conf
   arch-chroot /mnt mkinitcpio -P
-}
-
-update_service_timeout() {
-  local timeout_seconds=30
-  # Update service startup timeout
-  sudo sed -i "/^# TimeoutStartSec=/s/^#//" "/etc/systemd/system.conf"
-  sudo sed -i "s/^TimeoutStartSec=.*/TimeoutStartSec=$timeout_seconds/" "/etc/systemd/system.conf"
-  # Update service shutdown timeout
-  sudo sed -i "/^# TimeoutStopSec=/s/^#//" "/etc/systemd/system.conf"
-  sudo sed -i "s/^TimeoutStopSec=.*/TimeoutStopSec=$timeout_seconds/" "/etc/systemd/system.conf"
 }
 
 create_dirs() {
@@ -165,6 +165,43 @@ setup_hosts() {
 EOF
 }
 
+snapper_config() {
+  # configure snapper cleanup
+  cat <<EOF >/mnt/etc/snapper/configs/config
+TIMELINE_MIN_AGE="1800"
+TIMELINE_LIMIT_HOURLY="5"
+TIMELINE_LIMIT_DAILY="5"
+TIMELINE_LIMIT_WEEKLY="0"
+TIMELINE_LIMIT_MONTHLY="0"
+TIMELINE_LIMIT_YEARLY="0"
+NUMBER_LIMIT="10"
+EOF
+  chmod 644 /mnt/etc/snapper/configs/config
+}
+
+reflector_config() {
+  cat <<EOF >/etc/xdg/reflector/reflector.conf
+--save /etc/pacman.d/mirrorlist
+--protocol rsync,https
+--country US,CA,MX
+--fastest 12
+--latest 10
+--number 12
+EOF
+  chmod 644 /etc/xdg/reflector/reflector.conf
+}
+
+setup_ccache() {
+  cat <<EOF >/mnt/etc/profile.d/ccache.sh
+export USE_CCACHE=1
+export CCACHE_EXEC=/usr/bin/ccache
+if ! ccache -p | grep -q "^compression = true$"; then
+  ccache -o compression=true
+fi
+EOF
+  chmod 755 /mnt/etc/profile.d/ccache.sh
+}
+
 setup_nvim() {
   pacman -Sy --root /mnt neovim --needed
   # link nvim as vi and vim
@@ -190,14 +227,6 @@ EOF
   # set permissions
   chmod 644 /mnt/etc/vimrc
   chmod 644 /mnt/etc/xdg/nvim/sysinit.vim
-}
-
-install_powerpill() {
-  jailbreak_admin
-  echo "Installing $AUR and powerpill"
-  chmod +x /usr/share/libalpm/scripts/*
-  arch-chroot /mnt pacman -S --noconfirm $AUR powerpill
-  AUR_command update-grub shim-signed
 }
 
 create_users() {
@@ -247,41 +276,12 @@ create_users() {
   done
 }
 
-snapper_config() {
-  # configure snapper cleanup
-  cat <<EOF >/mnt/etc/snapper/configs/config
-TIMELINE_MIN_AGE="1800"
-TIMELINE_LIMIT_HOURLY="5"
-TIMELINE_LIMIT_DAILY="5"
-TIMELINE_LIMIT_WEEKLY="0"
-TIMELINE_LIMIT_MONTHLY="0"
-TIMELINE_LIMIT_YEARLY="0"
-NUMBER_LIMIT="10"
-EOF
-  chmod 644 /mnt/etc/snapper/configs/config
-}
-
-reflector_config() {
-  cat <<EOF >/etc/xdg/reflector/reflector.conf
---save /etc/pacman.d/mirrorlist
---protocol rsync,https
---country US,CA,MX
---fastest 12
---latest 10
---number 12
-EOF
-  chmod 644 /etc/xdg/reflector/reflector.conf
-}
-
-setup_ccache() {
-  cat <<EOF >/mnt/etc/profile.d/ccache.sh
-export USE_CCACHE=1
-export CCACHE_EXEC=/usr/bin/ccache
-if ! ccache -p | grep -q "^compression = true$"; then
-  ccache -o compression=true
-fi
-EOF
-  chmod 755 /mnt/etc/profile.d/ccache.sh
+install_powerpill() {
+  jailbreak_admin
+  echo "Installing $AUR and powerpill"
+  chmod +x /usr/share/libalpm/scripts/*
+  arch-chroot /mnt pacman -S --noconfirm $AUR powerpill
+  AUR_command update-grub shim-signed
 }
 
 enable_zram() {
@@ -325,6 +325,16 @@ blacklist_kernelmodules() {
   update_swappiness "/mnt/etc/sysctl.d/30_security-misc.conf"
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_silent-kernel-printk.conf >>/mnt/etc/sysctl.d/30_silent-kernel-printk.conf
   chmod 600 /mnt/etc/sysctl.d/*
+}
+
+update_service_timeout() {
+  local timeout_seconds=30
+  # Update service startup timeout
+  sudo sed -i "/^# TimeoutStartSec=/s/^#//" "/etc/systemd/system.conf"
+  sudo sed -i "s/^TimeoutStartSec=.*/TimeoutStartSec=$timeout_seconds/" "/etc/systemd/system.conf"
+  # Update service shutdown timeout
+  sudo sed -i "/^# TimeoutStopSec=/s/^#//" "/etc/systemd/system.conf"
+  sudo sed -i "s/^TimeoutStopSec=.*/TimeoutStopSec=$timeout_seconds/" "/etc/systemd/system.conf"
 }
 
 randomize_mac() {
@@ -376,6 +386,7 @@ setup_secureboot() {
 
 run() {
   configure_mounts
+  setup_ioudev
   setup_grub
   setup_mkinitcpio
   create_dirs
@@ -389,7 +400,9 @@ run() {
   install_powerpill
   enable_zram
   blacklist_kernelmodules
+  update_service_timeout
   randomize_mac
+  setupNetworkManager_DHCP_DNS
   install_grub
   setup_secureboot
 }
