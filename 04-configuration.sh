@@ -87,6 +87,52 @@ EOM
 EOF
 }
 
+create_users() {
+  # copy goodies to /usr/share
+  cp -r goodies /mnt/usr/share
+  # set folders to 644 and filse to 755
+  find /mnt/usr/share/goodies -type d -exec chmod 644 {} +
+  find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
+
+  for ((i = 0; i < ${#users[@]}; i++)); do
+    username=${users[$i]}
+    password=${passwords[$i]:-password}         # If no password is set, set password to "password"
+    nonadmingroups_arr=("${nonadmingroups[@]}") # Split nonadmingroups string into an array
+    admingroups_arr=("${admingroups[@]}")       # Split admingroups string into an array
+    shell=${shell[$i]}
+
+    # Create the user
+    echo "Creating user: $username"
+    arch-chroot /mnt useradd -m -s "$shell" "$username"
+    mkdir -p /mnt/home/$username/.config/alacritty
+    arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
+    arch-chroot /mnt cp -r /usr/share/goodies/i3 /home/$username/.config
+    arch-chroot /mnt cp -r /usr/share/goodies/i3status /home/$username/.config
+    arch-chroot /mnt cp -r /usr/share/goodies/sway /home/$username/.config
+    arch-chroot /mnt cp /usr/share/goodies/alacritty.yml /home/$username/.config/alacritty
+    arch-chroot /mnt chown -R $username /home/$username
+
+    # Set the password
+    arch-chroot /mnt chpasswd <<<"$username:$password"
+
+    # Add user to nonadmingroups
+    for group in "${nonadmingroups_arr[@]}"; do
+      echo "Adding $username to $group"
+      arch-chroot /mnt usermod -a -G "$group" "$username"
+    done
+
+    # Check if user is also in adminusers list
+    if [[ " ${adminusers[@]} " =~ " $username " ]]; then
+      for group in "${admingroups_arr[@]}"; do
+        # Create the groups if they don't exist
+        arch-chroot /mnt groupadd -r "$group"
+        echo "Adding $username to $group"
+        arch-chroot /mnt usermod -a -G "$group" "$username"
+      done
+    fi
+  done
+}
+
 configure_mounts() {
   # generate /etc/fstab
   echo "Generate fstab."
@@ -261,52 +307,6 @@ EOF
   install_VTI
 }
 
-create_users() {
-  # copy goodies to /usr/share
-  cp -r goodies /mnt/usr/share
-  # set folders to 644 and filse to 755
-  find /mnt/usr/share/goodies -type d -exec chmod 644 {} +
-  find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
-
-  for ((i = 0; i < ${#users[@]}; i++)); do
-    username=${users[$i]}
-    password=${passwords[$i]:-password}         # If no password is set, set password to "password"
-    nonadmingroups_arr=("${nonadmingroups[@]}") # Split nonadmingroups string into an array
-    admingroups_arr=("${admingroups[@]}")       # Split admingroups string into an array
-    shell=${shell[$i]}
-
-    # Create the user
-    echo "Creating user: $username"
-    arch-chroot /mnt useradd -m -s "$shell" "$username"
-    mkdir -p /mnt/home/$username/.config/alacritty
-    arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
-    arch-chroot /mnt cp -r /usr/share/goodies/i3 /home/$username/.config
-    arch-chroot /mnt cp -r /usr/share/goodies/i3status /home/$username/.config
-    arch-chroot /mnt cp -r /usr/share/goodies/sway /home/$username/.config
-    arch-chroot /mnt cp /usr/share/goodies/alacritty.yml /home/$username/.config/alacritty
-    arch-chroot /mnt chown -R $username /home/$username
-
-    # Set the password
-    arch-chroot /mnt chpasswd <<<"$username:$password"
-
-    # Add user to nonadmingroups
-    for group in "${nonadmingroups_arr[@]}"; do
-      echo "Adding $username to $group"
-      arch-chroot /mnt usermod -a -G "$group" "$username"
-    done
-
-    # Check if user is also in adminusers list
-    if [[ " ${adminusers[@]} " =~ " $username " ]]; then
-      for group in "${admingroups_arr[@]}"; do
-        # Create the groups if they don't exist
-        arch-chroot /mnt groupadd -r "$group"
-        echo "Adding $username to $group"
-        arch-chroot /mnt usermod -a -G "$group" "$username"
-      done
-    fi
-  done
-}
-
 install_powerpill() {
   jailbreak_admin
   echo "Installing $AUR and powerpill"
@@ -416,6 +416,7 @@ setup_secureboot() {
 }
 
 run() {
+  create_users
   configure_mounts
   setup_ioudev
   setup_grub
@@ -427,7 +428,6 @@ run() {
   reflector_config
   setup_ccache
   setup_nvim
-  create_users
   install_powerpill
   enable_zram
   blacklist_kernelmodules
