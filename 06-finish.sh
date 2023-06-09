@@ -135,4 +135,8 @@ run() {
   setup_apparmor
   setup_networking
   enable_services
+  jail_admin
 }
+
+source Configuration.cfg
+run
