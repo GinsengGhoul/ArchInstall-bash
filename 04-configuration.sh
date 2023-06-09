@@ -64,7 +64,7 @@ install_VTI() {
   mkdir -p /VTI
   chmod 777 /VTI
   # Create PKGBUILD file
-  cat <<EOM >/tmp/VTI/PKGBUILD
+  cat <<EOM >/VTI/PKGBUILD
 pkgname='VTI'
 pkgver=1.0
 pkgrel=1
@@ -81,6 +81,7 @@ package() {
 
 pkgdesc="\$pkgdesc"
 EOM
+  chown "$admin" /VTI/PKGBUILD
   # Change to the build directory
   cd /VTI
   # Build and install the package
