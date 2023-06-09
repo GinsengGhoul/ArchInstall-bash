@@ -61,7 +61,8 @@ install_VTI() {
   set -e
 
   # Create the build directory
-  mkdir -p /tmp/VTI
+  mkdir -p /VTI
+  chmod 777 /VTI
   # Create PKGBUILD file
   cat <<EOM >/tmp/VTI/PKGBUILD
 pkgname='VTI'
@@ -81,7 +82,7 @@ package() {
 pkgdesc="\$pkgdesc"
 EOM
   # Change to the build directory
-  cd /tmp/VTI
+  cd /VTI
   # Build and install the package
   su - "\$admin" -c "makepkg -si --noconfirm"
 EOF
@@ -131,6 +132,7 @@ create_users() {
       done
     fi
   done
+  jailbreak_admin
 }
 
 configure_mounts() {
@@ -308,7 +310,6 @@ EOF
 }
 
 install_powerpill() {
-  jailbreak_admin
   echo "Installing $AUR and powerpill"
   chmod +x /usr/share/libalpm/scripts/*
   arch-chroot /mnt pacman -S --noconfirm $AUR powerpill
