@@ -56,6 +56,37 @@ reenable_features() {
   sed -i 's/^blacklist sr_mod/#&/' $1
 }
 
+install_VTI() {
+  arch-chroot /mnt /bin/bash <<EOF
+  set -e
+
+  # Create the build directory
+  mkdir -p /tmp/VTI
+  # Create PKGBUILD file
+  cat <<EOM >/tmp/VTI/PKGBUILD
+pkgname='VTI'
+pkgver=1.0
+pkgrel=1
+pkgdesc="VIM Totally Installed"
+arch=('any')
+depends=('neovim')
+provides=("vim=999.99" "vi=999.99")
+
+package() {
+  mkdir -p "\$pkgdir/usr/bin"
+  ln -s /usr/bin/nvim "\$pkgdir/usr/bin/vim"
+  ln -s /usr/bin/nvim "\$pkgdir/usr/bin/vi"
+}
+
+pkgdesc="\$pkgdesc"
+EOM
+  # Change to the build directory
+  cd /tmp/VTI
+  # Build and install the package
+  su - "\$admin" -c "makepkg -si --noconfirm"
+EOF
+}
+
 configure_mounts() {
   # generate /etc/fstab
   echo "Generate fstab."
@@ -78,7 +109,7 @@ setup_ioudev() {
     echo "setup disks to use bpq scheduler"
     # IO udev rules, enables bpq scheduler for all disks
     # curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules >/mnt/etc/udev/rules.d/60-ioschedulers.rules
-    cat << EOF > /mnt/etc/udev/rules.d/60-ioschedulers.rules
+    cat <<EOF >/mnt/etc/udev/rules.d/60-ioschedulers.rules
 # Set I/O scheduler for spinning disks (SATA/SCSI)
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
 
@@ -205,8 +236,8 @@ EOF
 setup_nvim() {
   pacman -Sy --root /mnt neovim --needed
   # link nvim as vi and vim
-  arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vim
-  arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
+  #arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vim
+  #arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
   # create vimrc
   cat <<EOF >/mnt/etc/vimrc
 set number
@@ -227,6 +258,7 @@ EOF
   # set permissions
   chmod 644 /mnt/etc/vimrc
   chmod 644 /mnt/etc/xdg/nvim/sysinit.vim
+  install_VTI
 }
 
 create_users() {
@@ -235,7 +267,6 @@ create_users() {
   # set folders to 644 and filse to 755
   find /mnt/usr/share/goodies -type d -exec chmod 644 {} +
   find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
-
 
   for ((i = 0; i < ${#users[@]}; i++)); do
     username=${users[$i]}
