@@ -170,9 +170,9 @@ format_drive() {
   if [ $swap -gt 0 ]; then
     mkswap $disk$cp
     swapon $disk$cp
-    export Swap_UUID=$(blkid -s UUID -o value $disk$cp)
+    echo "Swap_UUID=$(blkid -s UUID -o value $disk$cp)" > swap
   else
-    Swap_UUID=""
+    echo "Swap_UUID=""" > swap
   fi
 }
 
