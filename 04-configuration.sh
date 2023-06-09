@@ -195,6 +195,7 @@ EOF
 install_powerpill() {
   jailbreak_admin
   echo "Installing $AUR and powerpill"
+  chmod +x /usr/share/libalpm/scripts/*
   arch-chroot /mnt pacman -S --noconfirm $AUR powerpill
   AUR_command update-grub shim-signed
 }
