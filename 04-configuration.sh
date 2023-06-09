@@ -177,7 +177,10 @@ setup_grub() {
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
   echo "setting up apparmor boot arguments, disabling zswap and enabling resume"
   sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0/' /mnt/etc/default/grub
-  sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub
+  # check if swap_UUID exist
+  if [ ! -z "$Swap_UUID" ]; then
+    sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub
+  fi
 }
 
 setup_mkinitcpio() {
@@ -227,6 +230,8 @@ setup_locale() {
   echo "$locale UTF-8" >>/mnt/etc/locale.gen
   echo "LANG=$locale" >/mnt/etc/locale.conf
   echo "LANG=$locale" >/mnt/etc/default/locale
+  chmod 644 /mnt/etc/locale.conf
+  chmod 644 /mnt/etc/default/locale
   arch-chroot /mnt locale-gen
 }
 
@@ -260,7 +265,7 @@ EOF
 }
 
 reflector_config() {
-  cat <<EOF >/etc/xdg/reflector/reflector.conf
+  cat <<EOF >/mnt/etc/xdg/reflector/reflector.conf
 --save /etc/pacman.d/mirrorlist
 --protocol rsync,https
 --country US,CA,MX
@@ -268,7 +273,7 @@ reflector_config() {
 --latest 10
 --number 12
 EOF
-  chmod 644 /etc/xdg/reflector/reflector.conf
+  chmod 644 /mnt/etc/xdg/reflector/reflector.conf
 }
 
 setup_ccache() {
@@ -362,12 +367,12 @@ blacklist_kernelmodules() {
 
 update_service_timeout() {
   local timeout_seconds=30
+  
   # Update service startup timeout
-  sudo sed -i "/^# TimeoutStartSec=/s/^#//" "/etc/systemd/system.conf"
-  sudo sed -i "s/^TimeoutStartSec=.*/TimeoutStartSec=$timeout_seconds/" "/etc/systemd/system.conf"
+  sudo sed -i "/\[Manager\]/a TimeoutStartSec=$timeout_seconds" "/etc/systemd/system.conf"
+  
   # Update service shutdown timeout
-  sudo sed -i "/^# TimeoutStopSec=/s/^#//" "/etc/systemd/system.conf"
-  sudo sed -i "s/^TimeoutStopSec=.*/TimeoutStopSec=$timeout_seconds/" "/etc/systemd/system.conf"
+  sudo sed -i "/\[Manager\]/a TimeoutStopSec=$timeout_seconds" "/etc/systemd/system.conf"
 }
 
 randomize_mac() {
@@ -375,7 +380,7 @@ randomize_mac() {
   # disable if random address is not wanted
   if [ -n "$randomize_mac" ]; then
     echo "Setup NetworkManager to randomize mac addresses"
-    cat <<EOF >/mnt/etc/NetworkManager/conf.d/00-macrandomize.conf
+    cat <<EOF >/mnt/etc/NetworkManager/conf.d/30-macrandomize.conf
 [device]
 wifi.scan-rand-mac-address=yes
 [connection]
@@ -383,7 +388,7 @@ wifi.cloned-mac-address=random
 ethernet.cloned-mac-address=random
 EOF
 
-    chmod 600 /mnt/etc/NetworkManager/conf.d/00-macrandomize.conf
+    chmod 600 /mnt/etc/NetworkManager/conf.d/30-macrandomize.conf
   fi
 }
 
@@ -441,4 +446,5 @@ run() {
 }
 
 source Configuration.cfg
+source swap
 run
