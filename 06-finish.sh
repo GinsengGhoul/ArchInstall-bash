@@ -121,7 +121,7 @@ enable_services() {
   arch-chroot /mnt systemctl enable firewalld
   arch-chroot /mnt systemctl enable snapper-timeline.timer
   arch-chroot /mnt systemctl enable snapper-cleanup.timer
-  arch-chroot /mnt systemctl enable grub-btrfs.path
+  # arch-chroot /mnt systemctl enable grub-btrfs.path
   arch-chroot /mnt systemctl enable thermald
   arch-chroot /mnt systemctl enable chronyd
   arch-chroot /mnt systemctl enable logrotate.timer
