@@ -99,7 +99,6 @@ setup_apparmor() {
   if ! grep -q "^$cache_loc_line" "$parser_conf"; then
     sed -i "/^$write_cache_line/a $cache_loc_line" "$parser_conf"
   fi
-  EOF
 }
 
 enable_services() {
