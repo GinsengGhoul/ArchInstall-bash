@@ -40,7 +40,7 @@
 #  come with one installed
 snapper="snapper snap-pac snap-sync"
 security="apparmor"
-optimizations="irqbalance ananicy-cpp chrony"
+optimizations="irqbalance ananicy-cpp chrony logrotate"
 compilier_optimizations="ccache"
 computer_signals="acpid tlp"
 git="git curl wget rsync"
