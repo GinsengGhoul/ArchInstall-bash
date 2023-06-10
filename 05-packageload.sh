@@ -83,50 +83,50 @@ variables=(
 install_DE() {
   case "$DE" in
   "Deepin")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-gtk-greeter deepin deepin-extra deepin-kwin
+    powerpill_command xorg lightdm lightdm-gtk-greeter deepin deepin-extra deepin-kwin
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "KDE")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk
+    powerpill_command xorg plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk
     arch-chroot /mnt systemctl enable sddm.service
     ;;
   "KDE-wayland")
-    arch-chroot /mnt powerpill -S --noconfirm --needed wayland plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk plasma-wayland-session
+    powerpill_command wayland plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk plasma-wayland-session
     arch-chroot /mnt systemctl enable sddm.service
     ;;
   "Cinnamon")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-slick-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc
+    powerpill_command xorg lightdm lightdm-slick-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc
     AUR_command xviewer pix mint-artwork lightdm-settings
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "Mate")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-gtk-greeter mate mate-extra pipewire pipewire-alsa pipewire-pulse wireplumber network-manager-applet gtk-engines gtk-engine-murrine
+    powerpill_command xorg lightdm lightdm-gtk-greeter mate mate-extra pipewire pipewire-alsa pipewire-pulse wireplumber network-manager-applet gtk-engines gtk-engine-murrine
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "XFCE")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-gtk-greeter xfce4 xfce4-goodies alacarte file-roller gnome-calculator gvfs gvfs-afc gvfs-mtp gvfs-gphoto2 pipewire pipewire-alsa pipewire-pulse network-manager-applet pavucontrol
+    powerpill_command xorg lightdm lightdm-gtk-greeter xfce4 xfce4-goodies alacarte file-roller gnome-calculator gvfs gvfs-afc gvfs-mtp gvfs-gphoto2 pipewire pipewire-alsa pipewire-pulse network-manager-applet pavucontrol
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "LXDE")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lxde xdg-utils libpulse libstatgrab libsysstat breeze-icons pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller picom
+    powerpill_command xorg lxde xdg-utils libpulse libstatgrab libsysstat breeze-icons pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller picom
     AUR_command nm-tray
     arch-chroot /mnt systemctl enable lxdm.service
     ;;
   "LXQT")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg sddm lxqt xdg-utils libpulse libstatgrab libsysstat breeze-icons pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller picom
+    powerpill_command xorg sddm lxqt xdg-utils libpulse libstatgrab libsysstat breeze-icons pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller picom
     AUR_command nm-tray opensnap
     arch-chroot /mnt systemctl enable sddm.service
     ;;
   "icewm")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-gtk-greeter icewm network-manager-applet notification-daemon xscreensaver lxsession volumeicon gvfs gvfs-afc gvfs-mtp gvfs-gphoto2 pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller
+    powerpill_command xorg lightdm lightdm-gtk-greeter icewm network-manager-applet notification-daemon xscreensaver lxsession volumeicon gvfs gvfs-afc gvfs-mtp gvfs-gphoto2 pulseaudio pulseaudio-bluetooth pulseaudio-alsa gnome-calculator file-roller
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "i3")
-    arch-chroot /mnt powerpill -S --noconfirm --needed xorg lightdm lightdm-gtk-greeter I3-wm rofi feh alacritty deadd-notification-center-git playerctl breeze qt5tc xclip
+    powerpill_command xorg lightdm lightdm-gtk-greeter I3-wm rofi feh alacritty deadd-notification-center-git playerctl breeze qt5tc xclip
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "sway")
-    arch-chroot /mnt powerpill -S --noconfirm --needed sway polkit wofi swaylock-effects swayidle swaybg alacritty mako sddm okular grim wl-clipboard thunar gvfs gvfs-afc gvfs-gphoto2 gvfs-mtp man brightnessctl pipewire pipewire-alsa pipewire-pulse wireplumber pavucontrol adapta-gtk-theme papirus-icon-theme qt6-wayland qt5-wayland slurp file-roller p7zip unrar unace lrzip squashfs-tools qt5ct lxappearance gnome-font-viewer mpv
+    powerpill_command sway polkit wofi swaylock-effects swayidle swaybg alacritty mako sddm okular grim wl-clipboard thunar gvfs gvfs-afc gvfs-gphoto2 gvfs-mtp man brightnessctl pipewire pipewire-alsa pipewire-pulse wireplumber pavucontrol adapta-gtk-theme papirus-icon-theme qt6-wayland qt5-wayland slurp file-roller p7zip unrar unace lrzip squashfs-tools qt5ct lxappearance gnome-font-viewer mpv
     arch-chroot /mnt systemctl enable sddm.service
     cat <<EOF >/mnt/etc/profile.d/qt5ct.sh
 #export QT_QPA_PLATFORMTHEME=qt5ct
@@ -292,10 +292,6 @@ set_packages() {
 
   #echo "Packages: $packages"
   #echo "AUR Packages: $AUR_packages"
-}
-
-powerpill_command(){
-  arch-chroot /mnt /bin/bash -c "powerpill -S --noconfirm --needed $*"
 }
 
 run() {
