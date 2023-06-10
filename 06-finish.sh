@@ -1,6 +1,7 @@
 #!/bin/bash
 
 setup_snapper() {
+  echo "creating snapper config"
   arch-chroot /mnt umount "/.snapshots"
   arch-chroot /mnt rm -r "/.snapshots"
   arch-chroot /mnt snapper --no-dbus -c root create-config /
@@ -11,12 +12,14 @@ setup_snapper() {
 }
 
 setup_ssh() {
+  echo "setting up dropbear ssh"
   arch-chroot /mnt systemctl enable dropbear
   curl -o dropbear.postinst https://raw.githubusercontent.com/mkj/dropbear/master/debian/dropbear.postinst
   arch-chroot /mnt /bin/bash dropbear.postinst configure
 }
 
 setup_samba() {
+  echo "setting up samba"
   arch-chroot /mnt systemctl enable smb
   cat <<EOF >/mnt/etc/samba/smb.conf
 [global]
@@ -51,18 +54,22 @@ EOF
 }
 
 setup_networking() {
+  echo "setting up Networking"
   case $networking in
   networkmanager)
+    echo "setting up NetworkManger"
     arch-chroot /mnt systemctl enable NetworkManager
     arch-chroot /mnt systemctl mask NetworkManager-wait-online
     ;;
   networkmanagercore)
+    echo "using NetworkManager CORE"
     rm /mnt/etc/NetworkManager/conf.d/*
     rm /mnt/etc/NetworkManager/dnsmasq.d/*
     arch-chroot /mnt systemctl enable NetworkManager
     arch-chroot /mnt systemctl mask NetworkManager-wait-online
     ;;
   systemd)
+    echo "setting up Systemd-Networkd"
     arch-chroot /mnt systemctl enable systemd-networkd
     arch-chroot /mnt systemctl mask systemd-networkd-wait-online.service
     arch-chroot /mnt ln -rsf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
@@ -88,10 +95,12 @@ EOF
 }
 
 setup_apparmor() {
-  local parser_conf="/etc/apparmor/parser.conf"
+  local parser_conf="/mnt/etc/apparmor/parser.conf"
   local write_cache_line="write-cache"
   local cache_loc_line="cache-loc=/etc/apparmor.d/cache.d/"
-
+  
+  echo "enabling write cache and relocating the cache location on apparmor"
+  
   # Uncomment "write-cache" line
   sed -i "s/^#$write_cache_line/$write_cache_line/" "$parser_conf"
 
@@ -99,9 +108,11 @@ setup_apparmor() {
   if ! grep -q "^$cache_loc_line" "$parser_conf"; then
     sed -i "/^$write_cache_line/a $cache_loc_line" "$parser_conf"
   fi
+  chmod 644 /mnt/etc/apparmor/parser.conf
 }
 
 enable_services() {
+  echo "enabling services"
   arch-chroot /mnt systemctl enable apparmor
   arch-chroot /mnt systemctl enable acpid
   arch-chroot /mnt systemctl enable tlp
