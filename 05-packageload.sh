@@ -41,7 +41,7 @@
 snapper="snapper snap-pac snap-sync"
 security="apparmor"
 optimizations="irqbalance ananicy-cpp chrony"
-compilier_optimizations="ccahe"
+compilier_optimizations="ccache"
 computer_signals="acpid tlp"
 git="git curl wget rsync"
 ssh="dropbear samba"
