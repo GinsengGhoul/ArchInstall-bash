@@ -13,10 +13,12 @@
 # 					    - broadwell and up use intel-media-driver
 # 				AMD	    - Radeon R300 to HD 2000 install mesa-vdpau
 # 					    - Radeon HD 2000 and up install both mesa-vdpau and libva-mesa-driver
-#               NVIDIA	- if you’re tesla to kepler v2 AND using nouveau
+#      NVIDIA	  - if you’re tesla to kepler v2 AND using nouveau
 # 					    - install libva-mesa-driver and mesa-vdpau
 # 					    - you’ll also need nouveau-fw
 # 					    - if you’re using nvidia’s proprietary stuff install nvidia-utils
+#               - for Turing and up(16 and 20 series and up) you can nuse
+#               - nvidia-open-dkms
 #  these are supplimental but not from official repos
 #                       - for GMA4500 h264 decoding you’ll want this libva-intel-driver-g45-h264
 # 						do note this gpu is literally so weak it probably isn’t worth it
@@ -292,12 +294,16 @@ set_packages() {
   #echo "AUR Packages: $AUR_packages"
 }
 
+powerpill_command(){
+  arch-chroot /mnt /bin/bash -c "powerpill -S --noconfirm --needed $*"
+}
+
 run() {
   set_template_packages
   set_packages
   echo "Packages: $packages"
   echo "AUR Packages: $AUR_packages"
-  arch-chroot /mnt powerpill -S --needed "$packages"
+  powerpill_command "$packages"
   AUR_command $aurpkgs
   install_DE
 }
