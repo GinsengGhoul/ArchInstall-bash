@@ -89,6 +89,8 @@ EOM
 EOF
 }
 
+arch-chroot /mnt chpasswd <<<"root:$rootpassword"
+
 create_users() {
   # copy goodies to /usr/share
   cp -r goodies /mnt/usr/share
