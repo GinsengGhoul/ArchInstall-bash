@@ -58,31 +58,34 @@ setup_networking() {
   case $networking in
   networkmanager)
     echo "setting up NetworkManger"
-    arch-chroot /mnt systemctl enable NetworkManager
-    arch-chroot /mnt systemctl mask NetworkManager-wait-online
+    arch-chroot /mnt /bin/bash -c "systemctl enable NetworkManager"
+    arch-chroot /mnt /bin/bash -c "systemctl mask NetworkManager-wait-online"
     ;;
   networkmanagercore)
     echo "using NetworkManager CORE"
     rm /mnt/etc/NetworkManager/conf.d/*
     rm /mnt/etc/NetworkManager/dnsmasq.d/*
-    arch-chroot /mnt systemctl enable NetworkManager
-    arch-chroot /mnt systemctl mask NetworkManager-wait-online
+    arch-chroot /mnt /bin/bash -c "systemctl enable NetworkManager"
+    arch-chroot /mnt /bin/bash -c "systemctl mask NetworkManager-wait-online"
     ;;
   systemd)
     echo "setting up Systemd-Networkd"
-    arch-chroot /mnt systemctl enable systemd-networkd
-    arch-chroot /mnt systemctl mask systemd-networkd-wait-online.service
-    arch-chroot /mnt ln -rsf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+    arch-chroot /mnt /bin/bash -c "systemctl enable systemd-networkd"
+    arch-chroot /mnt /bin/bash -c "systemctl enable systemd-resolved"
+    arch-chroot /mnt /bin/bash -c "systemctl mask systemd-networkd-wait-online.service"
+    rm /mnt/etc/resolv.conf
+    arch-chroot /mnt /bin/bash -c "ln -rsf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf"
+    mkdir -p /mnt/etc/systemd/network
     cat <<EOF >/mnt/etc/systemd/network/20-wired.network
 [Match]
-Name=en*
+Name=e*
 
 [Network]
 DHCP=yes
 EOF
     cat <<EOF >/mnt/etc/systemd/network/25-wireless.network
 [Match]
-Name=wl*
+Name=w*
 
 [Network]
 DHCP=yes
