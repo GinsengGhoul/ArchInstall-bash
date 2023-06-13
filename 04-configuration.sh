@@ -62,7 +62,7 @@ install_VTI() {
 
   # Create the build directory
   mkdir -p /tmp/VTI
-  # chmod 777 /VTI
+  # chmod 777 /tmp/VTI
   # Create PKGBUILD file
   cat <<'EOM' >/tmp/VTI/PKGBUILD
 pkgname='VTI'
