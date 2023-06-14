@@ -199,12 +199,11 @@ set_template_packages() {
 set_packages() {
   packages=""
   AUR_packages=""
-
+  packages=$general
+  
   for variable in "${variables[@]}"; do
     local install_variable="install_$variable"
     local package_variable="$variable"
-    
-    packages=$general
 
     if [[ "${!install_variable}" == "true" ]]; then
       if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" ]]; then
