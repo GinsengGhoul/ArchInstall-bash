@@ -200,7 +200,7 @@ set_packages() {
   packages=""
   AUR_packages=""
   packages=$general
-  
+
   for variable in "${variables[@]}"; do
     local install_variable="install_$variable"
     local package_variable="$variable"
@@ -226,6 +226,8 @@ run() {
   powerpill_command "$packages"
   AUR_command $aurpkgs
   install_DE
+  arch-chroot /mnt /bin/bash -c "pacman -Rns linux-zen linux-zen-headers"
+  powerpill_command $kernel $kernel-headers
 }
 
 source Configuration.cfg

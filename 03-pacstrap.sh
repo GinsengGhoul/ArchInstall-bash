@@ -20,7 +20,7 @@ run() {
   # pacstrap
   detect_microcode
   headers=$kernel-headers
-  pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist xyne-mirrorlist cachyos-keyring grub grub-btrfs efibootmgr
+  pacstrap -PK /mnt base base-devel linux-zen linux-zen-headers linux-firmware $microcode reflector $editor cachyos-mirrorlist xyne-mirrorlist cachyos-keyring grub grub-btrfs efibootmgr
 }
 
 source Configuration.cfg
