@@ -145,6 +145,7 @@ run() {
     ;;
   *) ;;
   esac
+  arch-chroot /mnt update-grub
   setup_apparmor
   setup_networking
   enable_services
