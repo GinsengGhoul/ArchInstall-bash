@@ -53,18 +53,53 @@ EOF
   arch-chroot /mnt firewall-cmd --permanent --add-service={samba,samba-client,samba-dc} --zone=public
 }
 
+
+randomize_mac() {
+  # Randomize Mac Address.
+  # disable if random address is not wanted
+  if [ -n "$randomize_mac" ]; then
+    echo "Setup NetworkManager to randomize mac addresses"
+    cat <<EOF >/mnt/etc/NetworkManager/conf.d/30-macrandomize.conf
+[device]
+wifi.scan-rand-mac-address=yes
+[connection]
+wifi.cloned-mac-address=random
+ethernet.cloned-mac-address=random
+EOF
+
+    chmod 600 /mnt/etc/NetworkManager/conf.d/30-macrandomize.conf
+  fi
+}
+
+setupNetworkManager_DHCP_DNS() {
+  cat <<EOF >/mnt/etc/NetworkManager/conf.d/dhcp-client.conf
+[main]
+dhcp=dhcpcd
+EOF
+
+  cat <<EOF >/mnt/etc/NetworkManager/conf.d/dns.conf
+[main]
+dns=dnsmasq
+EOF
+
+  echo "cache-size=1000" >>/mnt/etc/NetworkManager/dnsmasq.d/cache.conf
+
+  chmod 644 /mnt/etc/NetworkManager/dnsmasq.d/*
+  chmod 644 /mnt/etc/NetworkManager/conf.d/*
+}
+
 setup_networking() {
   echo "setting up Networking"
   case $NetworkingBackend in
   networkmanager)
     echo "setting up NetworkManger"
+    randomize_mac
+    setupNetworkManager_DHCP_DNS
     arch-chroot /mnt /bin/bash -c "systemctl enable NetworkManager"
     arch-chroot /mnt /bin/bash -c "systemctl mask NetworkManager-wait-online"
     ;;
   networkmanagercore)
     echo "using NetworkManager CORE"
-    rm /mnt/etc/NetworkManager/conf.d/*
-    rm /mnt/etc/NetworkManager/dnsmasq.d/*
     arch-chroot /mnt /bin/bash -c "systemctl enable NetworkManager"
     arch-chroot /mnt /bin/bash -c "systemctl mask NetworkManager-wait-online"
     ;;

@@ -378,40 +378,6 @@ update_service_timeout() {
   sudo sed -i "/\[Manager\]/a TimeoutStopSec=$timeout_seconds" "/etc/systemd/system.conf"
 }
 
-randomize_mac() {
-  # Randomize Mac Address.
-  # disable if random address is not wanted
-  if [ -n "$randomize_mac" ]; then
-    echo "Setup NetworkManager to randomize mac addresses"
-    cat <<EOF >/mnt/etc/NetworkManager/conf.d/30-macrandomize.conf
-[device]
-wifi.scan-rand-mac-address=yes
-[connection]
-wifi.cloned-mac-address=random
-ethernet.cloned-mac-address=random
-EOF
-
-    chmod 600 /mnt/etc/NetworkManager/conf.d/30-macrandomize.conf
-  fi
-}
-
-setupNetworkManager_DHCP_DNS() {
-  cat <<EOF >/mnt/etc/NetworkManager/conf.d/dhcp-client.conf
-[main]
-dhcp=dhcpcd
-EOF
-
-  cat <<EOF >/mnt/etc/NetworkManager/conf.d/dns.conf
-[main]
-dns=dnsmasq
-EOF
-
-  echo "cache-size=1000" >>/mnt/etc/NetworkManager/dnsmasq.d/cache.conf
-
-  chmod 644 /mnt/etc/NetworkManager/dnsmasq.d/*
-  chmod 644 /mnt/etc/NetworkManager/conf.d/*
-}
-
 install_grub() {
   arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot/efi" --bootloader-id=Arch --removable
   arch-chroot /mnt grub-install --target=i386-pc "$disk"
@@ -442,8 +408,6 @@ run() {
   enable_zram
   blacklist_kernelmodules
   update_service_timeout
-  randomize_mac
-  setupNetworkManager_DHCP_DNS
   install_grub
   setup_secureboot
 }
