@@ -226,8 +226,6 @@ run() {
   powerpill_command "$packages"
   AUR_command $aurpkgs
   install_DE
-  arch-chroot /mnt /bin/bash -c "pacman -Rns --noconfirm linux-zen linux-zen-headers"
-  powerpill_command $kernel $kernel-headers
 }
 
 source Configuration.cfg
