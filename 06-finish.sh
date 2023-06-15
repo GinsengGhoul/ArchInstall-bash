@@ -55,7 +55,7 @@ EOF
 
 setup_networking() {
   echo "setting up Networking"
-  case $networking in
+  case $NetworkingBackend in
   networkmanager)
     echo "setting up NetworkManger"
     arch-chroot /mnt /bin/bash -c "systemctl enable NetworkManager"
