@@ -61,10 +61,10 @@ install_VTI() {
   set -e
 
   # Create the build directory
-  mkdir -p /VTI
-  # chmod 777 /VTI
+  mkdir -p /tmp/VTI
+  chmod 777 /tmp/VTI
   # Create PKGBUILD file
-  cat <<'EOM' >/VTI/PKGBUILD
+  cat <<'EOM' >/tmp/VTI/PKGBUILD
 pkgname='VTI'
 pkgver=1.0
 pkgrel=1
@@ -81,12 +81,12 @@ package() {
 
 EOM
 
-  chown "$admin" /VTI/PKGBUILD
+  chown "$admin" /tmp/VTI/PKGBUILD
   # Change to the build directory
-  cd /VTI
+  cd /tmp/VTI
   # Build and install the package
   su "$admin" -c "makepkg -si --noconfirm"
-  rm -r /VTI
+  # rm -r /tmp/VTI
 EOF
 }
 
