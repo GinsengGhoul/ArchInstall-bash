@@ -1,0 +1,18 @@
+My personal collection of bash scripts that install Arch Linux
+to use:
+
+1. download the latest Arch Installation disk from https://archlinux.org/download/
+2. create a bootable medium so the Arch ISO can be booted. I recommennd a usb disk made with Ventoy, balena edtcher, or Rufus
+   https://github.com/ventoy/Ventoy
+   https://github.com/balena-io/etcher
+   https://github.com/pbatard/rufus
+3. once in the Arch live environment set up networking. The environment automatically sets up wired connnenctions but wireless connnections require manual setup.
+   reference here for how to connect using iwctl.
+   https://wiki.archlinux.org/title/Iwd#iwctl
+4. once connected install git
+   pacman -S git
+5. clone this repository
+   git clone https://github.com/GinsengGhoul/ArchInstall-bash
+6. cd into the directory
+   cd ArchInstall-bash
+7. edit the Configuration.cfg file to your liking before running the scripts on numerical order
