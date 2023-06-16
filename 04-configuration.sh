@@ -176,6 +176,11 @@ EOF
 }
 
 setup_grub() {
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >> /mnt/etc/grub.d/40_cpu_mitigations
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_distrust_cpu.cfg >> /mnt/etc/grub.d/40_distrust_cpu
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >> /mnt/etc/grub.d/40_enable_iommu
+  chmod 755 /mnt/etc/grub.d/*
+
   echo "setup faster grub timeout"
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
   echo "setting up apparmor boot arguments, disabling zswap and enabling resume"
