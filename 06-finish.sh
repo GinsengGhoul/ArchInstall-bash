@@ -45,10 +45,11 @@ setup_samba() {
    printable = no
 EOF
 
-  arch-chroot /mnt groupadd -r "$sambagroup"
-  for user in "${sambausers[@]}"; do
-    arch-chroot /mnt usermod -aG "$sambagroup" "$user"
-  done
+arch-chroot /mnt groupadd -r "$sambagroup"
+
+echo "$sambausers" | while read -r user; do
+  arch-chroot /mnt usermod -aG "$sambagroup" "$user"
+done
 
   arch-chroot /mnt firewall-cmd --permanent --add-service={samba,samba-client,samba-dc} --zone=public
 }
