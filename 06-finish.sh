@@ -45,6 +45,7 @@ setup_samba() {
    printable = no
 EOF
 
+  arch-chroot /mnt groupadd -r "$sambagroup"
   for user in "${sambausers[@]}"; do
     arch-chroot /mnt usermod -aG "$sambagroup" "$user"
   done
