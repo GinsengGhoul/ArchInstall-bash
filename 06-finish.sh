@@ -21,6 +21,8 @@ setup_ssh() {
 
 setup_samba() {
   echo "setting up samba"
+  sambauserssplit="${sambausers[*]}"
+
   arch-chroot /mnt systemctl enable smb
   cat <<EOF >/mnt/etc/samba/smb.conf
 [global]
@@ -39,7 +41,7 @@ setup_samba() {
 [SambaShare]
    comment = SambaShare
    path = /SambaShare/
-   valid users = "$sambausers" @"$sambagroup"
+   valid users = "$sambauserssplit" @"$sambagroup"
    public = no
    writable = yes
    printable = no
