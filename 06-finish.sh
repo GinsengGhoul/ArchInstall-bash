@@ -14,8 +14,9 @@ setup_snapper() {
 setup_ssh() {
   echo "setting up dropbear ssh"
   arch-chroot /mnt systemctl enable dropbear
-  curl -o dropbear.postinst https://raw.githubusercontent.com/mkj/dropbear/master/debian/dropbear.postinst
-  arch-chroot /mnt /bin/bash dropbear.postinst configure
+  #curl -o dropbear.postinst https://raw.githubusercontent.com/mkj/dropbear/master/debian/dropbear.postinst
+  #arch-chroot /mnt /bin/bash dropbear.postinst configure
+  curl -sSL https://raw.githubusercontent.com/mkj/dropbear/master/debian/dropbear.postinst | arch-chroot /mnt /bin/bash -s configure
 }
 
 setup_samba() {
@@ -43,8 +44,6 @@ setup_samba() {
    writable = yes
    printable = no
 EOF
-
-  arch-chroot /mnt groupadd -r "$group"
 
   for user in "${sambausers[@]}"; do
     arch-chroot /mnt usermod -aG "$sambagroup" "$user"
