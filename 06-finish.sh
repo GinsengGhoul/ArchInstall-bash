@@ -24,6 +24,7 @@ setup_samba() {
   sambauserssplit="${sambausers[*]}"
 
   arch-chroot /mnt systemctl enable smb
+
   cat <<EOF >/mnt/etc/samba/smb.conf
 [global]
   server string = ArchServer
@@ -41,7 +42,7 @@ setup_samba() {
 [SambaShare]
    comment = SambaShare
    path = /SambaShare/
-   valid users = "$sambauserssplit" @"$sambagroup"
+   valid users = $sambauserssplit @$sambagroup
    public = no
    writable = yes
    printable = no
@@ -54,6 +55,22 @@ echo "$sambausers" | while read -r user; do
 done
 
   arch-chroot /mnt firewall-cmd --permanent --add-service={samba,samba-client,samba-dc} --zone=public
+
+  for ((i=0; i<${#sambausers[@]}; i++)); do
+    username="${sambausers[i]}"
+    password="${passwords[i]}"
+
+    echo "Setting Samba password for $username..."
+    
+    # Set Samba password using smbpasswd command
+    echo -e "$password\n$password" | smbpasswd -a "$username"
+
+    if [ $? -eq 0 ]; then
+        echo "Password set successfully for $username"
+    else
+        echo "Failed to set password for $username"
+    fi
+done
 }
 
 
@@ -173,6 +190,10 @@ enable_services() {
 }
 
 run() {
+  arch-chroot /mnt update-grub
+  setup_apparmor
+  setup_networking
+
   case "$ArchInstallType" in
   laptop | desktop)
     setup_snapper
@@ -183,9 +204,7 @@ run() {
     ;;
   *) ;;
   esac
-  arch-chroot /mnt update-grub
-  setup_apparmor
-  setup_networking
+
   enable_services
   jail_admin
 }
