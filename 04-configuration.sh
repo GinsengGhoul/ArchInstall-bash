@@ -32,10 +32,13 @@ half_memory() {
 # 536870912      512mb
 # 1073741824    1024mb
 update_swappiness() {
-  sed -i '/^vm.swappiness=/s/=.*/=100/' $1
+  sed -i '/^vm.swappiness=/s/=.*/=180/' $1
   sed -i '/^vm.swappiness=/a vm.dirty_background_bytes = 16777216' $1
   sed -i '/^vm.swappiness=/a vm.dirty_bytes = 67108864' $1
   sed -i '/^vm.swappiness=/a vm.vfs_cache_pressure=500' $1
+  sed -i '/^vm.swappiness=/a vm.watermark_boost_factor = 0' $1
+  sed -i '/^vm.swappiness=/a vm.watermark_scale_factor = 125' $1
+  sed -i '/^vm.swappiness=/a vm.page-cluster = 0' $1
 }
 
 reenable_features() {
