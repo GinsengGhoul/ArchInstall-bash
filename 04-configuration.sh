@@ -101,17 +101,17 @@ create_users() {
   find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
 
   arch-chroot /mnt chpasswd <<<"root:$rootpassword"
-  
+
   for ((i = 0; i < ${#users[@]}; i++)); do
     username=${users[$i]}
     password=${passwords[$i]:-password}         # If no password is set, set password to "password"
     nonadmingroups_arr=("${nonadmingroups[@]}") # Split nonadmingroups string into an array
     admingroups_arr=("${admingroups[@]}")       # Split admingroups string into an array
-    shell=${shell[$i]}
+    Shell="/bin/$shell"
 
     # Create the user
     echo "Creating user: $username"
-    arch-chroot /mnt useradd -m -s "$shell" "$username"
+    arch-chroot /mnt useradd -m -s "$Shell" "$username"
     mkdir -p /mnt/home/$username/.config/alacritty
     arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
     arch-chroot /mnt cp -r /usr/share/goodies/i3 /home/$username/.config
@@ -179,9 +179,9 @@ EOF
 }
 
 setup_grub() {
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >> /mnt/etc/grub.d/40_cpu_mitigations
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_distrust_cpu.cfg >> /mnt/etc/grub.d/40_distrust_cpu
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >> /mnt/etc/grub.d/40_enable_iommu
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >>/mnt/etc/grub.d/40_cpu_mitigations
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_distrust_cpu.cfg >>/mnt/etc/grub.d/40_distrust_cpu
+  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >>/mnt/etc/grub.d/40_enable_iommu
   chmod 755 /mnt/etc/grub.d/*
 
   echo "setup faster grub timeout"
@@ -378,16 +378,16 @@ blacklist_kernelmodules() {
 
 update_service_timeout() {
   local timeout_seconds=30
-  
+
   # Update service startup timeout
   sudo sed -i "/\[Manager\]/a TimeoutStartSec=$timeout_seconds" "/etc/systemd/system.conf"
-  
+
   # Update service shutdown timeout
   sudo sed -i "/\[Manager\]/a TimeoutStopSec=$timeout_seconds" "/etc/systemd/system.conf"
 }
 
 install_grub() {
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot/efi" --bootloader-id=Arch --removable
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot" --removable
   arch-chroot /mnt grub-install --target=i386-pc "$disk"
   arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg"
 }

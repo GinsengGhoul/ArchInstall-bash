@@ -48,31 +48,30 @@ setup_samba() {
    printable = no
 EOF
 
-arch-chroot /mnt groupadd -r "$sambagroup"
+  arch-chroot /mnt groupadd -r "$sambagroup"
 
-echo "$sambausers" | while read -r user; do
-  arch-chroot /mnt usermod -aG "$sambagroup" "$user"
-done
+  echo "$sambausers" | while read -r user; do
+    arch-chroot /mnt usermod -aG "$sambagroup" "$user"
+  done
 
   arch-chroot /mnt firewall-cmd --permanent --add-service={samba,samba-client,samba-dc} --zone=public
 
-  for ((i=0; i<${#sambausers[@]}; i++)); do
+  for ((i = 0; i < ${#sambausers[@]}; i++)); do
     username="${sambausers[i]}"
     password="${passwords[i]}"
 
     echo "Setting Samba password for $username..."
-    
+
     # Set Samba password using smbpasswd command
     echo -e "$password\n$password" | smbpasswd -a "$username"
 
     if [ $? -eq 0 ]; then
-        echo "Password set successfully for $username"
+      echo "Password set successfully for $username"
     else
-        echo "Failed to set password for $username"
+      echo "Failed to set password for $username"
     fi
-done
+  done
 }
-
 
 randomize_mac() {
   # Randomize Mac Address.
@@ -156,9 +155,9 @@ setup_apparmor() {
   local parser_conf="/mnt/etc/apparmor/parser.conf"
   local write_cache_line="write-cache"
   local cache_loc_line="cache-loc=/etc/apparmor.d/cache.d/"
-  
+
   echo "enabling write cache and relocating the cache location on apparmor"
-  
+
   # Uncomment "write-cache" line
   sed -i "s/^#$write_cache_line/$write_cache_line/" "$parser_conf"
 
