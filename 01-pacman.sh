@@ -2,7 +2,10 @@
 # Gordon Teh 3/21/23
 #
 
-mirror_url="https://mirror.cachyos.org/repo/x86_64/cachyos"
+#mirror_url="https://mirror.cachyos.org/repo/x86_64/cachyos"
+mirror_url="https://aur.cachyos.org/repo/x86_64/cachyos/"
+
+logfile="Pacman.log"
 
 check_supported_isa_level() {
   SupportLevel=0
@@ -21,30 +24,6 @@ check_supported_isa_level() {
   else
     SupportLevel=1
   fi
-}
-
-check_if_repo_was_added() {
-  # this will simply look in pacman.conf for anything cachyos related
-  # so if anything shows up this is true
-  # if grep "(cachyos\|cachyos-v3\|cachyos-community-v3\|cachyos-v4)" /etc/pacman.conf
-  if grep -e cachyos -e cachyos-v3 -e cachyos-community-v3 -e cachyos-v4 /etc/pacman.conf; then
-    added=1
-  else
-    added=0
-  fi
-  clear
-}
-
-check_if_repo_was_commented() {
-  # this will first look for anything related to cachyOS
-  # then it'll slowly weed out anything with comments
-  # if there is anything left is outputed by grep, it's not commented
-  if grep "cachyos\|cachyos-v3\|cachyos-community-v3\|cachyos-v4" /etc/pacman.conf | grep -v "#\[" | grep "\["; then
-    commented=0
-  else
-    commented=1
-  fi
-  clear
 }
 
 add_repos() {
@@ -73,47 +52,45 @@ Include = /etc/pacman.d/xyne-mirrorlist
 EOF
 }
 
-install_mirrorlists() {
-  if [ $SupportLevel -eq 4 ]; then
-    pacman -U "${mirror_url}/cachyos-keyring-2-1-any.pkg.tar.zst" \
-      "${mirror_url}/cachyos-mirrorlist-17-1-any.pkg.tar.zst" \
-      "${mirror_url}/cachyos-v3-mirrorlist-17-1-any.pkg.tar.zst" \
-      "${mirror_url}/cachyos-v4-mirrorlist-5-1-any.pkg.tar.zst" \
-      --noconfirm
-  fi
-  if [ $SupportLevel -eq 3 ]; then
-    pacman -U "${mirror_url}/cachyos-keyring-2-1-any.pkg.tar.zst" \
-      "${mirror_url}/cachyos-mirrorlist-17-1-any.pkg.tar.zst" \
-      "${mirror_url}/cachyos-v3-mirrorlist-17-1-any.pkg.tar.zst" \
-      --noconfirm
-  fi
-  if [ $SupportLevel -le 2 ]; then
-    pacman -U "${mirror_url}/cachyos-keyring-2-1-any.pkg.tar.zst" \
-      "${mirror_url}/cachyos-mirrorlist-17-1-any.pkg.tar.zst" \
-      --noconfirm
-  fi
+download_and_install_packages() {
+  local packages=("$@")
+
+  # Extract package URLs from the webpage
+  webpage_content=$(curl -s "$mirror_url")
+  for package in "${packages[@]}"; do
+    # Try to find the package URL based on its title
+    package_url=$(echo "$webpage_content" | grep -oE 'href="([^"]+)" title="'"$package"'"' | cut -d'"' -f2)
+
+    if [ -z "$package_url" ]; then
+      echo "Package '$package' not found on the webpage."
+    else
+      # Download the package and its signature
+      package_filename=$(basename "$package_url")
+      package_signature_url="${package_url}.sig"
+
+      curl -O "$mirror_url/$package_url"
+      curl -O "$mirror_url/$package_signature_url"
+
+      # Verify the package signature
+      gpg --verify "$package_filename.sig" "$package_filename" 2>/dev/null
+
+      if [ $? -eq 0 ]; then
+        # Install the package using pacman
+        sudo pacman -U "$package_filename" --needed
+      else
+        echo "Package signature verification failed for '$package'."
+      fi
+    fi
+  done
 }
 
 run() {
-  /lib/ld-linux-x86-64.so.2 --help | grep "(supported, searched)" >/supportedlist
+  /lib/ld-linux-x86-64.so.2 --help | grep "(supported, searched)" >supportedlist
   check_supported_isa_level
-  check_if_repo_was_added
-  check_if_repo_was_commented
+
   echo "SupportLevel = $SupportLevel"
+  echo ""
   printf "Your CPU supports: "
-  printf "Your CPU supports: "
-  if [ $SupportLevel -ge 4 ]; then
-    printf "x86-64-v4 "
-  fi
-  if [ $SupportLevel -ge 3 ]; then
-    printf "x86-64-v3 "
-  fi
-  if [ $SupportLevel -ge 2 ]; then
-    printf "x86-64-v2 "
-  fi
-  if [ $SupportLevel -ge 1 ]; then
-    printf "x86-64 "
-  fi
   if [ $SupportLevel -ge 4 ]; then
     printf "x86-64-v4 "
   fi
@@ -127,45 +104,37 @@ run() {
     printf "x86-64 "
   fi
   echo ""
+
   #echo "commented = $commented"
   #echo "added = $added"
-  if [ $added -eq 0 ]; then
-    echo "initalize pacmankey"
-    pacman-key --init
-    echo "Update ArchLinux-keyring"
-    pacman -Sy archlinux-keyring --noconfirm
-    echo "importing CachyOS key"
-    pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
-    pacman-key --lsign-key F3B607488DB35A47
-    echo "installing CachyOS keyring and mirrorlists"
-    install_mirrorlists
-    echo "Adding CachyOS repos ..."
-    add_repos
-    echo "Adding xyne repos ..."
-    add_xyne_repo
-    echo "finish setting up pacman.conf"
-    # uncomment colors
-    sed -i '/Color/s/^#//g' /etc/pacman.conf
-    # uncomment Parallel Downloads
-    sed -i '/ParallelDownloads/s/^#//g' /etc/pacman.conf
-    # uncomment multilib(32bit binaries)
-    sed -i '/#\[multilib\]/s/^#//' /etc/pacman.conf
-    sed -i '/#Include = \/etc\/pacman\.d\/mirrorlist/s/^#//' /etc/pacman.conf
-    # update mirrorlists for faster update
-    echo "updating for fastest mirrors"
-    reflector -c "US" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist
-    # update packages
-    echo "update packages"
-    pacman -Sy pacman --noconfirm
-  elif [ $added -eq 1 ]; then
-    if [ $commented -eq 1 ]; then
-      echo "You've already added the CachyOS repos but they are commented"
-    else
-      echo "You've already added the CachyOS repos!"
-    fi
-  fi
+  echo "initalize pacmankey"
+  pacman-key --init
+  echo "Update ArchLinux-keyring"
+  pacman -Sy archlinux-keyring --noconfirm
+  echo "importing CachyOS key"
+  pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
+  pacman-key --lsign-key F3B607488DB35A47
+  echo "installing CachyOS keyring and mirrorlists"
+  download_and_install_packages "cachyos-mirrorlist" "cachyos-v3-mirrorlist" "cachyos-v4-mirrorlist"
+  echo "Adding CachyOS repos ..."
+  add_repos
+  echo "Adding xyne repos ..."
+  add_xyne_repo
+  echo "finish setting up pacman.conf"
+  # uncomment colors
+  sed -i '/Color/s/^#//g' /etc/pacman.conf
+  # uncomment Parallel Downloads
+  sed -i '/ParallelDownloads/s/^#//g' /etc/pacman.conf
+  # uncomment multilib(32bit binaries)
+  sed -i '/#\[multilib\]/s/^#//' /etc/pacman.conf
+  sed -i '/#Include = \/etc\/pacman\.d\/mirrorlist/s/^#//' /etc/pacman.conf
+  # update mirrorlists for faster update
+  echo "updating for fastest mirrors"
+  reflector -c "US" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist
+  # update packages
+  echo "update packages"
+  pacman -Sy pacman cachyos-keyring --noconfirm
   # cat /etc/pacman.conf
-  rm /supportedlist
 }
 
 run
