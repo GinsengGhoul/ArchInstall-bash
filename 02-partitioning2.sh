@@ -125,7 +125,7 @@ create_partitiontable() {
     Aux=0
   fi
 
-  disksize=$disksize - $recovery
+  disksize=$(($disksize - $recovery))
   echlog "------------------------------------" $logfile
 
 }
