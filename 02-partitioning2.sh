@@ -110,7 +110,7 @@ create_partitiontable() {
   if [ $Aux=true ]; then
     local DiskSize=$(($disksize - $BB - $EFI - $recovery - $swap))
     # max root size is 256
-    local root=$((256 * $Gib))
+    root=$((256 * $Gib))
     local decrease=$((16 * $Gib))
     local maxRoot=$(($DiskSize / 4))
 
@@ -120,9 +120,11 @@ create_partitiontable() {
       fi
     done
 
+    aux=$(($DiskSize - $root))
+
   else
     root=$(($disksize - $BB - $EFI - $recovery - $swap))
-    Aux=0
+    aux=0
   fi
 
   disksize=$(($disksize - $recovery))
