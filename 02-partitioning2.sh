@@ -205,6 +205,10 @@ format_drive() {
   fi
 }
 
+mount_partitions() {
+  echo "this isn't complete yet apparently ┐(ﾟ～ﾟ)┌"
+}
+
 run() {
   # overrides
   # sizes are in Mib

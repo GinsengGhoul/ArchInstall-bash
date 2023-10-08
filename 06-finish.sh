@@ -186,6 +186,22 @@ enable_services() {
   arch-chroot /mnt systemctl enable ananicy-cpp
   # arch-chroot /mnt systemctl enable doh-client
   arch-chroot /mnt systemctl mask ldconfig.service
+
+  if [ $ssd = true ]; then
+    cat <<EOF >/mnt/etc/systemd/system/boot-fstrim.service
+[Unit]
+Description=Run fstrim on all mounted filesystems
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/fstrim -a
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    arch-chroot /mnt systemctl enable boot-fstrim.service
+  fi
 }
 
 run() {

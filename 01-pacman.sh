@@ -2,7 +2,7 @@
 # Gordon Teh 3/21/23
 #
 
-#mirror_url="https://mirror.cachyos.org/repo/x86_64/cachyos"
+#mirror_url="https://mirror.cachyos.org/repo/x86_64/cachyos/"
 mirror_url="https://aur.cachyos.org/repo/x86_64/cachyos/"
 
 logfile="Pacman.log"
@@ -59,24 +59,24 @@ download_and_install_packages() {
   webpage_content=$(curl -s "$mirror_url")
   for package in "${packages[@]}"; do
     # Try to find the package URL based on its title
-    package_url=$(echo "$webpage_content" | grep -oE 'href="([^"]+)" title="'"$package"'"' | cut -d'"' -f2)
+    package_filename=$(echo "$webpage_content" | grep -oE 'href=([^ ]+)' | cut -d'=' -f2)
 
-    if [ -z "$package_url" ]; then
+    if [ -z "$package_filename" ]; then
       echo "Package '$package' not found on the webpage."
     else
       # Download the package and its signature
-      package_filename=$(basename "$package_url")
-      package_signature_url="${package_url}.sig"
+      package_signature="${package_filename}.sig"
 
-      curl -O "$mirror_url/$package_url"
-      curl -O "$mirror_url/$package_signature_url"
+      wget "$mirror_url$package_filename"
+      wget "$mirror_url$package_signature"
 
       # Verify the package signature
-      gpg --verify "$package_filename.sig" "$package_filename" 2>/dev/null
+      pacman-key --verify "$package_signature
 
       if [ $? -eq 0 ]; then
+        echlog "$package_filename"
         # Install the package using pacman
-        sudo pacman -U "$package_filename" --needed
+        sudo pacman -U "$package_filename" --noconfirm
       else
         echo "Package signature verification failed for '$package'."
       fi
@@ -88,7 +88,7 @@ run() {
   /lib/ld-linux-x86-64.so.2 --help | grep "(supported, searched)" >supportedlist
   check_supported_isa_level
 
-  echo "SupportLevel = $SupportLevel"
+  echlog "SupportLevel = $SupportLevel"
   echo ""
   printf "Your CPU supports: "
   if [ $SupportLevel -ge 4 ]; then
@@ -115,7 +115,10 @@ run() {
   pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
   pacman-key --lsign-key F3B607488DB35A47
   echo "installing CachyOS keyring and mirrorlists"
-  download_and_install_packages "cachyos-mirrorlist" "cachyos-v3-mirrorlist" "cachyos-v4-mirrorlist"
+  wget "$mirror_url"cachyos.db
+  wget "$mirror_url"cachyos.db.sig
+  pacman-key --verify cachyos.db.sig
+  download_and_install_packages "cachyos-keyring" "cachyos-mirrorlist" "cachyos-v3-mirrorlist" "cachyos-v4-mirrorlist"
   echo "Adding CachyOS repos ..."
   add_repos
   echo "Adding xyne repos ..."
