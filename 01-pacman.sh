@@ -110,10 +110,16 @@ run() {
 
   #echo "commented = $commented"
   #echo "added = $added"
-  echo "initalize pacmankey"
-  pacman-key --init
   echo "Update ArchLinux-keyring"
   pacman -Sy archlinux-keyring --noconfirm
+  rm -rf /etc/pacman.d/gnupg
+  pacman-key --init
+  pacman-key --populate
+
+  while ! pacman -Sy archlinux-keyring --noconfirm; do
+    pacman-key --refresh
+  done
+
   echo "importing CachyOS key"
   pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
   pacman-key --lsign-key F3B607488DB35A47
