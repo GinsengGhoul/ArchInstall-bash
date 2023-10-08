@@ -91,11 +91,11 @@ create_partitiontable() {
 
   if [ $Swap=true ]; then
     # determine swap size
-    maxSwapsize = $((disksize / 5))
+    maxSwapsize=$((disksize / 5))
     if [ $((ram * 2)) -le maxSwapsize]; then
       swap=$((ram * 2))
-    elif [ $((ram * 1.5)) -le maxSwapsize]; then
-      swap=$((ram * 1.5))
+    elif [ $((ram + ram / 2)) -le maxSwapsize]; then
+      swap=$((ram + ram / 2))
     elif [ $((ram)) -le maxSwapsize]; then
       swap=$((ram))
     else
@@ -218,7 +218,7 @@ run() {
 
   echlog "ram(Mib): $ram" $logfile
   echlog "disksize(Mib): $disksize" $logfile
-  ramGib=$(ram / Gib)
+  ramGib=$(($ram / $Gib))
   echlog "ramGib: $ramGib" $logfile
   echlog "------------------------------------" $logfile
 
