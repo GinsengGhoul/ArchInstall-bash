@@ -70,8 +70,8 @@ download_and_install_packages() {
       # Download the package and its signature
       package_signature="${package_filename}.sig"
 
-      wget "$mirror_url$package_filename"
-      wget "$mirror_url$package_signature"
+      curl -O "$mirror_url$package_filename"
+      curl -O "$mirror_url$package_signature"
 
       # Verify the package signature
       pacman-key --verify "$package_signature"
@@ -124,9 +124,6 @@ run() {
   pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
   pacman-key --lsign-key F3B607488DB35A47
   echo "installing CachyOS keyring and mirrorlists"
-  wget "$mirror_url"cachyos.db
-  wget "$mirror_url"cachyos.db.sig
-  pacman-key --verify cachyos.db.sig
   download_and_install_packages "cachyos-keyring" "cachyos-mirrorlist" "cachyos-v3-mirrorlist" "cachyos-v4-mirrorlist"
   echo "Adding CachyOS repos ..."
   add_repos
