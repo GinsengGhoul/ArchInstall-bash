@@ -71,7 +71,7 @@ download_and_install_packages() {
       wget "$mirror_url$package_signature"
 
       # Verify the package signature
-      pacman-key --verify "$package_signature
+      pacman-key --verify "$package_signature"
 
       if [ $? -eq 0 ]; then
         echlog "$package_filename"
@@ -85,7 +85,7 @@ download_and_install_packages() {
 }
 
 run() {
-  /lib/ld-linux-x86-64.so.2 --help | grep "(supported, searched)" >supportedlist
+  /lib/ld-linux-x86-64.so.2 --help | grep "supported, searched" >supportedlist
   check_supported_isa_level
 
   echlog "SupportLevel = $SupportLevel"
@@ -136,7 +136,7 @@ run() {
   reflector -c "US" -f 12 -l 10 -n 12 --save /etc/pacman.d/mirrorlist
   # update packages
   echo "update packages"
-  pacman -Sy pacman cachyos-keyring --noconfirm
+  pacman -Sy pacman --noconfirm
   # cat /etc/pacman.conf
 }
 
