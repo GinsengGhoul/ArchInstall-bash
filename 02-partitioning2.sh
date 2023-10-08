@@ -218,7 +218,7 @@ run() {
 
   echlog "ram(Mib): $ram" $logfile
   echlog "disksize(Mib): $disksize" $logfile
-  ramGib=$(find_closest "$ram")
+  ramGib=$(ram / Gib)
   echlog "ramGib: $ramGib" $logfile
   echlog "------------------------------------" $logfile
 
