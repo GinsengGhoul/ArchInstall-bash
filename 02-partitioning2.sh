@@ -77,7 +77,7 @@ create_partitiontable() {
   fi
 
   if [ $Recovery=true ]; then
-    recovery=Gib
+    recovery=$Gib
   else
     recovery=0
   fi
@@ -91,13 +91,15 @@ create_partitiontable() {
 
   if [ $Swap=true ]; then
     # determine swap size
-    maxSwapsize=$((disksize / 5))
-    if [ $((ram * 2)) -le maxSwapsize]; then
-      swap=$((ram * 2))
-    elif [ $((ram + ram / 2)) -le maxSwapsize]; then
-      swap=$((ram + ram / 2))
-    elif [ $((ram)) -le maxSwapsize]; then
-      swap=$((ram))
+    maxSwapsize=$(($disksize / 5))
+    if [ $(($ram * 2)) -le $maxSwapsize ]; then
+      swap=$(($ram * 2))
+    elif [ $(($ram + $ram / 2)) -le $maxSwapsize ]; then
+      swap=$(($ram + $ram / 2))
+    elif [ $(($ram)) -le $maxSwapsize ]; then
+      swap=$(($ram))
+    elif [ $(($ram / 2)) -le $maxSwapsize ]; then
+      swap=$(($ram / 2))
     else
       swap=0
     fi
@@ -106,24 +108,24 @@ create_partitiontable() {
   fi
 
   if [ $Aux=true ]; then
-    local DiskSize=$((disksize - BB - EFI - recovery - swap))
+    local DiskSize=$(($disksize - $BB - $EFI - $recovery - $swap))
     # max root size is 256
-    local root = $((256 * Gib))
-    local decrease = $((16 * Gib))
-    local maxRoot = $((DiskSize / 4))
+    local root=$((256 * $Gib))
+    local decrease=$((16 * $Gib))
+    local maxRoot=$(($DiskSize / 4))
 
     for ((i = 0; i < 15; i++)); do
-      if [ $root -gt maxRoot ]; then
-        root=$((root - decrease))
+      if [ $root -gt $maxRoot ]; then
+        root=$(($root - $decrease))
       fi
     done
 
   else
-    root=$((disksize - BB - EFI - recovery - swap))
+    root=$(($disksize - $BB - $EFI - $recovery - $swap))
     Aux=0
   fi
 
-  disksize = disksize - recovery
+  disksize=$disksize - $recovery
   echlog "------------------------------------" $logfile
 
 }
