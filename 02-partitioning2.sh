@@ -4,7 +4,7 @@ BB="1"
 recovery="1024"
 logfile="Partition.log"
 
-make_table_only = "true"
+make_table_only="true"
 xfs_format="mkfs.xfs -f "
 btrfs_format="mkfs.btrfs -f "
 f2fs_format="mkfs.f2fs -f "
@@ -179,6 +179,7 @@ format_drive() {
 
   if [ $Aux = true ]; then
     if [ $rootfs = "xfs" ]; then
+      command="$xfs_format""$dev$cp"
     elif [ $rootfs = "btrfs" ]; then
       command="$f2fs_format""$dev$cp"
     elif [ $rootfs = "f2fs" ]; then
