@@ -9,15 +9,15 @@ logfile="Pacman.log"
 
 check_supported_isa_level() {
   SupportLevel=0
-  if grep x86-64-v4 /supportedlist; then
+  if grep x86-64-v4 supportedlist; then
     SupportLevel=4
   fi
-  if grep x86-64-v3 /supportedlist; then
+  if grep x86-64-v3 supportedlist; then
     if [ $SupportLevel -lt 3 ]; then
       SupportLevel=3
     fi
   fi
-  if grep x86-64-v2 /supportedlist; then
+  if grep x86-64-v2 supportedlist; then
     if [ $SupportLevel -lt 2 ]; then
       SupportLevel=2
     fi
@@ -57,9 +57,12 @@ download_and_install_packages() {
 
   # Extract package URLs from the webpage
   webpage_content=$(curl -s "$mirror_url")
+  echo "$webpage_content" | grep -oP 'href="[^"]+" title="\K[^"]+(?=")' >catalogue
+  sed -i '/\.sig$/d' catalogue
+
   for package in "${packages[@]}"; do
     # Try to find the package URL based on its title
-    package_filename=$(echo "$webpage_content" | grep -oE 'href=([^ ]+)' | cut -d'=' -f2)
+    package_filename=$(cat catalogue | grep $package)
 
     if [ -z "$package_filename" ]; then
       echo "Package '$package' not found on the webpage."
