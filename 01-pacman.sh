@@ -113,8 +113,8 @@ run() {
   echo "Update ArchLinux-keyring"
   pacman -Sy archlinux-keyring --noconfirm
   #rm -rf /etc/pacman.d/gnupg
-  pacman-key --init
-  pacman-key --populate
+  #pacman-key --init
+  #pacman-key --populate
 
   #while ! pacman -Sy archlinux-keyring --noconfirm; do
   #  pacman-key --refresh
