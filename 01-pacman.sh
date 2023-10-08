@@ -149,4 +149,5 @@ run() {
   # cat /etc/pacman.conf
 }
 
+source Configuration.cfg
 run
