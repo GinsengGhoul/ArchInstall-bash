@@ -171,27 +171,27 @@ print_partitiontable() {
 
 # dynamic numbers to build partition table
 format_drive() {
-  if [ $BiosBoot = true ]; then
+  if [[ "$BiosBoot" == "true" ]]; then
     cp=2
   else
     cp=1
   fi
 
-  if [ $esp = true ]; then
+  if [{ "$esp" = "true" }]; then
     mkfs.fat -F32 $disk$cp # efi partition
     efipath=$disk$cp
     ((cp++))
   fi
 
-  if [ $rootfs = "xfs" ]; then
+  if [[ "$rootfs" = "xfs" ]]; then
     command="$xfs_format""-L Arch_root $dev$cp"
-  elif [ $rootfs = "btrfs" ]; then
+  elif [[ "$rootfs" = "btrfs" ]]; then
     command="$f2fs_format""-L Arch_root $dev$cp"
-  elif [ $rootfs = "f2fs" ]; then
+  elif [[ "$rootfs" = "f2fs" ]]; then
     command="$f2fs_format""-l Arch_root $dev$cp"
-  elif [ $rootfs = "ext4" ]; then
+  elif [[ "$rootfs" = "ext4" ]]; then
     command="$ext4_format""-L Arch_root $dev$cp"
-  elif [ $rootfs = "jfs" ]; then
+  elif [[ "$rootfs" = "jfs" ]]; then
     command="$jfs_format"" -L Arch_Root $dev$cp"
   fi
   exec $command
@@ -199,16 +199,16 @@ format_drive() {
   command=""
   ((cp++))
 
-  if [ $Aux = true ]; then
-    if [ $auxfs = "xfs" ]; then
+  if [[ $Aux = "true" ]]; then
+    if [[ "$auxfs" = "xfs" ]]; then
       command="$xfs_format""$dev$cp"
-    elif [ $auxfs = "btrfs" ]; then
+    elif [[ "$auxfs" = "btrfs" ]]; then
       command="$f2fs_format""$dev$cp"
-    elif [ $auxfs = "f2fs" ]; then
+    elif [[ "$auxfs" = "f2fs" ]]; then
       command="$f2fs_format""$dev$cp"
-    elif [ $auxfs = "ext4" ]; then
+    elif [[ "$auxfs" = "ext4" ]]; then
       command="$ext4_format""$dev$cp"
-    elif [ $auxfs = "jfs" ]; then
+    elif [[ "$auxfs" = "jfs" ]]; then
       command="$jfs_format""$dev$cp"
     fi
 
@@ -230,32 +230,32 @@ format_drive() {
 }
 
 mount_partitions() {
-  if [ $rootfs = "xfs" ]; then
+  if [[ "$rootfs" = "xfs" ]]; then
     mount -o $xfs_mount $rootpath /mnt
-  elif [ $rootfs = "btrfs" ]; then
+  elif [[ "$rootfs" = "btrfs" ]]; then
     mount -o $btrfs_mount $rootpath /mnt
-  elif [ $rootfs = "f2fs" ]; then
+  elif [[ "$rootfs" = "f2fs" ]]; then
     mount -o $f2fs_mount $rootpath /mnt
-  elif [ $rootfs = "ext4" ]; then
+  elif [[ "$rootfs" = "ext4" ]]; then
     mount -o $ext4_mount $rootpath /mnt
-  elif [ $rootfs = "jfs" ]; then
+  elif [[ "$rootfs" = "jfs" ]]; then
     mount -o $jfs_mount $rootpath /mnt
   fi
 
   mkdir /mnt/boot
   mount $efipath /mnt/boot
 
-  if [ $Aux = true ]; then
+  if [[ "$Aux" = true ]]; then
     mkdir -p /mnt/$AuxUse
-    if [ $auxfs = "xfs" ]; then
+    if [[ "$auxfs" = "xfs" ]]; then
       mount -o $xfs_mount $auxpath $AuxUse
-    elif [ $auxfs = "btrfs" ]; then
+    elif [[ "$auxfs" = "btrfs" ]]; then
       mount -o $btrfs_mount $auxpath $AuxUse
-    elif [ $auxfs = "f2fs" ]; then
+    elif [[ "$auxfs" = "f2fs" ]]; then
       mount -o $f2fs_mount $auxpath $AuxUse
-    elif [ $auxfs = "ext4" ]; then
+    elif [[ "$auxfs" = "ext4" ]]; then
       mount -o $ext4_mount_mount $auxpath $AuxUse
-    elif [ $auxfs = "jfs" ]; then
+    elif [[ "$auxfs" = "jfs" ]]; then
       mount -o $jfs_mount $auxpath $AuxUse
     fi
   fi
