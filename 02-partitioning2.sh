@@ -5,11 +5,27 @@ recovery="1024"
 logfile="Partition.log"
 
 make_table_only="true"
+
 xfs_format="mkfs.xfs -f "
 btrfs_format="mkfs.btrfs -f "
 f2fs_format="mkfs.f2fs -f "
 ext4_format="mkfs.ext4 -F "
 jfs_format="mkfs.jfs "
+
+# no need to add discard=async for ssds for btrfs as it is default
+# compression is 1-15, 1 is the fastest, 15 is the highest compression
+# 1 saves 40%
+# 3 saves 41%
+# 9 saves 43%
+# https://hackmd.io/kIMJv7yHSiKoAq1MPcCMdw
+# in most cases just use 1
+# lazytime keeps changes in ram.  if ram is in shortage, don't use it.
+# could also use noatime
+xfs_mount="defaults,lazytime"
+btrfs_mount="defaults,lazytime,discard=async,compress=zstd:1"
+f2fs_mount="compress_algorithm=zstd:1,compress_chksum,atgc,gc_merge,lazytime"
+ext4_mount="defaults,lazytime"
+jfs_mount="defaults,lazytime"
 
 # ef02 - bios boot
 # ef00 - efi partition
@@ -23,7 +39,7 @@ jfs_format="mkfs.jfs "
 # n\n\n\n+"$BB"M\nef02\n                make bios boot
 # n\n\n\n+"$EFI"M\nef00\n               make efi partition
 # n\n\n\n+"$root"M\n8300\n              make root partition
-# n\n\n\n+"$home"M\n8300\n              make home partition
+# n\n\n\n+"$aux"M\n8300\n               make aux partition
 # n\n\n\n+"$recovery"M\n0700\n          make recovery partition
 # n\n\n\n+"$swap"M\n\n8200\n            make swap partition
 # w\ny\n"                               write table
@@ -33,7 +49,7 @@ partition_drive() {
   bbstr='n\n\n\n+'$BB'M\nef02\n'
   efistr='n\n\n\n+'$EFI'M\nef00\n'
   rootstr='n\n\n\n+'$root'M\n8300\n'
-  homestr='n\n\n\n+'$aux'M\n8300\n'
+  auxstr='n\n\n\n+'$aux'M\n8300\n'
   recoverystr='n\n\n\n+'$recovery'M\n0700\n'
   swapstr='n\n\n\n\n+'$swap'M\n8200\n'
   writestr='w\ny\n'
@@ -42,8 +58,8 @@ partition_drive() {
 
   # start string_builder
   commands=$gptstr$bbstr$efistr$rootstr
-  if [ $home -gt 0 ]; then
-    commands=$commands$homestr
+  if [ $aux -gt 0 ]; then
+    commands=$commands$auxstr
   fi
   if [ $make_recovery == true ]; then
     commands=$commands$recoverystr
@@ -54,7 +70,7 @@ partition_drive() {
   commands=$commands$writestr
   echo $commands
   # override
-  #commands=$gptstr$bbstr$efistr$rootstr$homestr$recoverystr$swapstr$writestr
+  #commands=$gptstr$bbstr$efistr$rootstr$auxstr$recoverystr$swapstr$writestr
   #commands=$gptstr$swapstr$writestr
   #echo $commands
   echo -e $commands | gdisk $disk
@@ -184,15 +200,15 @@ format_drive() {
   ((cp++))
 
   if [ $Aux = true ]; then
-    if [ $rootfs = "xfs" ]; then
+    if [ $auxfs = "xfs" ]; then
       command="$xfs_format""$dev$cp"
-    elif [ $rootfs = "btrfs" ]; then
+    elif [ $auxfs = "btrfs" ]; then
       command="$f2fs_format""$dev$cp"
-    elif [ $rootfs = "f2fs" ]; then
+    elif [ $auxfs = "f2fs" ]; then
       command="$f2fs_format""$dev$cp"
-    elif [ $rootfs = "ext4" ]; then
+    elif [ $auxfs = "ext4" ]; then
       command="$ext4_format""$dev$cp"
-    elif [ $rootfs = "jfs" ]; then
+    elif [ $auxfs = "jfs" ]; then
       command="$jfs_format""$dev$cp"
     fi
 
@@ -201,6 +217,7 @@ format_drive() {
   fi
   if [ $recovery -gt 0 ]; then
     mkfs.fat -F32 $disk$cp
+    recoverypath=$disk$cp
     ((cp++))
   fi
   if [ $swap -gt 0 ]; then
@@ -213,7 +230,41 @@ format_drive() {
 }
 
 mount_partitions() {
-  echo "this isn't complete yet apparently ┐(ﾟ～ﾟ)┌"
+  if [ $rootfs = "xfs" ]; then
+    mount -o $xfs_mount $rootpath /mnt
+  elif [ $rootfs = "btrfs" ]; then
+    mount -o $btrfs_mount $rootpath /mnt
+  elif [ $rootfs = "f2fs" ]; then
+    mount -o $f2fs_mount $rootpath /mnt
+  elif [ $rootfs = "ext4" ]; then
+    mount -o $ext4_mount $rootpath /mnt
+  elif [ $rootfs = "jfs" ]; then
+    mount -o $jfs_mount $rootpath /mnt
+  fi
+
+  mkdir /mnt/boot
+  mount $efipath /mnt/boot
+
+  if [ $Aux = true ]; then
+    mkdir -p /mnt/$AuxUse
+    if [ $auxfs = "xfs" ]; then
+      mount -o $xfs_mount $auxpath $AuxUse
+    elif [ $auxfs = "btrfs" ]; then
+      mount -o $btrfs_mount $auxpath $AuxUse
+    elif [ $auxfs = "f2fs" ]; then
+      mount -o $f2fs_mount $auxpath $AuxUse
+    elif [ $auxfs = "ext4" ]; then
+      mount -o $ext4_mount_mount $auxpath $AuxUse
+    elif [ $auxfs = "jfs" ]; then
+      mount -o $jfs_mount $auxpath $AuxUse
+    fi
+  fi
+
+  if [ $recovery -gt 0 ]; then
+    mkdir /mnt/RECOVERY
+    mount $recoverypath /mnt/RECOVERY
+  fi
+
 }
 
 run() {
@@ -236,6 +287,7 @@ run() {
     mount -l /mnt
     partition_drive
     format_drive
+    mount_partitions
   fi
 }
 
