@@ -4,7 +4,7 @@ BB="1"
 recovery="1024"
 logfile="Partition.log"
 
-make_table_only="true"
+make_table_only="false"
 
 xfs_format="mkfs.xfs -f "
 btrfs_format="mkfs.btrfs -f "
