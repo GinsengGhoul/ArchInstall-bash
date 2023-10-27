@@ -141,9 +141,9 @@ print_partitiontable() {
   echlog "Recovery:       $recovery" $logfile
   echlog "Swap:           $swap" $logfile
   echlog "------------------------------------" $logfile
-  echlog "Total           $(($BB + $EFI + $root + $home + $swap + $recovery))" $logfile
+  echlog "Total           $(($BB + $EFI + $root + $aux + $swap + $recovery))" $logfile
   echo "lets do it!"
-  if [ $(($BB + $EFI + $root + $home + $swap + $recovery)) -eq $disksize ]; then
+  if [ $(($BB + $EFI + $root + $aux + $swap + $recovery)) -eq $disksize ]; then
     echo "these values seem correct"
   else
     echo "the numbers aren't numbering"
