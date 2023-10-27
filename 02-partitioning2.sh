@@ -83,6 +83,7 @@ create_partitiontable() {
 
   SoftSet BiosBoot true
   SoftSet Recovery true
+  SoftSet esp true
   SoftSet Aux true
   SoftSet Swap true
 
