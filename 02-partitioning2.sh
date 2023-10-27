@@ -93,7 +93,7 @@ create_partitiontable() {
   fi
 
   if [ $Recovery=true ]; then
-    recovery=$Gib
+    recovery=$((2 * $Gib))
   else
     recovery=0
   fi
@@ -180,6 +180,7 @@ format_drive() {
   if [{ "$esp" = "true" }]; then
     mkfs.fat -F32 $disk$cp # efi partition
     efipath=$disk$cp
+    echlog "esppath = $esppath | $disk$cp" $logfile
     ((cp++))
   fi
 
@@ -195,8 +196,10 @@ format_drive() {
     command="$jfs_format"" -L Arch_Root $dev$cp"
   fi
   exec $command
-  rootpath=$disk$cp
   command=""
+
+  rootpath=$disk$cp
+  echlog "rootpath = $rootpath | $disk$cp" $logfile
   ((cp++))
 
   if [[ $Aux = "true" ]]; then
@@ -211,17 +214,23 @@ format_drive() {
     elif [[ "$auxfs" = "jfs" ]]; then
       command="$jfs_format""$dev$cp"
     fi
+    exec $command
+    command=""
 
     auxpath=$disk$cp
+    echlog "auxpath = $auxpath | $disk$cp" $logfile
     ((cp++))
   fi
-  if [ $recovery -gt 0 ]; then
+  if [[ $recovery = "true" ]]; then
     mkfs.fat -F32 $disk$cp
     recoverypath=$disk$cp
+    echlog "recoverypath = $recoverypath | $disk$cp" $logfile
     ((cp++))
   fi
   if [ $swap -gt 0 ]; then
+    echlog "swappath = $disk$cp" $logfile
     mkswap $disk$cp
+    echlog "swappath = $disk$cp" $logfile
     swapon $disk$cp
     echo "Swap_UUID=$(blkid -s UUID -o value $disk$cp)" >swap
   else
@@ -245,7 +254,7 @@ mount_partitions() {
   mkdir /mnt/boot
   mount $efipath /mnt/boot
 
-  if [[ "$Aux" = true ]]; then
+  if [[ "$Aux" = "true" ]]; then
     mkdir -p /mnt/$AuxUse
     if [[ "$auxfs" = "xfs" ]]; then
       mount -o $xfs_mount $auxpath $AuxUse
@@ -260,7 +269,7 @@ mount_partitions() {
     fi
   fi
 
-  if [ $recovery -gt 0 ]; then
+  if [[ $recovery = "true" ]]; then
     mkdir /mnt/RECOVERY
     mount $recoverypath /mnt/RECOVERY
   fi
