@@ -178,7 +178,7 @@ format_drive() {
     cp=1
   fi
 
-  if [{ "$esp" = "true" }]; then
+  if [[ "$esp" = "true" ]]; then
     mkfs.fat -F32 $disk$cp # efi partition
     efipath=$disk$cp
     echlog "esppath = $esppath | $disk$cp" $logfile
