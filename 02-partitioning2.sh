@@ -146,7 +146,9 @@ print_partitiontable() {
   if [ $(($BB + $EFI + $root + $aux + $swap + $recovery)) -eq $disksize ]; then
     echo "these values seem correct"
   else
-    echo "the numbers aren't numbering"
+    echlog "the numbers aren't numbering" $logfile
+    echlog "$disksize != $(($BB + $EFI + $root + $aux + $swap + $recovery))" $logfile
+
     return 0
   fi
 }
