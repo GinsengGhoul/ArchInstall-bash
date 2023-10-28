@@ -58,13 +58,13 @@ partition_drive() {
 
   # start string_builder
   commands=$gptstr$bbstr$efistr$rootstr
-  if [ $aux -gt 0 ]; then
+  if [[ "$Aux" = "true" ]]; then
     commands=$commands$auxstr
   fi
-  if [ $make_recovery == true ]; then
+  if [[ "$Recovery" = "true" ]]; then
     commands=$commands$recoverystr
   fi
-  if [ $swap -gt 0 ]; then
+  if [[ "$Swap" = "true"]]; then
     commands=$commands$swapstr
   fi
   commands=$commands$writestr
@@ -87,26 +87,26 @@ create_partitiontable() {
   SoftSet Recovery true
   SoftSet Swap true
 
-  if [ $BiosBoot=true ]; then
+  if [[ "$BiosBoot" = "true" ]]; then
     BB=1
   else
     BB=0
   fi
 
-  if [ $Recovery=true ]; then
+  if [[ "$Recovery" = "true" ]]; then
     recovery=$((2 * $Gib))
   else
     recovery=0
   fi
 
-  if [ $esp=true ]; then
+  if [[ "$esp" = "true" ]]; then
     # for a single kernel, it's around 128
     EFI=256
   else
     EFI=0
   fi
 
-  if [ $Swap=true ]; then
+  if [[ "$Swap" = "true" ]]; then
     # determine swap size
     maxSwapsize=$(($disksize / 5))
     if [ $(($ram * 2)) -le $maxSwapsize ]; then
@@ -124,7 +124,7 @@ create_partitiontable() {
     swap=0
   fi
 
-  if [ $Aux=true ]; then
+  if [[ "$Aux" = "true" ]]; then
     local DiskSize=$(($disksize - $BB - $EFI - $recovery - $swap))
     # max root size is 256
     root=$((256 * $Gib))
@@ -185,6 +185,7 @@ format_drive() {
     echlog "esppath = $esppath | $disk$cp" $logfile
     ((cp++))
   fi
+  echlog "esp = $esp" $logfile
 
   if [[ "$rootfs" = "xfs" ]]; then
     command="$xfs_format""-L Arch_root $dev$cp"
