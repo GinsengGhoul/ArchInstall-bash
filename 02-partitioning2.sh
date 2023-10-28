@@ -82,9 +82,9 @@ create_partitiontable() {
   Boot=$((Gib * 1))
 
   SoftSet BiosBoot true
-  SoftSet Recovery true
   SoftSet esp true
   SoftSet Aux true
+  SoftSet Recovery true
   SoftSet Swap true
 
   if [ $BiosBoot=true ]; then
@@ -177,6 +177,7 @@ format_drive() {
   else
     cp=1
   fi
+  echlog "BiosBoot = $BiosBoot, setting cp to $cp" $logfile
 
   if [[ "$esp" = "true" ]]; then
     mkfs.fat -F32 $disk$cp # efi partition
