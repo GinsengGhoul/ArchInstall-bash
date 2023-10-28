@@ -224,7 +224,7 @@ format_drive() {
     echlog "auxpath = $auxpath | $disk$cp" $logfile
     ((cp++))
   fi
-  if [[ $recovery = "true" ]]; then
+  if [[ $Recovery = "true" ]]; then
     mkfs.fat -F32 $disk$cp
     recoverypath=$disk$cp
     echlog "recoverypath = $recoverypath | $disk$cp" $logfile
@@ -233,7 +233,6 @@ format_drive() {
   if [ $swap -gt 0 ]; then
     echlog "swappath = $disk$cp" $logfile
     mkswap $disk$cp
-    echlog "swappath = $disk$cp" $logfile
     swapon $disk$cp
     echo "Swap_UUID=$(blkid -s UUID -o value $disk$cp)" >swap
   else
@@ -272,7 +271,7 @@ mount_partitions() {
     fi
   fi
 
-  if [[ $recovery = "true" ]]; then
+  if [[ $Recovery = "true" ]]; then
     mkdir /mnt/RECOVERY
     mount $recoverypath /mnt/RECOVERY
   fi
