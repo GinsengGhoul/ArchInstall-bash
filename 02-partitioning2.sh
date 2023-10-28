@@ -64,7 +64,7 @@ partition_drive() {
   if [[ "$Recovery" = "true" ]]; then
     commands=$commands$recoverystr
   fi
-  if [[ "$Swap" = "true"]]; then
+  if [[ "$Swap" = "true" ]]; then
     commands=$commands$swapstr
   fi
   commands=$commands$writestr
