@@ -210,7 +210,7 @@ format_drive() {
     command="$jfs_format"" -L Arch_Root $disk$cp"
     echlog "command = $command"
   fi
-  exec $command
+  $command
   command=""
 
   rootpath=$disk$cp
@@ -240,7 +240,7 @@ format_drive() {
       command="$jfs_format""$disk$cp"
       echlog "command = $command"
     fi
-    exec $command
+    $command
     command=""
 
     auxpath=$disk$cp
