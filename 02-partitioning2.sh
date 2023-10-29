@@ -180,7 +180,7 @@ format_drive() {
   echlog "BiosBoot = $BiosBoot, setting cp to $cp"
 
   if [[ "$esp" = "true" ]]; then
-    echlog "formating $dev$cp as a Fat32 esp partition"
+    echlog "formating $disk$cp as a Fat32 esp partition"
     mkfs.fat -F32 $disk$cp # efi partition
     efipath=$disk$cp
     echlog "esppath = $esppath | $disk$cp"
@@ -190,24 +190,24 @@ format_drive() {
 
   SoftSet rootfs btrfs
   if [[ "$rootfs" = "xfs" ]]; then
-    echlog "formating $dev$cp as a XFS root partition"
-    command="$xfs_format""-L Arch_root $dev$cp"
+    echlog "formating $disk$cp as a XFS root partition"
+    command="$xfs_format""-L Arch_root $disk$cp"
     echlog "command = $command"
   elif [[ "$rootfs" = "btrfs" ]]; then
-    echlog "formating $dev$cp as a BTRFS root partition"
-    command="$btrfs_format""-L Arch_root $dev$cp"
+    echlog "formating $disk$cp as a BTRFS root partition"
+    command="$btrfs_format""-L Arch_root $disk$cp"
     echlog "command = $command"
   elif [[ "$rootfs" = "f2fs" ]]; then
-    echlog "formating $dev$cp as a F2FS root partition"
-    command="$f2fs_format""-l Arch_root $dev$cp"
+    echlog "formating $disk$cp as a F2FS root partition"
+    command="$f2fs_format""-l Arch_root $disk$cp"
     echlog "command = $command"
   elif [[ "$rootfs" = "ext4" ]]; then
-    echlog "formating $dev$cp as a EXT4 root partition"
-    command="$ext4_format""-L Arch_root $dev$cp"
+    echlog "formating $disk$cp as a EXT4 root partition"
+    command="$ext4_format""-L Arch_root $disk$cp"
     echlog "command = $command"
   elif [[ "$rootfs" = "jfs" ]]; then
-    echlog "formating $dev$cp as a JFS root partition"
-    command="$jfs_format"" -L Arch_Root $dev$cp"
+    echlog "formating $disk$cp as a JFS root partition"
+    command="$jfs_format"" -L Arch_Root $disk$cp"
     echlog "command = $command"
   fi
   exec $command
@@ -220,24 +220,24 @@ format_drive() {
   SoftSet auxfs btrfs
   if [[ $Aux = "true" ]]; then
     if [[ "$auxfs" = "xfs" ]]; then
-      echlog "formating $dev$cp as a XFS Aux partition"
-      command="$xfs_format""$dev$cp"
+      echlog "formating $disk$cp as a XFS Aux partition"
+      command="$xfs_format""$disk$cp"
       echlog "command = $command"
     elif [[ "$auxfs" = "btrfs" ]]; then
-      echlog "formating $dev$cp as a BTRFS Aux partition"
-      command="$btrfs_format""$dev$cp"
+      echlog "formating $disk$cp as a BTRFS Aux partition"
+      command="$btrfs_format""$disk$cp"
       echlog "command = $command"
     elif [[ "$auxfs" = "f2fs" ]]; then
-      echlog "formating $dev$cp as a F2FS Aux partition"
-      command="$f2fs_format""$dev$cp"
+      echlog "formating $disk$cp as a F2FS Aux partition"
+      command="$f2fs_format""$disk$cp"
       echlog "command = $command"
     elif [[ "$auxfs" = "ext4" ]]; then
-      echlog "formating $dev$cp as a EXT4 Aux partition"
-      command="$ext4_format""$dev$cp"
+      echlog "formating $disk$cp as a EXT4 Aux partition"
+      command="$ext4_format""$disk$cp"
       echlog "command = $command"
     elif [[ "$auxfs" = "jfs" ]]; then
-      echlog "formating $dev$cp as a JFS Aux partition"
-      command="$jfs_format""$dev$cp"
+      echlog "formating $disk$cp as a JFS Aux partition"
+      command="$jfs_format""$disk$cp"
       echlog "command = $command"
     fi
     exec $command
