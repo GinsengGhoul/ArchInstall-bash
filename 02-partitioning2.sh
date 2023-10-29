@@ -194,7 +194,7 @@ format_drive() {
     command="$xfs_format""-L Arch_root $dev$cp"
   elif [[ "$rootfs" = "btrfs" ]]; then
     echlog "formating $dev$cp as a BTRFS root partition"
-    command="$f2fs_format""-l Arch_root $dev$cp"
+    command="$btrfs_format""-L Arch_root $dev$cp"
   elif [[ "$rootfs" = "f2fs" ]]; then
     echlog "formating $dev$cp as a F2FS root partition"
     command="$f2fs_format""-l Arch_root $dev$cp"
