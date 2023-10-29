@@ -180,6 +180,7 @@ format_drive() {
   echlog "BiosBoot = $BiosBoot, setting cp to $cp"
 
   if [[ "$esp" = "true" ]]; then
+    echlog "formating $dev$cp as a Fat32 esp partition"
     mkfs.fat -F32 $disk$cp # efi partition
     efipath=$disk$cp
     echlog "esppath = $esppath | $disk$cp"
@@ -189,14 +190,19 @@ format_drive() {
 
   SoftSet rootfs btrfs
   if [[ "$rootfs" = "xfs" ]]; then
+    echlog "formating $dev$cp as a XFS root partition"
     command="$xfs_format""-L Arch_root $dev$cp"
   elif [[ "$rootfs" = "btrfs" ]]; then
+    echlog "formating $dev$cp as a BTRFS root partition"
     command="$f2fs_format""-l Arch_root $dev$cp"
   elif [[ "$rootfs" = "f2fs" ]]; then
+    echlog "formating $dev$cp as a F2FS root partition"
     command="$f2fs_format""-l Arch_root $dev$cp"
   elif [[ "$rootfs" = "ext4" ]]; then
+    echlog "formating $dev$cp as a EXT4 root partition"
     command="$ext4_format""-L Arch_root $dev$cp"
   elif [[ "$rootfs" = "jfs" ]]; then
+    echlog "formating $dev$cp as a JFS root partition"
     command="$jfs_format"" -L Arch_Root $dev$cp"
   fi
   exec $command
@@ -206,16 +212,22 @@ format_drive() {
   echlog "rootpath = $rootpath | $disk$cp"
   ((cp++))
 
+  SoftSet auxfs btrfs
   if [[ $Aux = "true" ]]; then
     if [[ "$auxfs" = "xfs" ]]; then
+      echlog "formating $dev$cp as a XFS Aux partition"
       command="$xfs_format""$dev$cp"
     elif [[ "$auxfs" = "btrfs" ]]; then
+      echlog "formating $dev$cp as a BTRFS Aux partition"
       command="$f2fs_format""$dev$cp"
     elif [[ "$auxfs" = "f2fs" ]]; then
+      echlog "formating $dev$cp as a F2FS Aux partition"
       command="$f2fs_format""$dev$cp"
     elif [[ "$auxfs" = "ext4" ]]; then
+      echlog "formating $dev$cp as a EXT4 Aux partition"
       command="$ext4_format""$dev$cp"
     elif [[ "$auxfs" = "jfs" ]]; then
+      echlog "formating $dev$cp as a JFS Aux partition"
       command="$jfs_format""$dev$cp"
     fi
     exec $command
@@ -231,7 +243,7 @@ format_drive() {
     echlog "recoverypath = $recoverypath | $disk$cp"
     ((cp++))
   fi
-  if [ $swap -gt 0 ]; then
+  if [[ $Swap = "true" ]]; then
     echlog "swappath = $disk$cp"
     mkswap $disk$cp
     swapon $disk$cp
