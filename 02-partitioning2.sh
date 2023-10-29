@@ -145,26 +145,26 @@ create_partitiontable() {
   fi
 
   DiskSize=$(($disksize - $recovery))
-  echlog "------------------------------------" $logfile
+  echlog "------------------------------------"
 
 }
 
 print_partitiontable() {
   # print partition table
-  echlog "Bios Boot:      $BB" $logfile
-  echlog "EFI:            $EFI" $logfile
-  echlog "Root:           $root" $logfile
-  echlog "Aux:            $aux" $logfile
-  echlog "Recovery:       $recovery" $logfile
-  echlog "Swap:           $swap" $logfile
-  echlog "------------------------------------" $logfile
-  echlog "Total           $(($BB + $EFI + $root + $aux + $swap + $recovery))" $logfile
+  echlog "Bios Boot:      $BB"
+  echlog "EFI:            $EFI"
+  echlog "Root:           $root"
+  echlog "Aux:            $aux"
+  echlog "Recovery:       $recovery"
+  echlog "Swap:           $swap"
+  echlog "------------------------------------"
+  echlog "Total           $(($BB + $EFI + $root + $aux + $swap + $recovery))"
   echo "lets do it!"
   if [ $(($BB + $EFI + $root + $aux + $swap + $recovery)) -eq $disksize ]; then
     echo "these values seem correct"
   else
-    echlog "the numbers aren't numbering" $logfile
-    echlog "$disksize != $(($BB + $EFI + $root + $aux + $swap + $recovery))" $logfile
+    echlog "the numbers aren't numbering"
+    echlog "$disksize != $(($BB + $EFI + $root + $aux + $swap + $recovery))"
 
     return 0
   fi
@@ -177,16 +177,17 @@ format_drive() {
   else
     cp=1
   fi
-  echlog "BiosBoot = $BiosBoot, setting cp to $cp" $logfile
+  echlog "BiosBoot = $BiosBoot, setting cp to $cp"
 
   if [[ "$esp" = "true" ]]; then
     mkfs.fat -F32 $disk$cp # efi partition
     efipath=$disk$cp
-    echlog "esppath = $esppath | $disk$cp" $logfile
+    echlog "esppath = $esppath | $disk$cp"
     ((cp++))
   fi
-  echlog "esp = $esp" $logfile
+  echlog "esp = $esp"
 
+  SoftSet rootfs btrfs
   if [[ "$rootfs" = "xfs" ]]; then
     command="$xfs_format""-L Arch_root $dev$cp"
   elif [[ "$rootfs" = "btrfs" ]]; then
@@ -202,7 +203,7 @@ format_drive() {
   command=""
 
   rootpath=$disk$cp
-  echlog "rootpath = $rootpath | $disk$cp" $logfile
+  echlog "rootpath = $rootpath | $disk$cp"
   ((cp++))
 
   if [[ $Aux = "true" ]]; then
@@ -221,17 +222,17 @@ format_drive() {
     command=""
 
     auxpath=$disk$cp
-    echlog "auxpath = $auxpath | $disk$cp" $logfile
+    echlog "auxpath = $auxpath | $disk$cp"
     ((cp++))
   fi
   if [[ $Recovery = "true" ]]; then
     mkfs.fat -F32 $disk$cp
     recoverypath=$disk$cp
-    echlog "recoverypath = $recoverypath | $disk$cp" $logfile
+    echlog "recoverypath = $recoverypath | $disk$cp"
     ((cp++))
   fi
   if [ $swap -gt 0 ]; then
-    echlog "swappath = $disk$cp" $logfile
+    echlog "swappath = $disk$cp"
     mkswap $disk$cp
     swapon $disk$cp
     echo "Swap_UUID=$(blkid -s UUID -o value $disk$cp)" >swap
@@ -242,36 +243,48 @@ format_drive() {
 
 mount_partitions() {
   if [[ "$rootfs" = "xfs" ]]; then
+    echlog "Mounting XFS root to /mnt"
     mount -o $xfs_mount $rootpath /mnt
   elif [[ "$rootfs" = "btrfs" ]]; then
+    echlog "Mounting BTRFS root to /mnt"
     mount -o $btrfs_mount $rootpath /mnt
   elif [[ "$rootfs" = "f2fs" ]]; then
+    echlog "Mounting F2FS root to /mnt"
     mount -o $f2fs_mount $rootpath /mnt
   elif [[ "$rootfs" = "ext4" ]]; then
+    echlog "Mounting EXT4 root to /mnt"
     mount -o $ext4_mount $rootpath /mnt
   elif [[ "$rootfs" = "jfs" ]]; then
+    echlog "Mounting JFS root to /mnt"
     mount -o $jfs_mount $rootpath /mnt
   fi
 
   mkdir /mnt/boot
   mount $efipath /mnt/boot
 
+  SoftSet AuxUse "/home"
   if [[ "$Aux" = "true" ]]; then
-    mkdir -p /mnt/$AuxUse
+    mkdir -p /mnt$AuxUse
     if [[ "$auxfs" = "xfs" ]]; then
-      mount -o $xfs_mount $auxpath $AuxUse
+      echlog "Mounting XFS aux to /mnt$AuxUse"
+      mount -o $xfs_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "btrfs" ]]; then
-      mount -o $btrfs_mount $auxpath $AuxUse
+      echlog "Mounting BTRFS aux to /mnt$AuxUse"
+      mount -o $btrfs_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "f2fs" ]]; then
-      mount -o $f2fs_mount $auxpath $AuxUse
+      echlog "Mounting F2FS aux to /mnt$AuxUse"
+      mount -o $f2fs_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "ext4" ]]; then
-      mount -o $ext4_mount_mount $auxpath $AuxUse
+      echlog "Mounting EXT4 aux to /mnt$AuxUse"
+      mount -o $ext4_mount_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "jfs" ]]; then
-      mount -o $jfs_mount $auxpath $AuxUse
+      echlog "Mounting JFS aux to /mnt$AuxUse"
+      mount -o $jfs_mount $auxpath /mnt$AuxUse
     fi
   fi
 
   if [[ $Recovery = "true" ]]; then
+    echlog "Mounting recovery to /mnt/RECOVERY"
     mkdir /mnt/RECOVERY
     mount $recoverypath /mnt/RECOVERY
   fi
@@ -284,11 +297,11 @@ run() {
   #ram=$((1*$Gib))
   #disksize=$((8*$Gib))
 
-  echlog "ram(Mib): $ram" $logfile
-  echlog "disksize(Mib): $disksize" $logfile
+  echlog "ram(Mib): $ram"
+  echlog "disksize(Mib): $disksize"
   ramGib=$(($ram / $Gib))
-  echlog "ramGib: $ramGib" $logfile
-  echlog "------------------------------------" $logfile
+  echlog "ramGib: $ramGib"
+  echlog "------------------------------------"
 
   create_partitiontable
   print_partitiontable
