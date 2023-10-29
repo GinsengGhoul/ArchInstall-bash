@@ -191,7 +191,7 @@ format_drive() {
   if [[ "$rootfs" = "xfs" ]]; then
     command="$xfs_format""-L Arch_root $dev$cp"
   elif [[ "$rootfs" = "btrfs" ]]; then
-    command="$f2fs_format""-L Arch_root $dev$cp"
+    command="$f2fs_format""-l Arch_root $dev$cp"
   elif [[ "$rootfs" = "f2fs" ]]; then
     command="$f2fs_format""-l Arch_root $dev$cp"
   elif [[ "$rootfs" = "ext4" ]]; then
