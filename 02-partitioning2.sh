@@ -266,19 +266,19 @@ format_drive() {
 
 mount_partitions() {
   if [[ "$rootfs" = "xfs" ]]; then
-    echlog "Mounting XFS root to /mnt"
+    echlog "Mounting XFS root $rootpath to /mnt"
     mount -o $xfs_mount $rootpath /mnt
   elif [[ "$rootfs" = "btrfs" ]]; then
-    echlog "Mounting BTRFS root to /mnt"
+    echlog "Mounting BTRFS root $rootpath to /mnt"
     mount -o $btrfs_mount $rootpath /mnt
   elif [[ "$rootfs" = "f2fs" ]]; then
-    echlog "Mounting F2FS root to /mnt"
+    echlog "Mounting F2FS root $rootpath to /mnt"
     mount -o $f2fs_mount $rootpath /mnt
   elif [[ "$rootfs" = "ext4" ]]; then
-    echlog "Mounting EXT4 root to /mnt"
+    echlog "Mounting EXT4 root $rootpath to /mnt"
     mount -o $ext4_mount $rootpath /mnt
   elif [[ "$rootfs" = "jfs" ]]; then
-    echlog "Mounting JFS root to /mnt"
+    echlog "Mounting JFS root $rootpath to /mnt"
     mount -o $jfs_mount $rootpath /mnt
   fi
 
@@ -289,19 +289,19 @@ mount_partitions() {
   if [[ "$Aux" = "true" ]]; then
     mkdir -p /mnt$AuxUse
     if [[ "$auxfs" = "xfs" ]]; then
-      echlog "Mounting XFS aux to /mnt$AuxUse"
+      echlog "Mounting XFS aux $auxpath to /mnt$AuxUse"
       mount -o $xfs_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "btrfs" ]]; then
-      echlog "Mounting BTRFS aux to /mnt$AuxUse"
+      echlog "Mounting BTRFS aux $auxpath to /mnt$AuxUse"
       mount -o $btrfs_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "f2fs" ]]; then
-      echlog "Mounting F2FS aux to /mnt$AuxUse"
+      echlog "Mounting F2FS aux $auxpath to /mnt$AuxUse"
       mount -o $f2fs_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "ext4" ]]; then
-      echlog "Mounting EXT4 aux to /mnt$AuxUse"
+      echlog "Mounting EXT4 aux $auxpath to /mnt$AuxUse"
       mount -o $ext4_mount_mount $auxpath /mnt$AuxUse
     elif [[ "$auxfs" = "jfs" ]]; then
-      echlog "Mounting JFS aux to /mnt$AuxUse"
+      echlog "Mounting JFS aux $auxpath to /mnt$AuxUse"
       mount -o $jfs_mount $auxpath /mnt$AuxUse
     fi
   fi
