@@ -282,9 +282,10 @@ mount_partitions() {
     mount -o $jfs_mount $rootpath /mnt
   fi
 
-  echlog "Creating mountpoint /mnt$espMount"
+  SoftSet espMount /boot/efi
+  echlog "Creating esp mountpoint /mnt$espMount"
   mkdir -p /mnt$espMount
-  echlog "Mounting $esppath to /mnt$espMount"
+  echlog "Mounting esp $esppath to /mnt$espMount"
   mount $esppath /mnt$espMount
 
   SoftSet AuxUse "/home"
