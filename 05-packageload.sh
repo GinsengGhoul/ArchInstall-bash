@@ -18,8 +18,12 @@ install_DE() {
     arch-chroot /mnt systemctl enable sddm.service
     ;;
   "Cinnamon")
-    powerpill_command xorg lightdm lightdm-slick-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc
+    powerpill_command xorg lightdm lightdm-gtk-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc
     AUR_command xviewer pix mint-artwork lightdm-settings
+    arch-chroot /mnt systemctl enable lightdm.service    
+    ;;
+  "Cinnamon-noAUR")
+    powerpill_command xorg lightdm lightdm-slick-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc loupe gthumb
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "Mate")
@@ -244,7 +248,7 @@ set_packages() {
     local package_variable="$variable"
 
     if [[ "${!install_variable}" == "true" ]]; then
-      if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" ]]; then
+      if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" || "$variable" == "video_3d" || "$variable" == "video_acceleration" ]]; then
         AUR_packages+=" ${!package_variable}"
       else
         packages+=" ${!package_variable}"
