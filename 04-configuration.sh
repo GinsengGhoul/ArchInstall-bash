@@ -402,7 +402,7 @@ setup_secureboot() {
 }
 
 run() {
-  SoftSet espMount /boot/efi
+  SoftSet espMount "/boot/efi"
   create_users
   configure_mounts
   setup_ioudev
