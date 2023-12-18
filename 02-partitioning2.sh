@@ -101,7 +101,7 @@ create_partitiontable() {
 
   if [[ "$esp" = "true" ]]; then
     # for a single kernel, it's around 128
-    SoftSet EFI 2
+    SoftSet EFI 8
     # EFI=256
   else
     SoftSet EFI 0
