@@ -1,5 +1,7 @@
 #!/bin/bash
 
+logfile=Configuration.log
+
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
   half_mem=$((total_mem / 2))
