@@ -183,7 +183,7 @@ format_drive() {
   if [[ "$esp" = "true" ]]; then
     echlog "formating $disk$cp as a Fat$espformat esp partition"
     mkfs.fat -F$espformat $disk$cp # efi partition
-    efipath=$disk$cp
+    esppath=$disk$cp
     echlog "esppath = $esppath | $disk$cp"
     ((cp++))
   fi
@@ -282,8 +282,8 @@ mount_partitions() {
     mount -o $jfs_mount $rootpath /mnt
   fi
 
-  mkdir /mnt/boot
-  mount $efipath /mnt/boot
+  mkdir -p /mnt$espMount
+  mount $esppath /mnt$espMount
 
   SoftSet AuxUse "/home"
   if [[ "$Aux" = "true" ]]; then
