@@ -20,7 +20,11 @@ run() {
   # pacstrap
   detect_microcode
   headers=$kernel-headers
-  pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub grub-btrfs efibootmgr $shell
+  if [[ "$rootfs" = "btrfs" ]]; then
+  pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub efibootmgr acpid $shell
+  else
+  pacstrap -PK /mnt base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub efibootmgr acpid grub-btrfs $shell
+  fi
 }
 
 source Configuration.cfg

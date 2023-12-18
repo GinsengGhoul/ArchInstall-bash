@@ -10,11 +10,11 @@ install_DE() {
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "KDE")
-    powerpill_command xorg plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk
+    powerpill_command wayland plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk plasma-wayland-session
     arch-chroot /mnt systemctl enable sddm.service
     ;;
-  "KDE-wayland")
-    powerpill_command wayland plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk plasma-wayland-session
+  "KDE-xorg")
+    powerpill_command xorg plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk
     arch-chroot /mnt systemctl enable sddm.service
     ;;
   "Cinnamon")
@@ -181,6 +181,44 @@ set_template_packages() {
     soft_set install_java11 "false"
     soft_set install_java17 "false"
     soft_set install_javaJDK "true"
+    soft_set install_java8JDK "false"
+    soft_set install_java17JDK "false"
+    soft_set install_java11JDK "false"
+    soft_set install_openfonts "false"
+    soft_set install_openfontsAUR "false"
+    soft_set install_libreoffice "false"
+    soft_set install_libreofficeAUR "false"
+    soft_set install_nativeMS "false"
+    soft_set install_MSfonts "false"
+    DE="none"
+    ;;
+    "core")
+    soft_set install_snapper "false"
+    soft_set install_security "true"
+    soft_set install_optimizations "true"
+    soft_set install_compilier_optimizations "true"
+    soft_set install_computer_signals "true"
+    soft_set install_git "true"
+    soft_set install_ssh "true"
+    soft_set install_mesa "false"
+    soft_set install_video "false"
+    soft_set install_video_3d "false"
+    soft_set install_video_acceleration "false"
+    soft_set install_networking "false"
+    soft_set install_wifi "false"
+    soft_set install_browser "false"
+    soft_set install_bluetooth "false"
+    soft_set install_editor "true"
+    soft_set install_fstools "false"
+    soft_set install_fonts "false"
+    soft_set install_pdf "false"
+    soft_set install_java "false"
+    soft_set install_java_management "false"
+    soft_set install_java "false"
+    soft_set install_java8 "false"
+    soft_set install_java11 "false"
+    soft_set install_java17 "false"
+    soft_set install_javaJDK "false"
     soft_set install_java8JDK "false"
     soft_set install_java17JDK "false"
     soft_set install_java11JDK "false"

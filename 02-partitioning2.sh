@@ -8,7 +8,7 @@ make_table_only="false"
 
 xfs_format="mkfs.xfs -f "
 btrfs_format="mkfs.btrfs -f "
-f2fs_format="mkfs.f2fs -f "
+f2fs_format="mkfs.f2fs -O extra_attr,inode_checksum,sb_checksum,compression -f "
 ext4_format="mkfs.ext4 -F "
 jfs_format="mkfs.jfs "
 
@@ -101,9 +101,10 @@ create_partitiontable() {
 
   if [[ "$esp" = "true" ]]; then
     # for a single kernel, it's around 128
-    EFI=256
+    SoftSet EFI 2
+    # EFI=256
   else
-    EFI=0
+    SoftSet EFI 0
   fi
 
   if [[ "$Swap" = "true" ]]; then
@@ -180,8 +181,8 @@ format_drive() {
   echlog "BiosBoot = $BiosBoot, setting cp to $cp"
 
   if [[ "$esp" = "true" ]]; then
-    echlog "formating $disk$cp as a Fat32 esp partition"
-    mkfs.fat -F32 $disk$cp # efi partition
+    echlog "formating $disk$cp as a Fat$espformat esp partition"
+    mkfs.fat -F$espformat $disk$cp # efi partition
     efipath=$disk$cp
     echlog "esppath = $esppath | $disk$cp"
     ((cp++))

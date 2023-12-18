@@ -387,16 +387,16 @@ update_service_timeout() {
 }
 
 install_grub() {
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="/boot" --removable
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="$espMount" --removable
   arch-chroot /mnt grub-install --target=i386-pc "$disk"
   arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg"
 }
 
 setup_secureboot() {
-  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi /boot/efi/EFI/BOOT/
-  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi /boot/efi/EFI/BOOT/
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "Shim" --loader /boot/efi/EFI/BOOT/shimx64.efi
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "MOKmanager" --loader /boot/efi/EFI/BOOT/mmx64.efi
+  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi $espMount/EFI/BOOT/
+  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi $espMount/EFI/BOOT/
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "Shim" --loader $espMount/EFI/BOOT/shimx64.efi
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "MOKmanager" --loader $espMount/EFI/BOOT/mmx64.efi
 }
 
 run() {
