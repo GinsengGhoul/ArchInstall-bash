@@ -5,7 +5,7 @@ logfile=Configuration.log
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
   half_mem=$((total_mem / 2))
-  echo "${half_mem}M"
+  echlog "${half_mem}M"
   # override zram size here
 }
 
@@ -112,7 +112,7 @@ create_users() {
     Shell="/bin/$shell"
 
     # Create the user
-    echo "Creating user: $username"
+    echlog "Creating user: $username"
     arch-chroot /mnt useradd -m -s "$Shell" "$username"
     mkdir -p /mnt/home/$username/.config/alacritty
     arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
@@ -127,7 +127,7 @@ create_users() {
 
     # Add user to nonadmingroups
     for group in "${nonadmingroups_arr[@]}"; do
-      echo "Adding $username to $group"
+      echlog "Adding $username to $group"
       arch-chroot /mnt usermod -a -G "$group" "$username"
     done
 
@@ -136,7 +136,7 @@ create_users() {
       for group in "${admingroups_arr[@]}"; do
         # Create the groups if they don't exist
         arch-chroot /mnt groupadd -r "$group"
-        echo "Adding $username to $group"
+        echlog "Adding $username to $group"
         arch-chroot /mnt usermod -a -G "$group" "$username"
       done
     fi
@@ -146,24 +146,24 @@ create_users() {
 
 configure_mounts() {
   # generate /etc/fstab
-  echo "Generate fstab."
+  echlog "Generate fstab."
   genfstab -U /mnt >>/mnt/etc/fstab
   # add pri=0 to physical swap partition if swap exist
   sed -i '/^\S.*swap/s/\(^\S*\s\+\S\+\s\+\S\+\s\+\)\(\S\+\)\(\s\+.*\)/\1\2,pri=0\3/' /mnt/etc/fstab
   #add tmpfs and zram
   # set limits accordingly
-  echo "adding tmpfs and zram mounts"
-  echo "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >>/mnt/etc/fstab
-  echo "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >>/mnt/etc/fstab
-  echo "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >>/mnt/etc/fstab
+  echlog "adding tmpfs and zram mounts"
+  echlog "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >>/mnt/etc/fstab
+  echlog "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >>/mnt/etc/fstab
+  echlog "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >>/mnt/etc/fstab
   # setup tmpfiles.d
-  echo "creating /var/cache/pacman tmpfs mountpoint"
-  echo "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
+  echlog "creating /var/cache/pacman tmpfs mountpoint"
+  echlog "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
 }
 
 setup_ioudev() {
   if [ -n "$bpq" ]; then
-    echo "setup disks to use bpq scheduler"
+    echlog "setup disks to use bpq scheduler"
     # IO udev rules, enables bpq scheduler for all disks
     # curl https://gitlab.com/garuda-linux/themes-and-settings/settings/performance-tweaks/-/raw/master/usr/lib/udev/rules.d/60-ioschedulers.rules >/mnt/etc/udev/rules.d/60-ioschedulers.rules
     cat <<EOF >/mnt/etc/udev/rules.d/60-ioschedulers.rules
@@ -186,9 +186,9 @@ setup_grub() {
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >>/mnt/etc/grub.d/40_enable_iommu
   chmod 755 /mnt/etc/grub.d/*
 
-  echo "setup faster grub timeout"
+  echlog "setup faster grub timeout"
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
-  echo "setting up apparmor boot arguments, disabling zswap and enabling resume"
+  echlog "setting up apparmor boot arguments, disabling zswap and enabling resume"
   sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0/' /mnt/etc/default/grub
   # check if swap_UUID exist
   if [ ! -z "$Swap_UUID" ]; then
@@ -204,12 +204,12 @@ setup_mkinitcpio() {
   if grep -Fxq "$HooksOG" "/mnt/etc/mkinitcpio.conf"; then
     # Replace the line with the new line and preserve comments
     sed -i "s@^$HooksOG\$@$HooksNW@" "/mnt/etc/mkinitcpio.conf"
-    echo "mkinitcpio.conf has the systemd and resume hook"
+    echlog "mkinitcpio.conf has the systemd and resume hook"
   else
-    echo "The line was not found in mkinitcpio.conf."
+    echlog "The line was not found in mkinitcpio.conf."
   fi
 
-  echo "set compression to zstd:15"
+  echlog "set compression to zstd:15"
   sed -i 's/^#\(COMPRESSION="zstd"\)/\1/' /mnt/etc/mkinitcpio.conf
   sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v -15)/' /mnt/etc/mkinitcpio.conf
   arch-chroot /mnt mkinitcpio -P
@@ -232,17 +232,17 @@ create_dirs() {
     /mnt/etc/tmpfiles.d/
   )
   for dir in "${dirs[@]}"; do
-    echo "creating $dir"
+    echlog "creating $dir"
     mkdir -p "$dir"
   done
 }
 
 setup_locale() {
-  echo "setup locale"
+  echlog "setup locale"
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
-  echo "$locale UTF-8" >>/mnt/etc/locale.gen
-  echo "LANG=$locale" >/mnt/etc/locale.conf
-  echo "LANG=$locale" >/mnt/etc/default/locale
+  echlog "$locale UTF-8" >>/mnt/etc/locale.gen
+  echlog "LANG=$locale" >/mnt/etc/locale.conf
+  echlog "LANG=$locale" >/mnt/etc/default/locale
   chmod 644 /mnt/etc/locale.conf
   chmod 644 /mnt/etc/default/locale
   arch-chroot /mnt locale-gen
@@ -250,11 +250,11 @@ setup_locale() {
 
 setup_hosts() {
   # Setting hostname.
-  echo "Setting Hostname"
-  echo "$hostname" >>/mnt/etc/hostname
-  echo "hostname=$hostname" >>/mnt/etc/conf.d/hostname
+  echlog "Setting Hostname"
+  echlog "$hostname" >>/mnt/etc/hostname
+  echlog "hostname=$hostname" >>/mnt/etc/conf.d/hostname
   # Setting hosts file.
-  echo "creating hosts file."
+  echlog "creating hosts file."
   cat <<EOF >>/mnt/etc/hosts
 127.0.0.1   localhost
 ::1         localhost
@@ -329,7 +329,7 @@ EOF
 }
 
 install_powerpill() {
-  echo "Installing $AUR and powerpill"
+  echlog "Installing $AUR and powerpill"
   chmod +x /usr/share/libalpm/scripts/*
   arch-chroot /mnt pacman -S --noconfirm $AUR powerpill
   AUR_command update-grub shim-signed
@@ -338,9 +338,9 @@ install_powerpill() {
 enable_zram() {
   if [ -n "$zram" ]; then
     # enable zram
-    echo 'zram' >/mnt/etc/modules-load.d/zram.conf
-    echo 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
-    echo 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", RUN="/usr/bin/mkswap -U clear /dev/%k", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
+    echlog 'zram' >/mnt/etc/modules-load.d/zram.conf
+    echlog 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
+    echlog 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", RUN="/usr/bin/mkswap -U clear /dev/%k", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
 
     chmod 644 /mnt/etc/modules-load.d/zram.conf
     chmod 644 /mnt/etc/modprobe.d/zram.conf
@@ -350,7 +350,7 @@ enable_zram() {
 }
 
 blacklist_kernelmodules() {
-  echo "disable unused kernel modules for better security"
+  echlog "disable unused kernel modules for better security"
   # Blacklisting kernel modules
   curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >>/mnt/etc/modprobe.d/30_security-misc.conf
   reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
