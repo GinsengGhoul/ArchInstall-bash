@@ -393,13 +393,16 @@ install_grub() {
 }
 
 setup_secureboot() {
-  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi $espMount/EFI/BOOT/
+  arch-chroot /mnt mv $espMount/EFI/BOOT/BOOTx64.EFI $espMount/EFI/BOOT/grubx64.efi
+  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi $espMount/EFI/BOOT/BOOTx64.EFI
   arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi $espMount/EFI/BOOT/
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "Shim" --loader $espMount/EFI/BOOT/shimx64.efi
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part 2 --create --label "MOKmanager" --loader $espMount/EFI/BOOT/mmx64.efi
+  local part=$(<"espPart")
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part $part --create --label "Shim" --loader $espMount/EFI/BOOT/shimx64.efi
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part $part --create --label "MOKmanager" --loader $espMount/EFI/BOOT/mmx64.efi
 }
 
 run() {
+  SoftSet espMount /boot/efi
   create_users
   configure_mounts
   setup_ioudev

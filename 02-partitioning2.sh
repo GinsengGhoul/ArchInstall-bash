@@ -185,6 +185,7 @@ format_drive() {
     SoftSet espformat 12
     mkfs.fat -F$espformat $disk$cp # efi partition
     esppath=$disk$cp
+    echo $cp > espPart
     echlog "esppath = $esppath | $disk$cp"
     ((cp++))
   fi
