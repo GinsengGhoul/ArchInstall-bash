@@ -18,6 +18,7 @@ detect_microcode() {
 
 run() {
   # pacstrap
+  SoftSet rootfs btrfs
   detect_microcode
   headers=$kernel-headers
   if [[ "$rootfs" = "btrfs" ]]; then
