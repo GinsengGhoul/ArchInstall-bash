@@ -329,7 +329,7 @@ run() {
   create_partitiontable
   print_partitiontable
 
-  SoftSet $make_table_only false
+  SoftSet make_table_only false
   if [ "$make_table_only" = false ]; then
     mount -l /mnt
     partition_drive
