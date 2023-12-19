@@ -400,8 +400,12 @@ install_grub() {
 }
 
 setup_secureboot() {
-  arch-chroot /mnt mv $espMount/EFI/BOOT/BOOTx64.EFI $espMount/EFI/BOOT/grubx64.efi | tee -a grub.log
+  local logfile="grub.log"
+  echlog "moving /mnt$espMount/EFI/BOOT/BOOTx64.EFI to /mnt$espMount/EFI/BOOT/grubx64.efi"
+  mv /mnt$espMount/EFI/BOOT/BOOTx64.EFI /mnt$espMount/EFI/BOOT/grubx64.efi
+  echlog "cp from chroot /usr/share/shim-signed/shimx64.efi to $espMount/EFI/BOOT/BOOTx64.EFI"
   arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi $espMount/EFI/BOOT/BOOTx64.EFI | tee -a grub.log
+  echlog "cp from chroot /usr/share/shim-signed/mmx64.efi to $espMount/EFI/BOOT/"
   arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi $espMount/EFI/BOOT/ | tee -a grub.log
   local part=$(<"espPart")
   echlog "read esp part from espPart, part: $part"
