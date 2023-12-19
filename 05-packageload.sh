@@ -1,4 +1,5 @@
 #!/bin/bash
+logfile="Packages.log"
 variables=(
   snapper security optimizations compilier_optimizations computer_signals git ssh mesa video_3d video_acceleration networking wifi browser bluetooth editor fstools fonts KVM pdf java java8 java11 java17 javaJDK java8JDK java11JDK java17JDK java_management openfonts openfontsAUR libreoffice libreofficeAUR nativeMS MSfonts
 )
@@ -20,10 +21,11 @@ install_DE() {
   "Cinnamon")
     powerpill_command xorg lightdm lightdm-gtk-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc
     AUR_command xviewer pix mint-artwork lightdm-settings
+    sed -i '/#greeter-session=example-gtk-gnome/a greeter-session=lightdm-slick-greeter' /mnt/etc/lightdm/lightdm.conf
     arch-chroot /mnt systemctl enable lightdm.service    
     ;;
   "Cinnamon-noAUR")
-    powerpill_command xorg lightdm lightdm-slick-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc loupe gthumb
+    powerpill_command xorg lightdm lightdm-gtk-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc loupe gthumb
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "Mate")
@@ -88,7 +90,7 @@ set_template_packages() {
     soft_set install_snapper "true"
     soft_set install_security "true"
     soft_set install_optimizations "true"
-    soft_set install_compilier_optimizations "true"
+    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "true"
     soft_set install_git "true"
     soft_set install_ssh "false"
@@ -125,7 +127,7 @@ set_template_packages() {
     soft_set install_snapper "true"
     soft_set install_security "true"
     soft_set install_optimizations "true"
-    soft_set install_compilier_optimizations "true"
+    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "false"
     soft_set install_git "true"
     soft_set install_ssh "false"
@@ -162,7 +164,7 @@ set_template_packages() {
     soft_set install_snapper "false"
     soft_set install_security "true"
     soft_set install_optimizations "false"
-    soft_set install_compilier_optimizations "true"
+    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "false"
     soft_set install_git "true"
     soft_set install_ssh "true"
@@ -200,7 +202,7 @@ set_template_packages() {
     soft_set install_snapper "false"
     soft_set install_security "true"
     soft_set install_optimizations "true"
-    soft_set install_compilier_optimizations "true"
+    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "true"
     soft_set install_git "true"
     soft_set install_ssh "true"
@@ -248,7 +250,7 @@ set_packages() {
     local package_variable="$variable"
 
     if [[ "${!install_variable}" == "true" ]]; then
-      if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" || "$variable" == "video_3d" || "$variable" == "video_acceleration" ]]; then
+      if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" || "$variable" == "video_3d" || "$variable" == "video_acceleration" || "$variable" == "javaJDK" || "$variable" == "java8JDK" || "$variable" == "java11JDK" || "$variable" == "java17JDK" ]]; then
         AUR_packages+=" ${!package_variable}"
       else
         packages+=" ${!package_variable}"
@@ -256,8 +258,8 @@ set_packages() {
     fi
   done
 
-  #echo "Packages: $packages"
-  #echo "AUR Packages: $AUR_packages"
+  echlog "Packages: $packages"
+  echlog "AUR Packages: $AUR_packages"
 }
 
 run() {
