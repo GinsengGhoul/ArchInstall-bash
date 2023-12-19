@@ -134,10 +134,10 @@ create_users() {
     # Check if user is also in adminusers list
     if [[ " ${adminusers[@]} " =~ " $username " ]]; then
       for group in "${admingroups_arr[@]}"; do
-        # Create the groups if they don't exist
-        arch-chroot /mnt groupadd -r "$group"
+        # Create the groups if they don't exist | tee grub.log
+        arch-chroot /mnt groupadd -r "$group" | tee -a grub.log
         echlog "Adding $username to $group"
-        arch-chroot /mnt usermod -a -G "$group" "$username"
+        arch-chroot /mnt usermod -a -G "$group" "$username" | tee -a grub.log
       done
     fi
   done
@@ -172,10 +172,10 @@ ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue
 
 # Set I/O scheduler for NVMe devices
 ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="none"
-
-# Set I/O scheduler for other devices (non-spinning disks, non-NVMe)
+ | tee grub.log
+# Set I/O sched | tee -a grub.loguler for other devices (non-spinning disks, non-NVMe)
 ACTION=="add|change", KERNEL=="sd[a-z]|hd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
-EOF
+EOF | tee -a grub.loguler for other devices (non-spinning disks, non-NVMe)
     chmod 600 /mnt/etc/udev/rules.d/*
   fi
 }
@@ -188,10 +188,10 @@ setup_grub() {
 
   echlog "setup faster grub timeout"
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
-  echlog "setting up apparmor boot arguments, disabling zswap and enabling resume"
-  sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0/' /mnt/etc/default/grub
+  echlog "setting up apparmor boot arguments, disabling zswap and enabling resume" | tee grub.log
+  sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparm | tee -a grub.logor,bpf zswap.enabled=0/' /mnt/etc/default/grub
   # check if swap_UUID exist
-  if [ ! -z "$Swap_UUID" ]; then
+  if [ ! -z "$Swap_UUID" ]; then | tee -a grub.logor,bpf zswap.enabled=0/' /mnt/etc/default/grub
     sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub
   fi
 }
@@ -202,10 +202,10 @@ setup_mkinitcpio() {
 
   # Check if the line already exists in the file
   if grep -Fxq "$HooksOG" "/mnt/etc/mkinitcpio.conf"; then
-    # Replace the line with the new line and preserve comments
-    sed -i "s@^$HooksOG\$@$HooksNW@" "/mnt/etc/mkinitcpio.conf"
+    # Replace the line with the new line and preserve comments | tee grub.log
+    sed -i "s@^$HooksOG\$@$HooksNW@" "/mnt/etc/mkinitcpio.conf" | tee -a grub.log
     echlog "mkinitcpio.conf has the systemd and resume hook"
-  else
+  else | tee -a grub.log
     echlog "The line was not found in mkinitcpio.conf."
   fi
 
@@ -290,10 +290,10 @@ EOF
 }
 
 setup_ccache() {
-  cat <<EOF >/mnt/etc/profile.d/ccache.sh
-export USE_CCACHE=1
+  cat <<EOF >/mnt/etc/profile.d/ccache.sh | tee grub.log
+export USE_CCACHE=1 | tee -a grub.log
 export CCACHE_EXEC=/usr/bin/ccache
-if ! ccache -p | grep -q "^compression = true$"; then
+if ! ccache -p | grep -q "^compression = true$"; then | tee -a grub.log
   ccache -o compression=true
 fi
 EOF
@@ -341,10 +341,10 @@ enable_zram() {
     echlog 'zram' >/mnt/etc/modules-load.d/zram.conf
     echlog 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
     echlog 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", RUN="/usr/bin/mkswap -U clear /dev/%k", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
-
-    chmod 644 /mnt/etc/modules-load.d/zram.conf
+ | tee grub.log
+    chmod 644 / | tee -a grub.logmnt/etc/modules-load.d/zram.conf
     chmod 644 /mnt/etc/modprobe.d/zram.conf
-    chmod 644 /mnt/etc/udev/rules.d/99-zram.rules
+    chmod 644 /mnt/etc/udev/rules.d/99-zram.rules | tee -a grub.logmnt/etc/modules-load.d/zram.conf
 
   fi
 }
@@ -389,18 +389,24 @@ update_service_timeout() {
 }
 
 install_grub() {
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="$espMount" --removable
-  arch-chroot /mnt grub-install --target=i386-pc "$disk"
-  arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg"
+  SoftSet esp "true"
+  arch-chroot /mnt grub-install --target=i386-pc "$disk" | tee grub.log
+  arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg" | tee -a grub.log
+  if[[ $esp = "true" ]]; then
+  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="$espMount" --removable | tee -a grub.log
+  setup_secureboot
+  fi
 }
 
 setup_secureboot() {
-  arch-chroot /mnt mv $espMount/EFI/BOOT/BOOTx64.EFI $espMount/EFI/BOOT/grubx64.efi
-  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi $espMount/EFI/BOOT/BOOTx64.EFI
-  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi $espMount/EFI/BOOT/
+  arch-chroot /mnt mv $espMount/EFI/BOOT/BOOTx64.EFI $espMount/EFI/BOOT/grubx64.efi | tee -a grub.log
+  arch-chroot /mnt cp /usr/share/shim-signed/shimx64.efi $espMount/EFI/BOOT/BOOTx64.EFI | tee -a grub.log
+  arch-chroot /mnt cp /usr/share/shim-signed/mmx64.efi $espMount/EFI/BOOT/ | tee -a grub.log
+  echlog "reading esp partition number from espPart file"
   local part=$(<"espPart")
-  arch-chroot /mnt efibootmgr --unicode --disk $disk --part $part --create --label "Shim" --loader /EFI/BOOT/BOOTx64.EFI
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part $part --create --label "MOKmanager" --loader /EFI/BOOT/mmx64.efi
+  echlog "part = $part"
+  arch-chroot /mnt efibootmgr --unicode --disk $disk --part $part --create --label "Shim" --loader /EFI/BOOT/BOOTx64.EFI | tee -a grub.log
+  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part $part --create --label "MOKmanager" --loader /EFI/BOOT/mmx64.efi | tee -a grub.log
 }
 
 run() {
@@ -422,7 +428,6 @@ run() {
   blacklist_kernelmodules
   update_service_timeout
   install_grub
-  setup_secureboot
 }
 
 source Configuration.cfg
