@@ -158,7 +158,9 @@ configure_mounts() {
   echlog "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >>/mnt/etc/fstab
   # setup tmpfiles.d
   echlog "creating /var/cache/pacman tmpfs mountpoint"
-  echlog "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
+  mkdir /mnt/etc/pacman.d/pacman-cache
+  # echlog "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
+  echlog "L /var/cache/pacman - - - - /etc/pacman.d/pacman-cache" >/mnt/etc/tmpfiles.d/pacman-cache.conf
 }
 
 setup_ioudev() {
@@ -410,7 +412,7 @@ setup_secureboot() {
   local part=$(<"espPart")
   echlog "read esp part from espPart, part: $part"
   arch-chroot /mnt efibootmgr --unicode --disk $disk --part $part --create --label "Shim" --loader /EFI/BOOT/BOOTx64.EFI | tee -a grub.log
-  arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part $part --create --label "MOKmanager" --loader /EFI/BOOT/mmx64.efi | tee -a grub.log
+  # arch-chroot /mnt efibootmgr --verbose --disk "$disk" --part $part --create --label "MOKmanager" --loader /EFI/BOOT/mmx64.efi | tee -a grub.log
 }
 
 run() {
