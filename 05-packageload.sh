@@ -95,7 +95,6 @@ set_template_packages() {
     fi
     soft_set install_security "true"
     soft_set install_optimizations "true"
-    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "true"
     soft_set install_git "true"
     soft_set install_ssh "false"
@@ -137,7 +136,6 @@ set_template_packages() {
     fi
     soft_set install_security "true"
     soft_set install_optimizations "true"
-    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "false"
     soft_set install_git "true"
     soft_set install_ssh "false"
@@ -174,7 +172,6 @@ set_template_packages() {
     soft_set install_snapper "false"
     soft_set install_security "true"
     soft_set install_optimizations "false"
-    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "false"
     soft_set install_git "true"
     soft_set install_ssh "true"
@@ -212,7 +209,6 @@ set_template_packages() {
     soft_set install_snapper "false"
     soft_set install_security "true"
     soft_set install_optimizations "true"
-    soft_set install_compiler_optimizations "true"
     soft_set install_computer_signals "true"
     soft_set install_git "true"
     soft_set install_ssh "true"
