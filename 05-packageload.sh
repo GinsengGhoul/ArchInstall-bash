@@ -87,7 +87,12 @@ soft_set() {
 set_template_packages() {
   case "$ArchInstallType" in
   "laptop")
+    SoftSet rootfs "btrfs"
+    if [[ "$rootfs" = "btrfs" ]]; then
     soft_set install_snapper "true"
+    else
+    soft_set install_snapper "false"
+    fi
     soft_set install_security "true"
     soft_set install_optimizations "true"
     soft_set install_compiler_optimizations "true"
@@ -124,7 +129,12 @@ set_template_packages() {
     soft_set install_MSfonts "true"
     ;;
   "desktop")
+    SoftSet rootfs "btrfs"
+    if [[ "$rootfs" = "btrfs" ]]; then
     soft_set install_snapper "true"
+    else
+    soft_set install_snapper "false"
+    fi
     soft_set install_security "true"
     soft_set install_optimizations "true"
     soft_set install_compiler_optimizations "true"
@@ -265,8 +275,7 @@ set_packages() {
 run() {
   set_template_packages
   set_packages
-  echo "Packages: $packages"
-  echo "AUR Packages: $AUR_packages"
+  echo $install_snapper > snapperInstalled
   powerpill_command "$packages"
   AUR_command $aurpkgs
   install_DE

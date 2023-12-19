@@ -9,6 +9,8 @@ setup_snapper() {
   arch-chroot /mnt mkdir "/.snapshots"
   arch-chroot /mnt mount -a
   arch-chroot /mnt chmod 750 "/.snapshots"
+  arch-chroot /mnt systemctl enable snapper-timeline.timer
+  arch-chroot /mnt systemctl enable snapper-cleanup.timer
 }
 
 setup_ssh() {
@@ -166,22 +168,20 @@ setup_apparmor() {
     sed -i "/^$write_cache_line/a $cache_loc_line" "$parser_conf"
   fi
   chmod 644 /mnt/etc/apparmor/parser.conf
+  arch-chroot /mnt systemctl enable apparmor
 }
 
 enable_services() {
   echo "enabling services"
-  arch-chroot /mnt systemctl enable apparmor
   arch-chroot /mnt systemctl enable acpid
   arch-chroot /mnt systemctl enable tlp
   arch-chroot /mnt systemctl enable reflector.timer
   arch-chroot /mnt systemctl enable systemd-oomd
   arch-chroot /mnt systemctl enable firewalld
-  arch-chroot /mnt systemctl enable snapper-timeline.timer
-  arch-chroot /mnt systemctl enable snapper-cleanup.timer
   # arch-chroot /mnt systemctl enable grub-btrfs.path
   arch-chroot /mnt systemctl enable thermald
   arch-chroot /mnt systemctl enable chronyd
-  arch-chroot /mnt systemctl enable logrotate.timer
+  #arch-chroot /mnt systemctl enable logrotate.timer
   arch-chroot /mnt systemctl enable irqbalance
   arch-chroot /mnt systemctl enable ananicy-cpp
   # arch-chroot /mnt systemctl enable doh-client
@@ -211,7 +211,10 @@ run() {
 
   case "$ArchInstallType" in
   laptop | desktop)
+    local snapperInstalled < $(<"snapperInstalled")
+    if [[ "$snapperInstalled" = "true" ]]; then
     setup_snapper
+    fi
     ;;
   server)
     setup_ssh
