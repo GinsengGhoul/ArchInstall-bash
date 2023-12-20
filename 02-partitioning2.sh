@@ -181,10 +181,10 @@ format_drive() {
   echlog "BiosBoot = $BiosBoot, setting cp to $cp"
 
   if [[ "$esp" = "true" ]]; then
-    echlog "formating $disk$cp as a Fat$espformat esp partition"
-    SoftSet espformat 12
+    echlog "formating $disk$cp as a Fat$espFormat esp partition"
+    SoftSet espFormat 12
      # efi partition
-    command="mkfs.fat -F "$espformat" -v "$disk""$cp""
+    command="mkfs.fat -F "$espFormat" -v "$disk""$cp""
     echlog "command = $command"
     $command
     command=""
