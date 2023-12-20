@@ -197,7 +197,7 @@ setup_grub() {
   # check if swap_UUID exist
   if [ ! -z "$Swap_UUID" ]; then
     sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub
-  file
+  fi
   SoftSet Recovery true
   if [[ "$Recovery" = "true" ]]; then
   echlog "Downloading newest ArchIso from https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
