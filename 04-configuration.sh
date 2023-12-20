@@ -185,9 +185,11 @@ EOF
 }
 
 setup_grub() {
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >>/mnt/etc/grub.d/40_cpu_mitigations
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_distrust_cpu.cfg >>/mnt/etc/grub.d/40_distrust_cpu
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >>/mnt/etc/grub.d/40_enable_iommu
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >/mnt/etc/grub.d/40_cpu_mitigations
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_distrust_cpu.cfg >/mnt/etc/grub.d/40_distrust_cpu
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >/mnt/etc/grub.d/40_enable_iommu
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_kernel_hardening.cfg >/mnt/etc/grub.d/40_kernel_hardening
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_distrust_bootloader.cfg >/mnt/etc/grub.d/40_distrust_bootloader
   chmod 755 /mnt/etc/grub.d/*
 
   echlog "setup faster grub timeout"
@@ -370,7 +372,7 @@ enable_zram() {
 blacklist_kernelmodules() {
   echlog "disable unused kernel modules for better security"
   # Blacklisting kernel modules
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/modprobe.d/30_security-misc.conf >>/mnt/etc/modprobe.d/30_security-misc.conf
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/modprobe.d/30_security-misc.conf >/mnt/etc/modprobe.d/30_security-misc.conf
   reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
   chmod 600 /mnt/etc/modprobe.d/*
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >>/mnt/bin/disabled-bluetooth-by-security-misc
@@ -387,12 +389,12 @@ blacklist_kernelmodules() {
   chmod +x /mnt/bin/disabled*
 
   # Security kernel settings.
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_security-misc.conf >>/mnt/etc/sysctl.d/30_security-misc.conf
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/lib/sysctl.d/990-security-misc.conf >/mnt/etc/sysctl.d/990-security-misc.conf
   # This will completely disallow debugging change to lower or disable this if debugging is necessary
   # removing debugging is good or security
-  sed -i 's/kernel.yama.ptrace_scope=2/kernel.yama.ptrace_scope=3/g' /mnt/etc/sysctl.d/30_security-misc.conf
-  update_swappiness "/mnt/etc/sysctl.d/30_security-misc.conf"
-  curl https://raw.githubusercontent.com/Whonix/security-misc/master/etc/sysctl.d/30_silent-kernel-printk.conf >>/mnt/etc/sysctl.d/30_silent-kernel-printk.conf
+  sed -i 's/kernel.yama.ptrace_scope=2/kernel.yama.ptrace_scope=3/g' /mnt/etc/sysctl.d/990-security-misc.conf
+  update_swappiness "/mnt/etc/sysctl.d/990-security-misc.conf"
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/lib/sysctl.d/30_silent-kernel-printk.conf >/mnt/etc/sysctl.d/30_silent-kernel-printk.conf
   chmod 600 /mnt/etc/sysctl.d/*
 }
 
