@@ -318,6 +318,8 @@ mount_partitions() {
   if [[ $Recovery = "true" ]]; then
     echlog "Mounting recovery to /mnt/RECOVERY"
     mkdir /mnt/RECOVERY
+    # ooh nooo not the massive security risk of a freely open directory
+    chmod 777 /mnt/RECOVERY
     mount $recoverypath /mnt/RECOVERY
   fi
 

@@ -160,7 +160,7 @@ configure_mounts() {
   echlog "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >>/mnt/etc/fstab
   # setup tmpfiles.d
   echlog "creating /var/cache/pacman tmpfs mountpoint"
-  mkdir /mnt/etc/pacman.d/pacman-cache
+  mkdir -p /mnt/etc/pacman.d/pacman-cache/pkg
   # echlog "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
   echlog "L /var/cache/pacman - - - - /etc/pacman.d/pacman-cache" >/mnt/etc/tmpfiles.d/pacman-cache.conf
 }
@@ -197,6 +197,20 @@ setup_grub() {
   # check if swap_UUID exist
   if [ ! -z "$Swap_UUID" ]; then
     sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub
+  file
+  SoftSet Recovery true
+  if [[ "$Recovery" = "true" ]]; then
+  echlog "Downloading newest ArchIso from https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
+  curl -o /mnt/RECOVERY/archlinux-x86_64.iso https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso
+  local iso_label=$(blkid -o value -s LABEL "/mnt/RECOVERY/archlinux-x86_64.iso")
+  cat <<EOF >>/mnt/etc/grub.d/40_custom
+menuentry "Arch Linux ISO" {
+    search --set=root --file /archlinux-x86_64.iso
+    loopback loop /archlinux-x86_64.iso
+    linux (loop)/arch/boot/x86_64/vmlinuz-linux archisobasedir=arch archisolabel=$iso_label
+    initrd (loop)/arch/boot/x86_64/initramfs-linux.img
+}
+EOF
   fi
 }
 
