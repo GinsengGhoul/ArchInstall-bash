@@ -120,11 +120,9 @@ create_users() {
     arch-chroot /mnt cp -r /usr/share/goodies/i3status /home/$username/.config
     arch-chroot /mnt cp -r /usr/share/goodies/sway /home/$username/.config
     arch-chroot /mnt cp /usr/share/goodies/alacritty.yml /home/$username/.config/alacritty
+    arch-chroot /mnt chmod 755 /home/$username/scripts
     arch-chroot /mnt chown -R $username /home/$username/scripts
-    arch-chroot /mnt chown -R $username /home/$username/.config/i3
-    arch-chroot /mnt chown -R $username /home/$username/.config/i3status
-    arch-chroot /mnt chown -R $username /home/$username/.config/sway
-    arch-chroot /mnt chown -R $username /home/$username/.config/alacritty
+    arch-chroot /mnt chown -R $username /home/$username/.config
 
     # Set the password
     arch-chroot /mnt chpasswd <<<"$username:$password"
