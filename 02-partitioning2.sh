@@ -183,7 +183,8 @@ format_drive() {
   if [[ "$esp" = "true" ]]; then
     echlog "formating $disk$cp as a Fat$espformat esp partition"
     SoftSet espformat 12
-    mkfs.fat -F$espformat $disk$cp # efi partition
+     # efi partition
+    mkfs.fat -F $espformat -v $disk$cp | tee $logfile
     esppath=$disk$cp
     echo $cp > espPart
     echlog "esppath = $esppath | $disk$cp"
