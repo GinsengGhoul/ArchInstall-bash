@@ -184,7 +184,10 @@ format_drive() {
     echlog "formating $disk$cp as a Fat$espformat esp partition"
     SoftSet espformat 12
      # efi partition
-    mkfs.fat -F $espformat -v $disk$cp | tee $logfile
+    command="mkfs.fat -F "$espformat" -v "$disk""$cp""
+    echlog "command = $command"
+    $command
+    command=""
     esppath=$disk$cp
     echo $cp > espPart
     echlog "esppath = $esppath | $disk$cp"
