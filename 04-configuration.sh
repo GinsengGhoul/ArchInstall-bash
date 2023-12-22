@@ -191,12 +191,13 @@ setup_grub() {
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >/mnt/etc/grub.d/40_enable_iommu
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_kernel_hardening.cfg >/mnt/etc/grub.d/40_kernel_hardening
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_distrust_bootloader.cfg >/mnt/etc/grub.d/40_distrust_bootloader
+  sed -i 's/^kpkg=/#kpkg=/; s/^kver=/#kver=/' /mnt/etc/grub.d/40_kernel_hardening
   chmod 755 /mnt/etc/grub.d/*
 
   echlog "setup faster grub timeout"
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
   echlog "setting up apparmor boot arguments, disabling zswap and enabling resume"
-  sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0/' /mnt/etc/default/grub
+  sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0 transparent_hugepage=never/' /mnt/etc/default/grub
   # check if swap_UUID exist
   if [ ! -z "$Swap_UUID" ]; then
     sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub
