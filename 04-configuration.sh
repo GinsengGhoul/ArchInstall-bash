@@ -206,12 +206,13 @@ setup_grub() {
   if [[ "$Recovery" = "true" ]]; then
   echlog "Downloading newest ArchIso from https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
   curl -o /mnt/RECOVERY/archlinux-x86_64.iso https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso
-  local iso_label=$(blkid -o value -s LABEL "/mnt/RECOVERY/archlinux-x86_64.iso")
+  local RECOVERY=$(blkid | awk -F '[" ]' '/PARTLABEL="Microsoft basic data"/ {for (i=1; i<NF; i++) if ($i == "UUID=") print $(i+1)}')
   cat <<EOF >>/mnt/etc/grub.d/40_custom
 menuentry "Arch Linux ISO" {
-    search --set=root --file /archlinux-x86_64.iso
-    loopback loop /archlinux-x86_64.iso
-    linux (loop)/arch/boot/x86_64/vmlinuz-linux archisobasedir=arch archisolabel=$iso_label
+    search --set=root --file "/archlinux-x86_64.iso"
+    loopback loop "/archlinux-x86_64.iso"
+
+    linux (loop)/arch/boot/x86_64/vmlinuz-linux img_dev=UUID=$RECOVERY img_loop="/archlinux-x86_64.iso"
     initrd (loop)/arch/boot/x86_64/initramfs-linux.img
 }
 EOF
