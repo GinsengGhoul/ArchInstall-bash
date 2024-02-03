@@ -204,10 +204,10 @@ setup_grub() {
   fi
   SoftSet Recovery true
   if [[ "$Recovery" = "true" ]]; then
-  echlog "Downloading newest ArchIso from https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
-  curl -o /mnt/RECOVERY/archlinux-x86_64.iso https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso
-  local RECOVERY=$(blkid | awk -F '[" ]' '/PARTLABEL="Microsoft basic data"/ {for (i=1; i<NF; i++) if ($i == "UUID=") print $(i+1)}')
-  cat <<EOF >>/mnt/etc/grub.d/40_custom
+    echlog "Downloading newest ArchIso from https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
+    curl -o /mnt/RECOVERY/archlinux-x86_64.iso https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso
+    local RECOVERY=$(blkid | awk -F '[" ]' '/PARTLABEL="Microsoft basic data"/ {for (i=1; i<NF; i++) if ($i == "UUID=") print $(i+1)}')
+    cat <<EOF >>/mnt/etc/grub.d/40_custom
 menuentry "Arch Linux ISO" {
     search --set=root --file "/archlinux-x86_64.iso"
     loopback loop "/archlinux-x86_64.iso"
@@ -411,14 +411,38 @@ update_service_timeout() {
   sudo sed -i "/\[Manager\]/a TimeoutStopSec=$timeout_seconds" "/etc/systemd/system.conf"
 }
 
+update_flags() {
+  local file_path=$1
+
+  if [ -f "$file_path" ]; then
+    # Update CFLAGS
+    sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/-march=native -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
+
+    # Update LDFLAGS
+    sed -i 's/-Wl,-O1/-Wl,-O2/' "$file_path"
+    sed -i 's/-as-needed/-as-needed,z,defs/' "$file_path"
+
+    # Update RUSTFLAGS
+    sed -i 's/#RUSTFLAGS="-C opt-level=2"/RUSTFLAGS="-C opt-level=2 -C target-cpu=native"/' "$file_path"
+
+    # use ccache
+    sed -i '/^BUILDENV=/ s/!ccache/ccache/' "$file_path"
+
+    # make and ninja flags
+    sed -i '/#MAKEFLAGS="-j2"/a MAKEFLAGS="-j$(nproc)"\nNINJAFLAGS="-j$(nproc)"' "$file_path"
+  else
+    echlog "File not found: $file_path"
+  fi
+}
+
 install_grub() {
   SoftSet esp true
   SoftSet espMount "/boot/efi"
   arch-chroot /mnt grub-install --target=i386-pc "$disk" | tee -a grub.log
   arch-chroot /mnt grub-mkconfig -o "/boot/grub/grub.cfg" | tee -a grub.log
   if [[ "$esp" = "true" ]]; then
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="$espMount" --removable  | tee grub.log
-  setup_secureboot
+    arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory="$espMount" --removable | tee grub.log
+    setup_secureboot
   fi
 }
 
@@ -454,6 +478,7 @@ run() {
   blacklist_kernelmodules
   update_service_timeout
   install_grub
+  update_flags "/mnt/etc/makepkg.conf"
 }
 
 source Configuration.cfg
