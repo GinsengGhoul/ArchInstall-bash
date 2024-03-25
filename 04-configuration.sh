@@ -158,12 +158,11 @@ configure_mounts() {
   echlog "adding tmpfs and zram mounts"
   echlog "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >>/mnt/etc/fstab
   echlog "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >>/mnt/etc/fstab
+  echlog "/etc/pacman.d/pacman-cache /var/cache/pacman none bind,x-mount.mkdir 0 0" >>/mnt/etc/fstab
   echlog "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >>/mnt/etc/fstab
   # setup tmpfiles.d
-  echlog "creating /var/cache/pacman tmpfs mountpoint"
+  echlog "creating /var/cache/pacman bindfs mountpoint"
   mkdir -p /mnt/etc/pacman.d/pacman-cache/pkg
-  # echlog "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
-  echlog "M /var/cache/pacman - - - - /etc/pacman.d/pacman-cache" >/mnt/etc/tmpfiles.d/pacman-cache.conf
 }
 
 setup_ioudev() {
