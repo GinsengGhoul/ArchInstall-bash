@@ -163,7 +163,7 @@ configure_mounts() {
   echlog "creating /var/cache/pacman tmpfs mountpoint"
   mkdir -p /mnt/etc/pacman.d/pacman-cache/pkg
   # echlog "d /var/cache/pacman - - -" >/mnt/etc/tmpfiles.d/pacman-cache.conf
-  echlog "L /var/cache/pacman - - - - /etc/pacman.d/pacman-cache" >/mnt/etc/tmpfiles.d/pacman-cache.conf
+  echlog "M /var/cache/pacman - - - - /etc/pacman.d/pacman-cache" >/mnt/etc/tmpfiles.d/pacman-cache.conf
 }
 
 setup_ioudev() {
