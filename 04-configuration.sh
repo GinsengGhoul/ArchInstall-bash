@@ -187,7 +187,8 @@ create_users() {
     arch-chroot /mnt mkdir -p /home/$username/.config
     arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
     arch-chroot /mnt cp -r /usr/share/goodies/source /home/$username/
-    arch-chroot /mnt cp -r /usr/share/goodies/config/* /home/$username/.config
+    local copy="cp -r /usr/share/goodies/config/* /home/$username/.config"
+    arch-chroot /mnt $copy
     arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/scripts"
     arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/.config"
     arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/scripts"
