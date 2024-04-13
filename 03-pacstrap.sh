@@ -1,5 +1,7 @@
 #!/bin/bash
 
+logfile=Pacstrap.log
+
 # added thermald as it only works on intel as of 2023
 # https://github.com/intel/thermal_daemon/issues/383
 detect_microcode() {
@@ -21,7 +23,9 @@ run() {
   SoftSet rootfs btrfs
   detect_microcode
   headers=$kernel-headers
-  sh -c "pacstrap -PK /mnt base base-devel "$kernel" "$headers" linux-firmware "$microcode" reflector "$editor" cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub efibootmgr acpid "$shell""
+  packages="base base-devel $kernel $headers linux-firmware $microcode reflector $editor cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub efibootmgr acpid $shell"
+  echlog "Base: $packages"
+  sh -c "pacstrap -PK /mnt $packages"
 }
 
 source Configuration.cfg
