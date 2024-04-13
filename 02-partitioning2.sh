@@ -357,6 +357,33 @@ run() {
   fi
 }
 
+update_flags() {
+  if [[ "$BB" = 0 ]]; then
+    sed -i 's/BiosBoot="true"/BiosBoot="false"/g' Configuration.cfg
+    sed -i 's/BiosBoot=""/BiosBoot="false"/g' Configuration.cfg
+  fi
+
+  if [[ "$EFI" = 0 ]]; then
+    sed -i 's/esp="true"/esp="false"/g' Configuration.cfg
+    sed -i 's/esp=""/esp="false"/g' Configuration.cfg
+  fi
+
+  if [[ "$Aux" = 0 ]]; then
+    sed -i 's/Aux="true"/Aux="false"/g' Configuration.cfg
+    sed -i 's/Aux=""/Aux="false"/g' Configuration.cfg
+  fi
+
+  if [[ "$recovery" = 0 ]]; then
+    sed -i 's/Recovery="true"/Recovery="false"/g' Configuration.cfg
+    sed -i 's/Recovery=""/Recovery="false"/g' Configuration.cfg
+  fi
+
+  if [[ "$swap" = 0 ]]; then
+    sed -i 's/Swap="true"/Swap="false"/g' Configuration.cfg
+    sed -i 's/Swap=""/Swap="false"/g' Configuration.cfg
+  fi
+}
+
 source Configuration.cfg
 # returns kibibytes
 # convert to Mb
@@ -366,3 +393,4 @@ ram=$(($ram / 1024))
 disksize=$(lsblk -b --output SIZE -n -d $disk)
 disksize=$(($disksize / 1048576))
 run
+update_flags
