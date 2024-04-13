@@ -129,16 +129,20 @@ create_partitiontable() {
     local DiskSize=$(($disksize - $BB - $EFI - $recovery - $swap))
     # max root size is 256
     root=$((256 * $Gib))
-    local decrease=$((16 * $Gib))
+    local decrease=$((8 * $Gib))
     local maxRoot=$(($DiskSize / 4))
 
-    for ((i = 0; i < 15; i++)); do
+    for ((i = 0; i < 30; i++)); do
       if [ $root -gt $maxRoot ]; then
         root=$(($root - $decrease))
       fi
     done
 
-    aux=$(($DiskSize - $root))
+    if [[ $(($DiskSize - $root)) -gt $((8 * $Gib)) ]]; then
+      aux=$(($DiskSize - $root))
+    else
+      aux=0
+    fi
 
   else
     root=$(($disksize - $BB - $EFI - $recovery - $swap))
@@ -183,13 +187,13 @@ format_drive() {
   if [[ "$esp" = "true" ]]; then
     echlog "formating $disk$cp as a Fat$espFormat esp partition"
     SoftSet espFormat 12
-     # efi partition
+    # efi partition
     command="mkfs.fat -F "$espFormat" -v "$disk""$cp""
     echlog "command = $command"
     $command
     command=""
     esppath=$disk$cp
-    echo $cp > espPart
+    echo $cp >espPart
     echlog "esppath = $esppath | $disk$cp"
     ((cp++))
   fi
