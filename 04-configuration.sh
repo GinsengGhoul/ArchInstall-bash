@@ -125,6 +125,8 @@ EOF
 }
 
 install_VTI() {
+  install_xxd
+
   arch-chroot /mnt /bin/bash <<'EOF'
   set -e
 
@@ -183,10 +185,10 @@ create_users() {
     arch-chroot /mnt cp -r /usr/share/goodies/i3status /home/$username/.config
     arch-chroot /mnt cp -r /usr/share/goodies/sway /home/$username/.config
     arch-chroot /mnt cp /usr/share/goodies/alacritty.yml /home/$username/.config/alacritty
-    arch-chroot /mnt chown -R $username /home/$username/scripts
-    arch-chroot /mnt chown -R $username /home/$username/.config
-    arch-chroot /mnt chmod 755 -R /home/$username/scripts
-    arch-chroot /mnt chmod 755 -R /home/$username/.config
+    arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/scripts"
+    arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/.config"
+    arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/scripts"
+    arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/.config"
 
     # Set the password
     arch-chroot /mnt chpasswd <<<"$username:$password"
