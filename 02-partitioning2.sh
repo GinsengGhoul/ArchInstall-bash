@@ -358,7 +358,7 @@ run() {
 }
 
 update_flags() {
-  if [[ "$aux" = 0 ]; then
+  if [[ "$aux" = 0 ]]; then
     sed -i 's/Aux="true"/Aux="false"/g' Configuration.cfg
     sed -i 's/Aux=""/Aux="false"/g' Configuration.cfg
   fi
