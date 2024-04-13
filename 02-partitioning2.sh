@@ -138,10 +138,14 @@ create_partitiontable() {
       fi
     done
 
-    if [[ $(($DiskSize - $root)) -gt $((8 * $Gib)) ]]; then
+    if [ $(($DiskSize - $root)) -gt $((8 * $Gib)) ]; then
       aux=$(($DiskSize - $root))
     else
       aux=0
+    fi
+
+    if [ $(($DiskSize - $root)) -lt 0 ]; then
+      root=$(($disksize - $BB - $EFI - $recovery - $swap))
     fi
 
   else
@@ -299,7 +303,7 @@ mount_partitions() {
   mount $esppath /mnt$espMount
 
   SoftSet AuxUse "/home"
-  if [[ "$Aux" = "true" ]]; then
+  if [[ "$Aux" = "true" && "$Aux" -gt 0 ]]; then
     mkdir -p /mnt$AuxUse
     if [[ "$auxfs" = "xfs" ]]; then
       echlog "Mounting XFS aux $auxpath to /mnt$AuxUse"
@@ -319,12 +323,12 @@ mount_partitions() {
     fi
   fi
 
-  if [[ $Recovery = "true" ]]; then
+  if [[ "$Recovery" = "true" && "$Recovery" -gt 0 ]]; then
     echlog "Mounting recovery to /mnt/RECOVERY"
     mkdir /mnt/RECOVERY
     # ooh nooo not the massive security risk of a freely open directory
     chmod 777 /mnt/RECOVERY
-    mount $recoverypath /mnt/RECOVERY
+    mount "$recoverypath" /mnt/RECOVERY
   fi
 
 }
@@ -335,10 +339,10 @@ run() {
   #ram=$((1*$Gib))
   #disksize=$((8*$Gib))
 
-  echlog "ram(Mib): $ram"
-  echlog "disksize(Mib): $disksize"
-  ramGib=$(($ram / $Gib))
-  echlog "ramGib: $ramGib"
+  echlog "ram(Mib): "$ram""
+  echlog "disksize(Mib): "$disksize""
+  ramGib=$(("$ram" / "$Gib"))
+  echlog "ramGib: "$ramGib""
   echlog "------------------------------------"
 
   create_partitiontable
