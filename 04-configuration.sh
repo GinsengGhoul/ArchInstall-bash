@@ -168,7 +168,7 @@ create_users() {
   find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
 
   if [[ "$shell" = "zsh" ]]; then
-    local command="pacman -Sy $zsh"
+    local command="pacman -Sy --needed --noconfirm $zsh"
     arch-chroot /mnt /bin/sh -c "$command"
   fi
 
