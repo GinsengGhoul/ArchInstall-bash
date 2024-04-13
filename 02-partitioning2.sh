@@ -358,24 +358,9 @@ run() {
 }
 
 update_flags() {
-  if [[ "$BB" = 0 ]]; then
-    sed -i 's/BiosBoot="true"/BiosBoot="false"/g' Configuration.cfg
-    sed -i 's/BiosBoot=""/BiosBoot="false"/g' Configuration.cfg
-  fi
-
-  if [[ "$EFI" = 0 ]]; then
-    sed -i 's/esp="true"/esp="false"/g' Configuration.cfg
-    sed -i 's/esp=""/esp="false"/g' Configuration.cfg
-  fi
-
-  if [[ "$Aux" = 0 ]]; then
+  if [[ "$aux" = 0 ]; then
     sed -i 's/Aux="true"/Aux="false"/g' Configuration.cfg
     sed -i 's/Aux=""/Aux="false"/g' Configuration.cfg
-  fi
-
-  if [[ "$recovery" = 0 ]]; then
-    sed -i 's/Recovery="true"/Recovery="false"/g' Configuration.cfg
-    sed -i 's/Recovery=""/Recovery="false"/g' Configuration.cfg
   fi
 
   if [[ "$swap" = 0 ]]; then
