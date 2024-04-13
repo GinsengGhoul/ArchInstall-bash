@@ -125,8 +125,6 @@ EOF
 }
 
 install_VTI() {
-  install_xxd
-
   arch-chroot /mnt /bin/bash <<'EOF'
   set -e
 
