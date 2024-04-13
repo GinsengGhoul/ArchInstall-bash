@@ -323,7 +323,7 @@ mount_partitions() {
     fi
   fi
 
-  if [[ "$Recovery" = "true" && "$Recovery" -gt 0 ]]; then
+  if [[ "$Recovery" = "true" && "$recovery" -gt 0 ]]; then
     echlog "Mounting recovery to /mnt/RECOVERY"
     mkdir /mnt/RECOVERY
     # ooh nooo not the massive security risk of a freely open directory
@@ -358,9 +358,14 @@ run() {
 }
 
 update_flags() {
-  if [[ "$aux" = 0 ]]; then
+  if [[ "$aux" = 0 ]; then
     sed -i 's/Aux="true"/Aux="false"/g' Configuration.cfg
     sed -i 's/Aux=""/Aux="false"/g' Configuration.cfg
+  fi
+
+  if [[ "$recovery" = 0 ]; then
+    sed -i 's/Recovery="true"/Recovery="false"/g' Configuration.cfg
+    sed -i 's/Recovery=""/Recovery="false"/g' Configuration.cfg
   fi
 
   if [[ "$swap" = 0 ]]; then
