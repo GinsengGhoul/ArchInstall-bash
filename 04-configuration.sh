@@ -300,7 +300,7 @@ setup_mkinitcpio() {
 
   echlog "set compression to zstd:22"
   sed -i 's/^#\(COMPRESSION="zstd"\)/\1/' /mnt/etc/mkinitcpio.conf
-  sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v -T0 --ultra -22)/' /mnt/etc/mkinitcpio.conf
+  sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v -T0 --ultra -9)/' /mnt/etc/mkinitcpio.conf
   arch-chroot /mnt mkinitcpio -P
 }
 
