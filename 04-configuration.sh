@@ -353,7 +353,7 @@ snapper_config() {
   # make sure user has explictly enabled snapper
   SoftSet rootfs "btrfs"
   if [[ "$rootfs" = "btrfs" ]]; then
-    soft_set install_snapper "false"
+    SoftSet install_snapper "false"
   else
     # if your rootfs isn't btrfs you should never have any of the snapper stuff
     install_snapper="false"
