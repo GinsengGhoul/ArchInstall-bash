@@ -189,19 +189,25 @@ enable_services() {
   arch-chroot /mnt systemctl mask ldconfig.service
 
   if [[ $ssd = true ]]; then
-    cat <<EOF >/mnt/etc/systemd/system/boot-fstrim.service
+    cat <<EOF >/mnt/etc/systemd/system/fstrim.service
 [Unit]
-Description=Run fstrim on all mounted filesystems
-After=local-fs.target
+Description=Discard unused blocks on filesystems from /etc/fstab
+Documentation=man:fstrim(8)
+ConditionVirtualization=!container
 
 [Service]
 Type=oneshot
-ExecStart=/sbin/fstrim -a
-
-[Install]
-WantedBy=multi-user.target
+ExecStart=/usr/bin/fstrim --listed-in /etc/fstab:/proc/self/mountinfo --verbose --quiet-unsupported
+PrivateDevices=no
+PrivateNetwork=yes
+PrivateUsers=no
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+MemoryDenyWriteExecute=yes
+SystemCallFilter=@default @file-system @basic-io @system-service
 EOF
-    arch-chroot /mnt systemctl enable boot-fstrim.service
+    arch-chroot /mnt systemctl enable fstrim.service
   fi
 }
 
