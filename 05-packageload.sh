@@ -22,7 +22,7 @@ install_DE() {
     powerpill_command xorg lightdm lightdm-gtk-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc
     AUR_command xviewer pix mint-artwork lightdm-settings
     sed -i '/#greeter-session=example-gtk-gnome/a greeter-session=lightdm-slick-greeter' /mnt/etc/lightdm/lightdm.conf
-    arch-chroot /mnt systemctl enable lightdm.service    
+    arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "Cinnamon-noAUR")
     powerpill_command xorg lightdm lightdm-gtk-greeter cinnamon gnome-terminal file-roller xed xreader gnome-calculator gnome-font-viewer gnome-screenshot xdg-utils gvfs-mtp gvfs-gphoto2 gvfs-afc loupe gthumb
@@ -89,9 +89,10 @@ set_template_packages() {
   "laptop")
     SoftSet rootfs "btrfs"
     if [[ "$rootfs" = "btrfs" ]]; then
-    soft_set install_snapper "true"
+      soft_set install_snapper "false"
     else
-    soft_set install_snapper "false"
+      # if your rootfs isn't btrfs you should never have any of the snapper stuff
+      install_snapper="false"
     fi
     soft_set install_security "true"
     soft_set install_optimizations "true"
@@ -129,9 +130,10 @@ set_template_packages() {
   "desktop")
     SoftSet rootfs "btrfs"
     if [[ "$rootfs" = "btrfs" ]]; then
-    soft_set install_snapper "true"
+      soft_set install_snapper "false"
     else
-    soft_set install_snapper "false"
+      # if your rootfs isn't btrfs you should never have any of the snapper stuff
+      install_snapper="false"
     fi
     soft_set install_security "true"
     soft_set install_optimizations "true"
@@ -202,12 +204,13 @@ set_template_packages() {
     soft_set install_MSfonts "false"
     DE="none"
     ;;
-    "core")
+  "core")
     SoftSet rootfs "btrfs"
     if [[ "$rootfs" = "btrfs" ]]; then
-    soft_set install_snapper "true"
+      soft_set install_snapper "false"
     else
-    soft_set install_snapper "false"
+      # if your rootfs isn't btrfs you should never have any of the snapper stuff
+      install_snapper="false"
     fi
     soft_set install_security "true"
     soft_set install_optimizations "true"
@@ -272,7 +275,6 @@ set_packages() {
 run() {
   set_template_packages
   set_packages
-  echo $install_snapper > snapperInstalled
   powerpill_command "$packages"
   AUR_command $aurpkgs
   install_DE

@@ -4,8 +4,9 @@ logfile=Configuration.log
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
-  half_mem=$((total_mem / 2))
-  echlog "${half_mem}M"
+  # always return increments of 512
+  half_mem=$(((total_mem / 1024) * 512))
+  echo "${half_mem}M"
   # override zram size here
 }
 
@@ -35,12 +36,12 @@ half_memory() {
 # 1073741824    1024mb
 update_swappiness() {
   sed -i '/^vm.swappiness=/s/=.*/=180/' $1
-  sed -i '/^vm.swappiness=/a vm.dirty_background_bytes = 16777216' $1
-  sed -i '/^vm.swappiness=/a vm.dirty_bytes = 67108864' $1
+  sed -i '/^vm.swappiness=/a vm.dirty_background_bytes=16777216' $1
+  sed -i '/^vm.swappiness=/a vm.dirty_bytes=67108864' $1
   sed -i '/^vm.swappiness=/a vm.vfs_cache_pressure=500' $1
-  sed -i '/^vm.swappiness=/a vm.watermark_boost_factor = 0' $1
-  sed -i '/^vm.swappiness=/a vm.watermark_scale_factor = 125' $1
-  sed -i '/^vm.swappiness=/a vm.page-cluster = 0' $1
+  sed -i '/^vm.swappiness=/a vm.watermark_boost_factor=0' $1
+  sed -i '/^vm.swappiness=/a vm.watermark_scale_factor=125' $1
+  sed -i '/^vm.swappiness=/a vm.page-cluster=0' $1
 }
 
 reenable_features() {
@@ -61,6 +62,68 @@ reenable_features() {
   sed -i 's/^blacklist sr_mod/#&/' $1
 }
 
+install_xxd() {
+  arch-chroot /mnt /bin/bash <<'EOF'
+  set -e
+
+  # Create the build directory
+  mkdir -p /tmp/xxd-standalone-git
+  chmod 777 /tmp/xxd-standalone-git
+  # Create PKGBUILD file
+  cat <<'EOM' >/tmp/xxd-standalone-git/PKGBUILD
+pkgname=xxd-standalone-git
+pkgver=$(echo $(curl -s https://raw.githubusercontent.com/vim/vim/master/src/version.h | sed -n 's/#define VIM_VERSION_MAJOR[[:space:]]*\([0-9]*\).*/\1/p')$(curl -s https://raw.githubusercontent.com/vim/vim/master/src/version.h | sed -n 's/#define VIM_VERSION_MINOR[[:space:]]*\([0-9]*\).*/.\1/p')$(curl -s https://raw.githubusercontent.com/vim/vim/master/src/version.h | sed -n 's/#define VIM_VERSION_BUILD[[:space:]]*\([0-9]*\).*/\1/p') | tr -d '[:space:]')
+
+pkgrel=1
+pkgdesc="Hexdump utility from vim"
+arch=(any)
+url="https://www.vim.org"
+license=(GPL2)
+provides=(xxd)
+conflicts=(xxd)
+depends=(glibc)
+source=("https://raw.githubusercontent.com/vim/vim/master/src/xxd/xxd.c"
+        "https://raw.githubusercontent.com/vim/vim/master/runtime/doc/xxd.1"
+        "https://raw.githubusercontent.com/vim/vim/master/src/xxd/Makefile"
+        "https://raw.githubusercontent.com/vim/vim/master/LICENSE"
+        )
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
+prepare() {
+  for file in "${source[@]}"; do
+    filename=$(basename "$file")
+    if [ ! -f "$filename" ]; then
+      echo "Downloading $filename..."
+      curl -LO "$file"
+    fi
+  done
+  }
+
+build() {
+  CFLAGS="-march=native -Os"
+  THREADS=$(($(nproc) +2))
+  make CFLAGS="$CFLAGS" -j$THREADS -f "Makefile"
+}
+
+package() {
+  install -Dm755 xxd "${pkgdir}/usr/bin/xxd"
+  install -Dm644 xxd.1 "${pkgdir}/usr/share/man/man1/xxd.1"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
+EOM
+
+  chown "$admin" /tmp/xxd-standalone-git/PKGBUILD
+  # Change to the build directory
+  cd /tmp/xxd-standalone-git
+  # Build and install the package
+  su "$admin" -c "makepkg -si --noconfirm"
+  # rm -r /tmp/xxd-standalone-git
+EOF
+}
+
 install_VTI() {
   arch-chroot /mnt /bin/bash <<'EOF'
   set -e
@@ -75,8 +138,8 @@ pkgver=1.0
 pkgrel=1
 pkgdesc="VIM Totally Installed"
 arch=('any')
-depends=('neovim')
-provides=("vim=999.99" "vi=999.99")
+depends=('neovim' 'xxd')
+provides=('vi' 'vim')
 
 package() {
   mkdir -p $pkgdir/usr/bin
@@ -241,7 +304,6 @@ create_dirs() {
   # Create Directories
   dirs=(
     /mnt/etc/modules-load.d
-    /mnt/etc/snapper/configs
     /mnt/etc/default
     /mnt/etc/conf.d
     /mnt/etc/sysctl.d/
@@ -286,8 +348,19 @@ EOF
 }
 
 snapper_config() {
-  # configure snapper cleanup
-  cat <<EOF >/mnt/etc/snapper/configs/config
+  # make sure user has explictly enabled snapper
+  SoftSet rootfs "btrfs"
+  if [[ "$rootfs" = "btrfs" ]]; then
+    soft_set install_snapper "false"
+  else
+    # if your rootfs isn't btrfs you should never have any of the snapper stuff
+    install_snapper="false"
+  fi
+
+  if [[ "$install_snapper" = "true" ]]; then
+    mkdir -p /mnt/etc/snapper/configs
+    # configure snapper cleanup
+    cat <<EOF >/mnt/etc/snapper/configs/config
 TIMELINE_MIN_AGE="1800"
 TIMELINE_LIMIT_HOURLY="5"
 TIMELINE_LIMIT_DAILY="5"
@@ -296,7 +369,8 @@ TIMELINE_LIMIT_MONTHLY="0"
 TIMELINE_LIMIT_YEARLY="0"
 NUMBER_LIMIT="10"
 EOF
-  chmod 644 /mnt/etc/snapper/configs/config
+    chmod 644 /mnt/etc/snapper/configs/config
+  fi
 }
 
 reflector_config() {
@@ -323,7 +397,8 @@ EOF
 }
 
 setup_nvim() {
-  pacman -Sy --root /mnt neovim --needed
+  install_xxd
+  install_VTI
   # link nvim as vi and vim
   #arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vim
   #arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
@@ -347,7 +422,6 @@ EOF
   # set permissions
   chmod 644 /mnt/etc/vimrc
   chmod 644 /mnt/etc/xdg/nvim/sysinit.vim
-  install_VTI
 }
 
 install_powerpill() {

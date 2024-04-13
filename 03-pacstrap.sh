@@ -21,11 +21,7 @@ run() {
   SoftSet rootfs btrfs
   detect_microcode
   headers=$kernel-headers
-  if [[ "$rootfs" = "btrfs" ]]; then
-  pacstrap -PK /mnt base base-devel "$kernel" $headers linux-firmware "$microcode" reflector "$editor" cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub efibootmgr acpid grub-btrfs "$shell"
-  else
-  pacstrap -PK /mnt base base-devel "$kernel" "$headers" linux-firmware "$microcode" reflector "$editor" cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub efibootmgr acpid "$shell"
-  fi
+  sh -c "pacstrap -PK /mnt base base-devel "$kernel" "$headers" linux-firmware "$microcode" reflector "$editor" cachyos-mirrorlist cachyos-keyring cachyos-v3-mirrorlist cachyos-v4-mirrorlist xyne-mirrorlist grub efibootmgr acpid "$shell""
 }
 
 source Configuration.cfg

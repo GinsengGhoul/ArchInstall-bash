@@ -182,7 +182,7 @@ enable_services() {
   arch-chroot /mnt systemctl enable thermald
   arch-chroot /mnt systemctl enable chronyd
   #arch-chroot /mnt systemctl enable logrotate.timer
-  sudo systemctl enable --now paccache.timer
+  arch-chroot /mnt systemctl enable paccache.timer
   arch-chroot /mnt systemctl enable irqbalance
   arch-chroot /mnt systemctl enable ananicy-cpp
   # arch-chroot /mnt systemctl enable doh-client
@@ -211,9 +211,15 @@ run() {
   setup_networking
 
   case "$ArchInstallType" in
-  laptop | desktop)
-    local snapperInstalled <$(<"snapperInstalled")
-    if [[ "$snapperInstalled" = "true" ]]; then
+  laptop | desktop | core)
+    if [[ "$rootfs" = "btrfs" ]]; then
+      soft_set install_snapper "false"
+    else
+      # if your rootfs isn't btrfs you should never have any of the snapper stuff
+      install_snapper="false"
+    fi
+
+    if [[ "$install_snapper" = "true" ]]; then
       setup_snapper
     fi
     ;;
