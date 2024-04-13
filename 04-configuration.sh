@@ -184,6 +184,7 @@ create_users() {
     # Create the user
     echlog "Creating user: $username"
     arch-chroot /mnt useradd -m -s "$Shell" "$username"
+    arch-chroot /mnt mkdir -p /home/$username/.config
     arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
     arch-chroot /mnt cp -r /usr/share/goodies/source /home/$username/
     arch-chroot /mnt cp -r /usr/share/goodies/config/* /home/$username/.config
