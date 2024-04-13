@@ -303,7 +303,7 @@ mount_partitions() {
   mount $esppath /mnt$espMount
 
   SoftSet AuxUse "/home"
-  if [[ "$Aux" = "true" && "$Aux" -gt 0 ]]; then
+  if [[ "$Aux" = "true" && "$aux" -gt 0 ]]; then
     mkdir -p /mnt$AuxUse
     if [[ "$auxfs" = "xfs" ]]; then
       echlog "Mounting XFS aux $auxpath to /mnt$AuxUse"
@@ -358,12 +358,12 @@ run() {
 }
 
 update_flags() {
-  if [[ "$aux" = 0 ]; then
+  if [[ "$aux" = 0 ]]; then
     sed -i 's/Aux="true"/Aux="false"/g' Configuration.cfg
     sed -i 's/Aux=""/Aux="false"/g' Configuration.cfg
   fi
 
-  if [[ "$recovery" = 0 ]; then
+  if [[ "$recovery" = 0 ]]; then
     sed -i 's/Recovery="true"/Recovery="false"/g' Configuration.cfg
     sed -i 's/Recovery=""/Recovery="false"/g' Configuration.cfg
   fi
