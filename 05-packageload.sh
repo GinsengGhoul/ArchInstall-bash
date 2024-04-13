@@ -51,7 +51,7 @@ install_DE() {
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "i3")
-    powerpill_command xorg lightdm lightdm-gtk-greeter I3-wm rofi feh alacritty deadd-notification-center-git playerctl breeze qt5tc xclip
+    powerpill_command xorg lightdm lightdm-gtk-greeter i3-wm rofi feh alacritty deadd-notification-center-git playerctl breeze qt5ct xclip jq gnome-calendar thunar-archive-plugin thunar-media-tags-plugin thunar-volman tumbler ffmpegthumbnailer poppler-glib libgsf libopenraw freetype2 xfce4-mount-plugin xfce4-battery-plugin xfce4-clipman-plugin xfce4-netload-plugin xfce4-pulseaudio-plugin xfce4-whiskermenu-plugin thunar gvfs gvfs-afc gvfs-mtp gvfs-gphoto2 pipewire pipewire-alsa pipewire-pulse xfce4-power-manager maim brightnessctl alacarte kate mate-polkit lxqt-config imagemagick loupe adapta-gtk-theme papirus-icon-theme easyeffects audacity lsp-plugins-lv2 calf vvave
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "sway")

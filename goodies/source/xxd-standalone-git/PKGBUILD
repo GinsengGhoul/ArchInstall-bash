@@ -1,0 +1,41 @@
+pkgname=xxd-standalone-git
+pkgver=$(echo $(curl -s https://raw.githubusercontent.com/vim/vim/master/src/version.h | sed -n 's/#define VIM_VERSION_MAJOR[[:space:]]*\([0-9]*\).*/\1/p')$(curl -s https://raw.githubusercontent.com/vim/vim/master/src/version.h | sed -n 's/#define VIM_VERSION_MINOR[[:space:]]*\([0-9]*\).*/.\1/p')$(curl -s https://raw.githubusercontent.com/vim/vim/master/src/version.h | sed -n 's/#define VIM_VERSION_BUILD[[:space:]]*\([0-9]*\).*/\1/p') | tr -d '[:space:]')
+
+pkgrel=1
+pkgdesc="Hexdump utility from vim"
+arch=(any)
+url="https://www.vim.org"
+license=(GPL2)
+provides=(xxd)
+conflicts=(xxd)
+depends=(glibc)
+source=("https://raw.githubusercontent.com/vim/vim/master/src/xxd/xxd.c"
+        "https://raw.githubusercontent.com/vim/vim/master/runtime/doc/xxd.1"
+        "https://raw.githubusercontent.com/vim/vim/master/src/xxd/Makefile"
+        "https://raw.githubusercontent.com/vim/vim/master/LICENSE"
+        )
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
+prepare() {
+  for file in "${source[@]}"; do
+    filename=$(basename "$file")
+    if [ ! -f "$filename" ]; then
+      echo "Downloading $filename..."
+      curl -LO "$file"
+    fi
+  done
+  }
+
+build() {
+  CFLAGS="-march=native -Os"
+  THREADS=$(($(nproc) +2))
+  make CFLAGS="$CFLAGS" -j$THREADS -f "Makefile"
+}
+
+package() {
+  install -Dm755 xxd "${pkgdir}/usr/bin/xxd"
+  install -Dm644 xxd.1 "${pkgdir}/usr/share/man/man1/xxd.1"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

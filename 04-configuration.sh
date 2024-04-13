@@ -167,6 +167,11 @@ create_users() {
   find /mnt/usr/share/goodies -type d -exec chmod 644 {} +
   find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
 
+  if [[ "$shell" = "zsh"]]; then
+    local command="pacman -Sy $zsh"
+  arch-chroot /mnt /bin/sh -c "$command"
+  fi
+
   arch-chroot /mnt chpasswd <<<"root:$rootpassword"
 
   for ((i = 0; i < ${#users[@]}; i++)); do
@@ -179,15 +184,13 @@ create_users() {
     # Create the user
     echlog "Creating user: $username"
     arch-chroot /mnt useradd -m -s "$Shell" "$username"
-    mkdir -p /mnt/home/$username/.config/alacritty
     arch-chroot /mnt cp -r /usr/share/goodies/scripts /home/$username/
-    arch-chroot /mnt cp -r /usr/share/goodies/i3 /home/$username/.config
-    arch-chroot /mnt cp -r /usr/share/goodies/i3status /home/$username/.config
-    arch-chroot /mnt cp -r /usr/share/goodies/sway /home/$username/.config
-    arch-chroot /mnt cp /usr/share/goodies/alacritty.yml /home/$username/.config/alacritty
+    arch-chroot /mnt cp -r /usr/share/goodies/source /home/$username/
+    arch-chroot /mnt cp -r /usr/share/goodies/config/* /home/$username/.config
     arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/scripts"
     arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/.config"
     arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/scripts"
+    arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/source"
     arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/.config"
 
     # Set the password
@@ -261,7 +264,7 @@ setup_grub() {
   echlog "setup faster grub timeout"
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
   echlog "setting up apparmor boot arguments, disabling zswap and enabling resume"
-  sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0 transparent_hugepage=never/' /mnt/etc/default/grub
+  sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet\)/\1 lsm=landlock,lockdown,yama,apparmor,bpf zswap.enabled=0 transparent_hugepage=madvise/' /mnt/etc/default/grub
   # check if swap_UUID exist
   if [ ! -z "$Swap_UUID" ]; then
     sed -i 's/\(GRUB_CMDLINE_LINUX="[^"]*\)/\1 resume=UUID="'"$Swap_UUID"'"/' /mnt/etc/default/grub

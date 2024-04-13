@@ -1,0 +1,30 @@
+pkgname=JTI
+pkgver=1.0.1
+pkgrel=1
+pkgdesc="Java Totally Installed - pretend 8, 11, and 17 are installed"
+arch=('any')
+license=('GPL')
+depends=('jdk-openjdk')
+conflicts=('jdk8-openjdk' 'jdk11-openjdk' 'jdk17-openjdk')
+# "java-runtime=${_majorver}" "java-runtime-openjdk=${_majorver}" "jre${_majorver}-openjdk=${pkgver}-${pkgrel}"
+provides=(          
+          "java-runtime=8"
+          "java-environment-openjdk=8"
+          "java-runtime-openjdk=8"
+          "jre8-openjdk=8.402.u06-1"
+          "java-runtime=11"
+          "java-environment-openjdk=11"
+          "java-runtime-openjdk=11" 
+          "jre11-openjdk=11.0.22.u7"
+          "java-runtime=17"
+          "java-environment-openjdk=17"
+          "java-runtime-openjdk=17"
+          "jre17-openjdk=17.0.10.u7-1"
+          )
+
+package() {
+  # Empty, as this is a meta package
+  # No need to install anything
+  return 0
+}
+

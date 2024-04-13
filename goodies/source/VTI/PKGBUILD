@@ -1,0 +1,13 @@
+pkgname='VTI'
+pkgver=1.0
+pkgrel=1
+pkgdesc="VIM Totally Installed"
+arch=('any')
+depends=('neovim' 'xxd')
+provides=('vi' 'vim')
+
+package() {
+  mkdir -p $pkgdir/usr/bin
+  ln -s /usr/bin/nvim $pkgdir/usr/bin/vim
+  ln -s /usr/bin/nvim $pkgdir/usr/bin/vi
+}
