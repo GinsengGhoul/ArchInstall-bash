@@ -260,7 +260,7 @@ set_packages() {
     local package_variable="$variable"
 
     if [[ "${!install_variable}" == "true" ]]; then
-      if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" || "$variable" == "video_3d" || "$variable" == "video_acceleration" || "$variable" == "javaJDK" || "$variable" == "java8JDK" || "$variable" == "java11JDK" || "$variable" == "java17JDK" ]]; then
+      if [[ "${package_variable: -3}" == "AUR" || "$variable" == "MSfonts" || "$variable" == "nativeMS" || "$variable" == "video_3d" || "$variable" == "video_acceleration" || "$variable" == "javaJDK" || "$variable" == "java8JDK" || "$variable" == "java11JDK" || "$variable" == "java17JDK" || "$variable" == "xorg_drivers" ]]; then
         AUR_packages+=" ${!package_variable}"
       else
         packages+=" ${!package_variable}"
