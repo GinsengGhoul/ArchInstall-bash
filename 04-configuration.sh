@@ -282,7 +282,7 @@ setup_grub() {
     echo "https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso	https://mirror.rackspace.com/archlinux/iso/latest/archlinux-x86_64.iso	https://mirrors.edge.kernel.org/archlinux/iso/latest/archlinux-x86_64.iso" >/mnt/RECOVERY/mirrors.txt
     chomod 755 /mnt/RECOVERY/mirrors.txt
     #curl -o /mnt/RECOVERY/archlinux-x86_64.iso https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso
-    arch-chroot /mnt /bin/sh -c "aria2c -s 24 -j 12 -x 4 -c true -d /RECOVERY -i /RECOVERY/mirrors.txt"
+    arch-chroot /mnt /bin/sh -c "aria2c -s 24 -j 12 -x 4 -c true --check-integrity=true -d /RECOVERY -i /RECOVERY/mirrors.txt"
     local RECOVERY=$(blkid | awk -F '[" ]' '/PARTLABEL="Microsoft basic data"/ {for (i=1; i<NF; i++) if ($i == "UUID=") print $(i+1)}')
     cat <<EOF >>/mnt/etc/grub.d/40_custom
 menuentry "Arch Linux ISO" {
