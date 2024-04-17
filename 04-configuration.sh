@@ -193,6 +193,13 @@ create_users() {
     arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/.config"
     arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/source"
 
+    if [[ "$shell" = "zsh" ]]; then
+      arch-chroot /mnt cp -r /usr/share/goodies/.zshrc /home/$username/
+      arch-chroot /mnt cp -r /usr/share/goodies/.p10k.zsh /home/$username/
+      arch-chroot /mnt /bin/sh -c "chown $username /home/$username/.zshrc"
+      arch-chroot /mnt /bin/sh -c "chown $username /home/$username/.p10k.zsh"
+    fi
+
     # Set the password
     arch-chroot /mnt chpasswd <<<"$username:$password"
 
