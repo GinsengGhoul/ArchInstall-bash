@@ -171,7 +171,7 @@ set_template_packages() {
   "server")
     soft_set install_snapper "false"
     soft_set install_security "true"
-    soft_set install_optimizations "false"
+    soft_set install_optimizations "true"
     soft_set install_computer_signals "false"
     soft_set install_git "true"
     soft_set install_ssh "true"

@@ -4,11 +4,26 @@ logfile=Configuration.log
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
-  # always return increments of 512
+  # calculate half memory in increments of 512
   half_mem=$(((total_mem / 1024) * 512))
+
+  # calculate 80% of total memory
+  eighty_percent=$((total_mem * 80 / 100))
+
+  if ((half_mem > eighty_percent)); then
+    half_mem=512
+  elif ((half_mem > 256)); then
+    half_mem=256
+  elif ((half_mem > 128)); then
+    half_mem=128
+  else
+    half_mem=0
+  fi
+
   echo "${half_mem}M"
   # override zram size here
 }
+
 
 # cache pressure increases the tendency for the kernel to reclaim cache pages
 # swappiness how agressively the system swaps memory pages
@@ -447,7 +462,7 @@ install_powerpill() {
 }
 
 enable_zram() {
-  if [ -n "$zram" ]; then
+  if [[ -n "$zram" && "$(half_memory)" -gt 0 ]]; then
     # enable zram
     echlog 'zram' >/mnt/etc/modules-load.d/zram.conf
     echlog 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
