@@ -162,8 +162,8 @@ create_users() {
   # copy goodies to /usr/share
   cp -r goodies /mnt/usr/share
   # set folders to 644 and filse to 755
-  find /mnt/usr/share/goodies -type d -exec chmod 644 {} +
-  find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
+  chmod 644 /mnt/usr/share/goodies
+  chmod 755 /mnt/usr/share/goodies/*
 
   if [[ "$shell" = "zsh" ]]; then
     local command="pacman -Sy --needed --noconfirm $zsh"
