@@ -57,23 +57,28 @@ partition_drive() {
   # for some reason, the last line needs one more enter...
 
   # start string_builder
-  commands=$gptstr$bbstr$efistr$rootstr
-  if [[ "$Aux" = "true" ]]; then
-    commands=$commands$auxstr
+  commands="$gptstr$bbstr"
+  if [ "$EFI" -gt 0 ]; then
+    commands="$commands$efistr"
   fi
-  if [[ "$Recovery" = "true" ]]; then
-    commands=$commands$recoverystr
+  commands="$commands$rootstr"
+  $rootstr
+  if [ "$aux" -gt 0 ]; then
+    commands="$commands$auxstr"
   fi
-  if [[ "$Swap" = "true" ]]; then
-    commands=$commands$swapstr
+  if [ "$recovery" -gt 0 ]; then
+    commands="$commands$recoverystr"
   fi
-  commands=$commands$writestr
-  echo $commands
+  if [ "$swap" -gt 0 ]; then
+    commands="$commands$swapstr"
+  fi
+  commands="$commands$writestr"
+  echo "$commands"
   # override
   #commands=$gptstr$bbstr$efistr$rootstr$auxstr$recoverystr$swapstr$writestr
   #commands=$gptstr$swapstr$writestr
   #echo $commands
-  echo -e $commands | gdisk $disk
+  echo -e "$commands" | gdisk "$disk"
   #echo -e $commands
   return
 }
@@ -93,7 +98,7 @@ create_partitiontable() {
     BB=0
   fi
 
-  if [[ "$Recovery" = "true" ]]; then
+  if [[ "$Recovery" = "true" && "$recovery" -lt $((disksize / 4)) ]]; then
     recovery=$((2 * $Gib))
   else
     recovery=0
@@ -232,8 +237,7 @@ format_drive() {
   echlog "rootpath = $rootpath | $disk$cp"
   ((cp++))
 
-  SoftSet auxfs btrfs
-  if [[ $Aux = "true" ]]; then
+  if [ $aux -gt 0 ]; then
     if [[ "$auxfs" = "xfs" ]]; then
       echlog "formating $disk$cp as a XFS Aux partition"
       command="$xfs_format""$disk$cp"
@@ -258,17 +262,17 @@ format_drive() {
     $command
     command=""
 
-    auxpath=$disk$cp
+    auxpath="$disk$cp"
     echlog "auxpath = $auxpath | $disk$cp"
     ((cp++))
   fi
-  if [[ $Recovery = "true" ]]; then
-    mkfs.fat -F32 $disk$cp
-    recoverypath=$disk$cp
+  if [ "$recovery" -gt 0 ]; then
+    mkfs.fat -F32 "$disk$cp"
+    recoverypath="$disk$cp"
     echlog "recoverypath = $recoverypath | $disk$cp"
     ((cp++))
   fi
-  if [[ $Swap = "true" ]]; then
+  if [ "$swap" -gt 0 ]; then
     echlog "swappath = $disk$cp"
     mkswap $disk$cp
     swapon $disk$cp
@@ -303,7 +307,7 @@ mount_partitions() {
   mount $esppath /mnt$espMount
 
   SoftSet AuxUse "/home"
-  if [[ "$Aux" = "true" && "$aux" -gt 0 ]]; then
+  if [ "$aux" -gt 0 ]; then
     mkdir -p /mnt$AuxUse
     if [[ "$auxfs" = "xfs" ]]; then
       echlog "Mounting XFS aux $auxpath to /mnt$AuxUse"
@@ -323,7 +327,7 @@ mount_partitions() {
     fi
   fi
 
-  if [[ "$Recovery" = "true" && "$recovery" -gt 0 ]]; then
+  if [ "$recovery" -gt 0 ]; then
     echlog "Mounting recovery to /mnt/RECOVERY"
     mkdir /mnt/RECOVERY
     # ooh nooo not the massive security risk of a freely open directory
