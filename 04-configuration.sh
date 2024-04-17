@@ -188,9 +188,10 @@ create_users() {
     cp -r /mnt/usr/share/goodies/config/* /mnt/home/$username/.config
     arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/scripts"
     arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/.config"
+    arch-chroot /mnt /bin/sh -c "chown -R $username /home/$username/source"
     arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/scripts"
-    arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/source"
     arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/.config"
+    arch-chroot /mnt /bin/sh -c "chmod 755 -R /home/$username/source"
 
     # Set the password
     arch-chroot /mnt chpasswd <<<"$username:$password"
@@ -271,7 +272,10 @@ setup_grub() {
   SoftSet Recovery true
   if [[ "$Recovery" = "true" ]]; then
     echlog "Downloading newest ArchIso from https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso"
-    curl -o /mnt/RECOVERY/archlinux-x86_64.iso https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso
+    echo "https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso     https://mirror.rackspace.com/archlinux/iso/latest/archlinux-x86_64.iso     https://mirrors.edge.kernel.org/archlinux/iso/latest/archlinux-x86_64.iso" > /mnt/RECOVERY/mirrors.txt
+    chomod 755 /mnt/RECOVERY/mirrors.txt
+    #curl -o /mnt/RECOVERY/archlinux-x86_64.iso https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso
+    arch-chroot /mnt /bin/sh -c "aria2c -s 24 -j 12 -x 4 -c true -d /RECOVERY -i /RECOVERY/mirrors.txt"
     local RECOVERY=$(blkid | awk -F '[" ]' '/PARTLABEL="Microsoft basic data"/ {for (i=1; i<NF; i++) if ($i == "UUID=") print $(i+1)}')
     cat <<EOF >>/mnt/etc/grub.d/40_custom
 menuentry "Arch Linux ISO" {
@@ -286,8 +290,8 @@ EOF
 }
 
 setup_mkinitcpio() {
-  local HooksOG="HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont block filesystems fsck)"
-  local HooksNW="HOOKS=(systemd autodetect modconf kms keyboard keymap consolefont block filesystems fsck resume)"
+  local HooksOG="HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)"
+  local HooksNW="HOOKS=(systemd autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck resume)"
 
   # Check if the line already exists in the file
   if grep -Fxq "$HooksOG" "/mnt/etc/mkinitcpio.conf"; then
@@ -497,7 +501,7 @@ update_flags() {
 
     # Update LDFLAGS
     sed -i 's/-Wl,-O1/-Wl,-O2/' "$file_path"
-    sed -i 's/-as-needed/-as-needed,z,defs/' "$file_path"
+    sed -i 's/-as-needed/-as-needed,-z,defs/' "$file_path"
 
     # Update RUSTFLAGS
     sed -i 's/#RUSTFLAGS="-C opt-level=2"/RUSTFLAGS="-C opt-level=2 -C target-cpu=native"/' "$file_path"
@@ -506,7 +510,10 @@ update_flags() {
     sed -i '/^BUILDENV=/ s/!ccache/ccache/' "$file_path"
 
     # make and ninja flags
-    sed -i '/#MAKEFLAGS="-j2"/a MAKEFLAGS="-j$(nproc)"\nNINJAFLAGS="-j$(nproc)"' "$file_path"
+    sed -i '/#MAKEFLAGS="-j2"/a MAKEFLAGS="-j$($(nproc)+2)"\nNINJAFLAGS="-j$($(nproc)+2)"' "$file_path"
+
+    #zstd flags to 9
+    sed -i 's/--ultra -20/--ultra -9/' "$file_path"
   else
     echlog "File not found: $file_path"
   fi
