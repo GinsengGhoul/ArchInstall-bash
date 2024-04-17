@@ -65,7 +65,7 @@ EOF
     echo "Setting Samba password for $username..."
 
     # Set Samba password using smbpasswd command
-    echo -e "$password\n$password" | smbpasswd -a "$username"
+    echo -e "$password\n$password" | arch-chroot /mnt /bin/sh -c "smbpasswd -a "$username""
 
     if [ $? -eq 0 ]; then
       echo "Password set successfully for $username"
