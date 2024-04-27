@@ -11,10 +11,6 @@ install_DE() {
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "KDE")
-    powerpill_command wayland plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk plasma-wayland-session
-    arch-chroot /mnt systemctl enable sddm.service
-    ;;
-  "KDE-xorg")
     powerpill_command xorg plasma kde-graphics-meta kde-system-meta kde-utilities-meta breeze-gtk
     arch-chroot /mnt systemctl enable sddm.service
     ;;
