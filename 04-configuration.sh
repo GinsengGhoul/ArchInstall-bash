@@ -4,26 +4,15 @@ logfile=Configuration.log
 
 half_memory() {
   total_mem=$(free -m | awk '/^Mem:/{print $2}')
-  # calculate half memory in increments of 512
-  half_mem=$(((total_mem / 1024) * 512))
-
-  # calculate 80% of total memory
-  eighty_percent=$((total_mem * 80 / 100))
-
-  if ((half_mem > eighty_percent)); then
-    half_mem=512
-  elif ((half_mem > 256)); then
-    half_mem=256
-  elif ((half_mem > 128)); then
-    half_mem=128
-  else
-    half_mem=0
-  fi
+  rounded_mem=$(((total_mem + 31) / 128 * 128))
+  # always return increments of 512
+  half_mem=$((rounded_mem / 2))
+  # Find the smallest increment of 128MB that is above half_mem
+  smallest_increment=$(((half_mem + 31) / 128 * 128))
 
   echo "${half_mem}M"
   # override zram size here
 }
-
 
 # cache pressure increases the tendency for the kernel to reclaim cache pages
 # swappiness how agressively the system swaps memory pages
@@ -177,8 +166,8 @@ create_users() {
   # copy goodies to /usr/share
   cp -r goodies /mnt/usr/share
   # set folders to 644 and filse to 755
-  chmod 644 /mnt/usr/share/goodies
-  chmod 755 /mnt/usr/share/goodies/*
+  find /mnt/usr/share/goodies -type d -exec chmod 644 {} +
+  find /mnt/usr/share/goodies -type f -exec chmod 755 {} +
 
   if [[ "$shell" = "zsh" ]]; then
     local command="pacman -Sy --needed --noconfirm $zsh"
