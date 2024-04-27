@@ -9,8 +9,7 @@ half_memory() {
   half_mem=$((rounded_mem / 2))
   # Find the smallest increment of 128MB that is above half_mem
   smallest_increment=$(((half_mem + 31) / 128 * 128))
-
-  echo "${half_mem}M"
+  echo "${smallest_increment}M"
   # override zram size here
 }
 
