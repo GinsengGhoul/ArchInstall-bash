@@ -39,8 +39,8 @@ half_memory() {
 # 1073741824    1024mb
 update_swappiness() {
   sed -i '/^vm.swappiness=/s/=.*/=180/' $1
-  sed -i '/^vm.swappiness=/a vm.dirty_background_bytes=16777216' $1
-  sed -i '/^vm.swappiness=/a vm.dirty_bytes=67108864' $1
+  sed -i '/^vm.swappiness=/a vm.dirty_background_bytes=134217728' $1
+  sed -i '/^vm.swappiness=/a vm.dirty_bytes=536870912' $1
   sed -i '/^vm.swappiness=/a vm.vfs_cache_pressure=500' $1
   sed -i '/^vm.swappiness=/a vm.watermark_boost_factor=0' $1
   sed -i '/^vm.swappiness=/a vm.watermark_scale_factor=125' $1
@@ -198,6 +198,7 @@ create_users() {
 
     if [[ "$shell" = "zsh" ]]; then
       arch-chroot /mnt cp -r /usr/share/goodies/.zshrc /home/$username/
+      arch-chroot /mnt sed -i "s|/home/USER/.zshrc|/home/$username/.zshrc|" /home/$username/.zshrc
       arch-chroot /mnt cp -r /usr/share/goodies/.p10k.zsh /home/$username/
       arch-chroot /mnt /bin/sh -c "chown $username /home/$username/.zshrc"
       arch-chroot /mnt /bin/sh -c "chown $username /home/$username/.p10k.zsh"
@@ -312,9 +313,20 @@ setup_mkinitcpio() {
     echlog "The line was not found in mkinitcpio.conf."
   fi
 
-  echlog "set compression to zstd:22"
+  echlog "set compression to zstd:19"
   sed -i 's/^#\(COMPRESSION="zstd"\)/\1/' /mnt/etc/mkinitcpio.conf
-  sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v -T0 --ultra -9)/' /mnt/etc/mkinitcpio.conf
+  sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v --long --auto-threads=logical -T0 --ultra -19)/' /mnt/etc/mkinitcpio.conf
+
+  # Set MODULES_DECOMPRESS="yes" and uncomment it
+  sed -i 's/^#\(MODULES_DECOMPRESS=\)"no"/\1"yes"/' /mnt/etc/mkinitcpio.conf
+
+  # Add zram to MODULES array
+  if grep -q '^MODULES=(' /mnt/etc/mkinitcpio.conf; then
+    sed -i '/^MODULES=(/ s/)/ zram)/' /mnt/etc/mkinitcpio.conf
+  else
+    echo 'MODULES=(zram)' >>/mnt/etc/mkinitcpio.conf
+  fi
+
   arch-chroot /mnt mkinitcpio -P
 }
 
@@ -422,6 +434,10 @@ setup_nvim() {
   #arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
   # create vimrc
   cat <<EOF >/mnt/etc/vimrc
+highlight Normal guibg=none
+highlight NonText guibg=none
+highlight Normal ctermbg=none
+highlight NonText ctermbg=none
 set number
 set wrap
 syntax on
@@ -432,7 +448,8 @@ set softtabstop=2
 set tabstop=2
 set autoindent
 set smartindent
-set cc=80,90,100
+"set cc=80,90,100
+set cc=80
 map <F4> :nohl<CR>
 EOF
   # create a copy into nvim's config
@@ -454,7 +471,7 @@ enable_zram() {
     # enable zram
     echlog 'zram' >/mnt/etc/modules-load.d/zram.conf
     echlog 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
-    echlog 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", RUN="/usr/bin/mkswap -U clear /dev/%k", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
+    echlog 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", ATTR{recomp_algorithm}="algo=lz4 priority=1", RUN="/usr/bin/mkswap -U clear /dev/%k", RUN+="/sbin/sh -c echo 'type=huge' > /sys/block/%k/recompress", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
 
     chmod 644 /mnt/etc/modules-load.d/zram.conf
     chmod 644 /mnt/etc/modprobe.d/zram.conf
@@ -492,14 +509,72 @@ blacklist_kernelmodules() {
   chmod 600 /mnt/etc/sysctl.d/*
 }
 
+custom_config() {
+  # from cachyOS settings
+  cat <<EOF >/mnt/etc/sysctl.d/99-user-settings
+# Enable TCP Fast Open
+# TCP Fast Open is an extension to the transmission control protocol (TCP) that helps reduce network latency
+# by enabling data to be exchanged during the sender's initial TCP SYN [3]. 
+# Using the value 3 instead of the default 1 allows TCP Fast Open for both incoming and outgoing connections: 
+net.ipv4.tcp_fastopen = 3
+
+# Enable BBR3
+# The BBR3 congestion control algorithm can help achieve higher bandwidths and lower latencies for internet traffic
+net.ipv4.tcp_congestion_control = bbr
+
+# TCP SYN cookie protection
+# Helps protect against SYN flood attacks. Only kicks in when net.ipv4.tcp_max_syn_backlog is reached: 
+net.ipv4.tcp_syncookies = 1
+
+# TCP Enable ECN Negotiation by default
+net.ipv4.tcp_ecn = 1
+
+# TCP Reduce performance spikes
+# Refer https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/reduce_tcp_performance_spikes
+net.ipv4.tcp_timestamps = 0
+
+# Increase netdev receive queue
+# May help prevent losing packets
+net.core.netdev_max_backlog = 16384
+
+# Disable TCP slow start after idle
+# Helps kill persistent single connection performance
+net.ipv4.tcp_slow_start_after_idle = 0
+
+# Protect against tcp time-wait assassination hazards, drop RST packets for sockets in the time-wait state. Not widely supported outside of Linux, but conforms to RFC: 
+net.ipv4.tcp_rfc1337 = 1
+
+# Set size of file handles and inode cache
+fs.file-max = 2097152
+
+# Increase writeback interval  for xfs
+fs.xfs.xfssyncd_centisecs = 10000
+EOF
+  chmod 600 /mnt/etc/sysctl.d/*
+}
+
 update_service_timeout() {
-  local timeout_seconds=30
+  cat <<EOF >/mnt/etc/systemd/journald.conf.d/00-journal-size.conf
+[Journal]
+SystemMaxUse=50M
+EOF
 
-  # Update service startup timeout
-  sudo sed -i "/\[Manager\]/a TimeoutStartSec=$timeout_seconds" "/etc/systemd/system.conf"
+  cat <<EOF >/mnt/etc/systemd/system.conf.d/00-timeout.conf
+[Manager]
+DefaultTimeoutStartSec=10s
+DefaultTimeoutStopSec=10s
+EOF
 
-  # Update service shutdown timeout
-  sudo sed -i "/\[Manager\]/a TimeoutStopSec=$timeout_seconds" "/etc/systemd/system.conf"
+  cat <<EOF >/mnt/etc/systemd/system.conf.d/limits.conf
+[Manager]
+DefaultLimitNOFILE=2048:2097152
+EOF
+  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/modprobe.d/amdgpu.conf >/mnt/etc/modprobe.d/amdgpu.conf
+  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/modprobe.d/blacklist.conf >/mnt/etc/modprobe.d/blacklist.conf
+  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/modprobe.d/nvidia.conf >/mnt/etc/modprobe.d/nvidia.conf
+
+  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/udev/rules.d/99-ntsync.rules >/mnt/etc/udev/rules.d/99-ntsync.rules
+  curl https://raw.githubusercontent.com/CachyOS/CachyOS-Settings/master/usr/lib/tmpfiles.d/thp.conf >/mnt/etc/tmpfiles.d/thp.conf
 }
 
 update_flags() {
@@ -570,6 +645,7 @@ run() {
   install_powerpill
   enable_zram
   blacklist_kernelmodules
+  custom_config
   update_service_timeout
   install_grub
   update_flags "/mnt/etc/makepkg.conf"
