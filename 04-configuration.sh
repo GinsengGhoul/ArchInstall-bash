@@ -321,11 +321,7 @@ setup_mkinitcpio() {
   sed -i 's/^#\(MODULES_DECOMPRESS=\)"no"/\1"yes"/' /mnt/etc/mkinitcpio.conf
 
   # Add zram to MODULES array
-  if grep -q '^MODULES=(' /mnt/etc/mkinitcpio.conf; then
-    sed -i '/^MODULES=(/ s/)/ zram)/' /mnt/etc/mkinitcpio.conf
-  else
-    echo 'MODULES=(zram)' >>/mnt/etc/mkinitcpio.conf
-  fi
+  sed -i '/^MODULES=(/ s/)/ zram)/' /mnt/etc/mkinitcpio.conf
 
   arch-chroot /mnt mkinitcpio -P
 }
