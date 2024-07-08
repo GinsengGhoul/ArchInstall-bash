@@ -121,7 +121,7 @@ run() {
   #done
 
   echo "importing CachyOS key"
-  pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
+  pacman-key --recv-keys F3B607488DB35A47
   pacman-key --lsign-key F3B607488DB35A47
   echo "installing CachyOS keyring and mirrorlists"
   download_and_install_packages "cachyos-keyring" "cachyos-mirrorlist" "cachyos-v3-mirrorlist" "cachyos-v4-mirrorlist"
