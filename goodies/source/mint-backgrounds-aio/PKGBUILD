@@ -1,0 +1,172 @@
+pkgname=mint-backgrounds-aio
+pkgver=1.0
+pkgrel=1
+pkgdesc="all the mint backgrounds, at once, using aria2c"
+arch=('any')
+url="http://packages.linuxmint.com/pool/main/m"
+provides=(
+  'mint-backgrounds'
+  'mint-backgrounds-helena'
+  'mint-backgrounds-isadora'
+  'mint-backgrounds-julia'
+  'mint-backgrounds-katya'
+  'mint-backgrounds-lisa'
+  'mint-backgrounds-maya'
+  'mint-backgrounds-nadia'
+  'mint-backgrounds-olivia'
+  'mint-backgrounds-petra'
+  'mint-backgrounds-qiana'
+  'mint-backgrounds-rafaela'
+  'mint-backgrounds-rebecca'
+  'mint-backgrounds-rosa'
+  'mint-backgrounds-sarah'
+  'mint-backgrounds-serena'
+  'mint-backgrounds-sonya'
+  'mint-backgrounds-sylvia'
+  'mint-backgrounds-tara'
+  'mint-backgrounds-tessa'
+  'mint-backgrounds-tina'
+  'mint-backgrounds-tricia'
+  'mint-backgrounds-ulyana'
+  'mint-backgrounds-ulyssa'
+  'mint-backgrounds-uma'
+  'mint-backgrounds-una'
+  'mint-backgrounds-vanessa'
+  'mint-backgrounds-vera'
+  'mint-backgrounds-victoria'
+  'mint-backgrounds-virginia'
+  'mint-backgrounds-wilma'
+  'mint-backgrounds-xfce'
+  'mint-backgrounds-retro'
+  'mint-backgrounds-debian'
+)
+conflicts=(
+  'mint-backgrounds'
+  'mint-backgrounds-helena'
+  'mint-backgrounds-isadora'
+  'mint-backgrounds-julia'
+  'mint-backgrounds-katya'
+  'mint-backgrounds-lisa'
+  'mint-backgrounds-maya'
+  'mint-backgrounds-nadia'
+  'mint-backgrounds-olivia'
+  'mint-backgrounds-petra'
+  'mint-backgrounds-qiana'
+  'mint-backgrounds-rafaela'
+  'mint-backgrounds-rebecca'
+  'mint-backgrounds-rosa'
+  'mint-backgrounds-sarah'
+  'mint-backgrounds-serena'
+  'mint-backgrounds-sonya'
+  'mint-backgrounds-sylvia'
+  'mint-backgrounds-tara'
+  'mint-backgrounds-tessa'
+  'mint-backgrounds-tina'
+  'mint-backgrounds-tricia'
+  'mint-backgrounds-ulyana'
+  'mint-backgrounds-ulyssa'
+  'mint-backgrounds-uma'
+  'mint-backgrounds-una'
+  'mint-backgrounds-vanessa'
+  'mint-backgrounds-vera'
+  'mint-backgrounds-victoria'
+  'mint-backgrounds-virginia'
+  'mint-backgrounds-wilma'
+)
+
+packages=(
+  'mint-backgrounds-xfce:2017.10.27:e7a4db70a91f621f1f3f9d7fd623f20f669332e21d581c9ba8bede658539a59b'
+  'mint-backgrounds-retro:1.3:125aaf12ee79740824467e77fd280d68bfb402ea823651323ee0b76dd2bff590'
+  'mint-backgrounds-debian:1.4:3f7fa386e7d6a829ca4fa98af71befcb780e9ab52446a2781687f858e0bd6071'
+  'mint-backgrounds-helena:1.0:dea2b270d1c13cebdb348b42e39baece112549609cd7651f5bd2438b4275b13a'
+  'mint-backgrounds-isadora:1.0:5b2f1dafa77cdc40d012eea3a0f51f02f2de80aa604246cc73386c53a9aa3168'
+  'mint-backgrounds-julia:1.0:3afad858e57bfcc595201125da4c78b3649d5d69f5b2dc4bdcab64a5b7dac62b'
+  'mint-backgrounds-katya:1.0.1:8b305f7b93bc2da06d34a70e5476c29400f55f96c61b9ad37953a64fbfbe0010'
+  'mint-backgrounds-katya-extra:1.0.1:f0e83537ab23ebaf5374f6b2a81cfaaefbdeacc5734dbe8e8277b1a96eb576f9'
+  'mint-backgrounds-lisa:1.1:be6c378505a901a62735b12bb615e79723788f5eecba944a930f9811eddec133'
+  'mint-backgrounds-lisa-extra:1.1:23f42e10323e76b7b6b427a5e732d5a6d4372a67ad3e92a0d1c68d9ab24b9bbe'
+  'mint-backgrounds-maya:1.5:907ed8d392c5a23934587c0fc14d0756dd7fbf1964ffb3bf7f449682eeff8c0e'
+  'mint-backgrounds-maya-extra:1.1:766079c0e9b1256b5078ec1d5b724d0af7467ae4e36798b16094c492d71ee145'
+  'mint-backgrounds-nadia:1.4:fa081c3ae4e909e372c41b0119c5c5a4b7beabaf05299ec1d47190dbf1368d0d'
+  'mint-backgrounds-nadia-extra:1.0:5500312c21bc199aa664d6d883931a7a7d264d73fce63439a03a780597f4f65c'
+  'mint-backgrounds-olivia:1.7:223cdb3fb85c5ff8a137529d4011a7a934fe07f79a77e2eeaf37b2a12f13f187'
+  'mint-backgrounds-petra:1.7:4d5285838d5c59d7af8d0c5c7d66900f0583e2b26f3cf419d58d1ae1572fd9d8'
+  'mint-backgrounds-qiana:1.5:bdcf8c4f338f4f3825dedf87a91de746f321054509ef5df41e742e3a8f7e5106'
+  'mint-backgrounds-rafaela:1.2:a3880fe98797d1eefcd3f9504aca0804ad071df7c1d410566ead663213b6391c'
+  'mint-backgrounds-rebecca:1.5:91279f51c2bb6134429b9a88a84a4a0bf7857b9ad3963ac1c0c9ed7d1e0e2193'
+  'mint-backgrounds-rosa:1.2:aab944b3e52f49603da3be97c35bf9bbde051f8391b32df33cb55a8cec493dc9'
+  'mint-backgrounds-sarah:1.1:9c9b77d42ffb992d294d7337ca7fda029b499ebb15dfd6b976eee04f200c0496'
+  'mint-backgrounds-serena:1.1:aa363f05c9bd1ddf6954986448632b2120b3912ce971e8707c04799858b29c7b'
+  'mint-backgrounds-sonya:1.1:71bd0590a2c0e2ff5b838228de63c8f1eaf6160e84bca214819f2cacf74253ba'
+  'mint-backgrounds-sylvia:1.2:8ec8a55d8a60f30fa835f3a9d96f13fb9eecc7b9d215606fb926c0c3fbc6bb9a'
+  'mint-backgrounds-tara:1.1:f82f526a7ffcc9345a40ab29189a20c89e8b09ac020c5fc2bbc20184a19c6055'
+  'mint-backgrounds-tessa:1.1:699bd69f85434610011fb2db6aafd44773100bd3a5b85784a48855f955112c0b'
+  'mint-backgrounds-tina:1.2:d9c96b0ebe0d56b8ec4e985e5b98b4eee99f9b36619def20c3baa48e9f90c63b'
+  'mint-backgrounds-tricia:1.1:955af797142654bac47a99209bfd6cac0508737f6da78af8dcd4d47e9658eb52'
+  'mint-backgrounds-ulyana:1.1:cfe7870d506097ac6622ea1ea2498c7165f6a4a31a3d0ce52b09547e1e80d9b4'
+  'mint-backgrounds-ulyssa:1.1:b1abd4d0fe894a5fdf8c24dd592a4a2ffb7d964888ef3f0dad65526e3a5776af'
+  'mint-backgrounds-uma:1.2:adccbda9ab4eb661b7797464ba3a57c2eeed18d62b50c12e0d3cd85687ee0b45'
+  'mint-backgrounds-una:1.1:42a8af8c7f18bb83743ba31ee6c2d74ba9328bbac2d28399a7218991400a6e9c'
+  'mint-backgrounds-vanessa:1.1:8ea148cd78c01a54c1d1ea4d8bbfb8d58ba20ac03cb945014d223f09b8e42b92'
+  'mint-backgrounds-vera:1.0:d328ba55a9fa231d628098e325e87f3bc017fc6a61b854542e0ee7ee6ebebc6e'
+  'mint-backgrounds-victoria:1.2:a8de3ae8baae5f58d037f2f329d5ece087397ef1e2d2835245ec570304a367d5'
+  'mint-backgrounds-virginia:1.1:7aad260184afd9512cca67071c0bba2bf8d4645824299bd1118cefc51e1fb8c8'
+  'mint-backgrounds-wilma:1.1:42dd75974b2c1fe5e988ad894518b9a26ae75809fac026ca74b9bbdc8061b810'
+)
+
+package() {
+  mkdir -p ${pkgdir}/usr/share/{cinnamon-background-properties,mate-background-properties,gnome-background-properties}
+  download_list="${srcdir}/download_list.txt" > "$download_list"
+
+  for pkg in "${packages[@]}"; do
+        IFS=":" read -r srcpkg srcver srcsha256 <<< "$pkg"
+        echo "${url}/${srcpkg}/${srcpkg}_$srcver.tar.gz" >> "$download_list"
+  done
+
+  cd ${srcdir}
+  aria2c --dir="$srcdir" --file-allocation=prealloc --continue=true --max-tries=10 --check-integrity=true --split=8 --min-split-size=8M --max-connection-per-server=8 --retry-wait=5 --input-file="$download_list"
+
+  for pkg in "${packages[@]}"; do
+    IFS=":" read -r srcpkg srcver srcsha256 <<< "$pkg"
+
+    if [[ "$srcpkg" == *"-extra" ]]; then
+      codename=$(echo "$srcpkg" | awk -F'-' '{print $3"-extra"}')
+    else
+      codename=$(echo "$srcpkg" | awk -F'-' '{print $3}')
+    fi
+
+    echo "$srcsha256  ${srcpkg}_$srcver.tar.gz" | sha256sum -c - || { echo "Checksum for ${srcpkg}_$srcver.tar.gz failed"; exit 1; }
+
+    mkdir --parents ${pkgdir}/usr/share/backgrounds/${srcpkg}
+    tar -xzf "${srcdir}/${srcpkg}_$srcver.tar.gz" -C "${srcdir}"
+
+    extracted_dir=$(find "${srcdir}" -maxdepth 1 -type d -name "${srcpkg}*" -print -quit)
+    if [[ -d "${extracted_dir}/usr/share/" ]]; then
+      extracted_dir="${extracted_dir}/usr/share"
+    fi
+
+    if [[ -d "${extracted_dir}/backgrounds/linuxmint-${codename}" ]]; then
+      cp --archive ${extracted_dir}/backgrounds/linuxmint-${codename} ${pkgdir}/usr/share/backgrounds
+    elif [[ -d "${extracted_dir}/xfce4" ]]; then
+      cp --archive ${extracted_dir}/xfce4 ${pkgdir}/usr/share
+    fi
+
+    if [[ -d "${extracted_dir}/gnome-background-properties" ]]; then
+      cp --archive ${extracted_dir}/gnome-background-properties/* ${pkgdir}/usr/share/gnome-background-properties
+
+      # Copy cinnamon-background-properties
+      if [[ -d "${extracted_dir}/cinnamon-background-properties/" ]]; then
+        cp  --archive "${extracted_dir}/cinnamon-background-properties/"* "${pkgdir}/usr/share/cinnamon-background-properties"
+      else
+        cp --archive ${extracted_dir}/gnome-background-properties/* ${pkgdir}/usr/share/cinnamon-background-properties
+      fi
+
+      # Copy mate-background-properties if needed
+      if [[ -d "${extracted_dir}/mate-background-properties/" ]]; then
+        cp --archive "${extracted_dir}/mate-background-properties/"* "${pkgdir}/usr/share/mate-background-properties"
+      else
+        cp --archive ${extracted_dir}/gnome-background-properties/* ${pkgdir}/usr/share/mate-background-properties
+      fi
+    fi
+  done
+}
