@@ -465,9 +465,9 @@ install_powerpill() {
 enable_zram() {
   if [[ -n "$zram" && "$(half_memory)" -gt 0 ]]; then
     # enable zram
-    echlog 'zram' >/mnt/etc/modules-load.d/zram.conf
-    echlog 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
-    echlog 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", ATTR{recomp_algorithm}="algo=lz4 priority=1", RUN="/usr/bin/mkswap -U clear /dev/%k", RUN+="/sbin/sh -c echo 'type=huge' > /sys/block/%k/recompress", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
+    echo 'zram' >/mnt/etc/modules-load.d/zram.conf
+    echo 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
+    echo 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", ATTR{recomp_algorithm}="algo=lz4 priority=1", RUN="/usr/bin/mkswap -U clear /dev/%k", RUN+="/sbin/sh -c echo 'type=huge' > /sys/block/%k/recompress", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
 
     chmod 644 /mnt/etc/modules-load.d/zram.conf
     chmod 644 /mnt/etc/modprobe.d/zram.conf
@@ -578,7 +578,13 @@ update_flags() {
 
   if [ -f "$file_path" ]; then
     # Update CFLAGS
-    sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/-march=native -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
+    #sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/-march=native -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
+    local native=$(gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\\\\\\\n        /g')
+    sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/ $native -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
+    # true native gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//'
+    # gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\n        /g'
+    # exception exception
+    # gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\\\n        /g'gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\\\n        /g'
 
     # Update LDFLAGS
     sed -i 's/-Wl,-O1/-Wl,-O2/' "$file_path"
