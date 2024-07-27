@@ -236,7 +236,7 @@ configure_mounts() {
   # set limits accordingly
   echlog "adding tmpfs and zram mounts"
   echlog "tmpfs	        /tmp		tmpfs   defaults,noatime,size=2048M,mode=1777	0 0" >>/mnt/etc/fstab
-  echlog "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=10M,mode=1755	0 0" >>/mnt/etc/fstab
+  echlog "tmpfs	        /var/cache	tmpfs   defaults,noatime,size=128M,mode=1755	0 0" >>/mnt/etc/fstab
   echlog "/etc/pacman.d/pacman-cache /var/cache/pacman none bind,x-mount.mkdir 0 0" >>/mnt/etc/fstab
   echlog "/dev/zram0	none    	swap	defaults,pri=32767,discard		0 0" >>/mnt/etc/fstab
   # setup tmpfiles.d
