@@ -56,6 +56,8 @@ reenable_features() {
   # or not using intel wireless
   sed -i 's/^install mei-me \/bin\/disabled-intelme-by-security-misc/#&/' $1
   sed -i 's/^install mei \/bin\/disabled-intelme-by-security-misc/#&/' $1
+  # thunderbolt
+  sed -i 's/^install thunderbolt \/bin\/disabled-thunderbolt-by-security-misc/#&/' $1
   # enable bluetooth
   sed -i 's/^install bluetooth \/bin\/disabled-bluetooth-by-security-misc/#&/' $1
   sed -i 's/^install btusb \/bin\/disabled-bluetooth-by-security-misc/#&/' $1
@@ -578,13 +580,9 @@ update_flags() {
 
   if [ -f "$file_path" ]; then
     # Update CFLAGS
-    #sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/-march=native -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
-    local native=$(gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\\\\\\\n        /g')
-    sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/ $native -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
-    # true native gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//'
-    # gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\n        /g'
-    # exception exception
-    # gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\\\n        /g'gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed -r 's/(.{1,70})/\1 \\\\\n        /g'
+    native="native="$(gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//')""
+    sudo sed -i '/CFLAGS=/i '"$native"'' "$file_path"
+    sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/"$native" -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
 
     # Update LDFLAGS
     sed -i 's/-Wl,-O1/-Wl,-O2/' "$file_path"
