@@ -580,7 +580,7 @@ update_flags() {
 
   if [ -f "$file_path" ]; then
     # Update CFLAGS
-    native="native="$(gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//')""
+    native="native="$(gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed 's/^/\"/;s/$/\"/')""
     sudo sed -i '/CFLAGS=/i '"$native"'' "$file_path"
     sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/"$native" -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
 
