@@ -317,7 +317,7 @@ setup_mkinitcpio() {
 
   echlog "set compression to zstd:19"
   sed -i 's/^#\(COMPRESSION="zstd"\)/\1/' /mnt/etc/mkinitcpio.conf
-  sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v --long --auto-threads=logical -T0 --ultra -19)/' /mnt/etc/mkinitcpio.conf
+  sed -i 's/^#COMPRESSION_OPTIONS=()/COMPRESSION_OPTIONS=(-v --auto-threads=logical -T0 --ultra -19)/' /mnt/etc/mkinitcpio.conf
 
   # Set MODULES_DECOMPRESS="yes" and uncomment it
   sed -i 's/^#\(MODULES_DECOMPRESS=\)"no"/\1"yes"/' /mnt/etc/mkinitcpio.conf
