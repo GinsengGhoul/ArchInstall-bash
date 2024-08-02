@@ -270,8 +270,8 @@ setup_grub() {
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_kernel_hardening.cfg >/mnt/etc/grub.d/40_kernel_hardening
   sed -i 's/^kpkg=/#kpkg=/; s/^kver=/#kver=/' /mnt/etc/grub.d/40_kernel_hardening
   # reenable SMT, brother this is a laptop I cannot be losing up to* 30% of my performance
-  sed -i 's/,nosmt//g' /mnt/etc/grub.d/40_cpu_mitigations.cfg
-  sed -i '/^GRUB_CMDLINE_LINUX="\$GRUB_CMDLINE_LINUX nosmt=force"/ s/^/#/' /mnt/etc/grub.d/40_cpu_mitigations.cfg
+  sed -i 's/,nosmt//g' /mnt/etc/grub.d/40_cpu_mitigations
+  sed -i '/^GRUB_CMDLINE_LINUX="\$GRUB_CMDLINE_LINUX nosmt=force"/ s/^/#/' /mnt/etc/grub.d/40_cpu_mitigations
   chmod 755 /mnt/etc/grub.d/*
 
   echlog "setup faster grub timeout"
