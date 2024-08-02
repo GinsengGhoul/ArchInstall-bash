@@ -267,11 +267,11 @@ EOF
 
 setup_grub() {
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >/mnt/etc/grub.d/40_cpu_mitigations
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_distrust_cpu.cfg >/mnt/etc/grub.d/40_distrust_cpu
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_enable_iommu.cfg >/mnt/etc/grub.d/40_enable_iommu
   curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_kernel_hardening.cfg >/mnt/etc/grub.d/40_kernel_hardening
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_distrust_bootloader.cfg >/mnt/etc/grub.d/40_distrust_bootloader
   sed -i 's/^kpkg=/#kpkg=/; s/^kver=/#kver=/' /mnt/etc/grub.d/40_kernel_hardening
+  # reenable SMT, brother this is a laptop I cannot be losing up to* 30% of my performance
+  sed -i 's/,nosmt//g' /mnt/etc/grub.d/40_cpu_mitigations.cfg
+  sed -i '/^GRUB_CMDLINE_LINUX="\$GRUB_CMDLINE_LINUX nosmt=force"/ s/^/#/' /mnt/etc/grub.d/40_cpu_mitigations.cfg
   chmod 755 /mnt/etc/grub.d/*
 
   echlog "setup faster grub timeout"
@@ -481,19 +481,24 @@ enable_zram() {
 blacklist_kernelmodules() {
   echlog "disable unused kernel modules for better security"
   # Blacklisting kernel modules
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/modprobe.d/30_security-misc.conf >/mnt/etc/modprobe.d/30_security-misc.conf
-  reenable_features "/mnt/etc/modprobe.d/30_security-misc.conf"
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/modprobe.d/30_security-misc_blacklist.conf >/mnt/etc/modprobe.d/30_security-misc_blacklist.conf
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/modprobe.d/30_security-misc_conntrack.conf >/mnt/etc/modprobe.d/30_security-misc_conntrack.conf
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/modprobe.d/30_security-misc_disable.conf >/mnt/etc/modprobe.d/30_security-misc_disable.conf
+  reenable_features "/mnt/etc/modprobe.d/30_security-misc_blacklist.conf"
+  reenable_features "/mnt/etc/modprobe.d/30_security-misc_conntrack.conf"
+  reenable_features "/mnt/etc/modprobe.d/30_security-misc_disable.conf"
   chmod 600 /mnt/etc/modprobe.d/*
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-bluetooth-by-security-misc >>/mnt/bin/disabled-bluetooth-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-cdrom-by-security-misc >>/mnt/bin/disabled-cdrom-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-filesys-by-security-misc >>/mnt/bin/disabled-filesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-firewire-by-security-misc >>/mnt/bin/disabled-firewire-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-intelme-by-security-misc >>/mnt/bin/disabled-intelme-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-msr-by-security-misc >>/mnt/bin/disabled-msr-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-netfilesys-by-security-misc >>/mnt/bin/disabled-netfilesys-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-network-by-security-misc >>/mnt/bin/disabled-network-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-thunderbolt-by-security-misc >>/mnt/bin/disabled-thunderbolt-by-security-misc
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/bin/disabled-vivid-by-security-misc >>/mnt/bin/disabled-vivid-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-bluetooth-by-security-misc >>/mnt/bin/disabled-bluetooth-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-cdrom-by-security-misc >>/mnt/bin/disabled-cdrom-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-filesys-by-security-misc >>/mnt/bin/disabled-filesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-firewire-by-security-misc >>/mnt/bin/disabled-firewire-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-gps-by-security-misc >>/mnt/bin/disabled-gps-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-intelme-by-security-misc >>/mnt/bin/disabled-intelme-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-intelpmt-by-security-misc >>/mnt/bin/disabled-intelpmt-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-netfilesys-by-security-misc >>/mnt/bin/disabled-netfilesys-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-network-by-security-misc >>/mnt/bin/disabled-network-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-thunderbolt-by-security-misc >>/mnt/bin/disabled-thunderbolt-by-security-misc
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/usr/bin/disabled-miscellaneous-by-security-misc >>/mnt/bin/disabled-miscellaneous-by-security-misc
   chmod 755 /mnt/bin/disabled*
   chmod +x /mnt/bin/disabled*
 
