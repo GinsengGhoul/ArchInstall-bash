@@ -33,11 +33,11 @@ add_repos() {
   if [ $SupportLevel -ge 1 ]; then
     sed -i --posix '/after the header/a\\n[cachyos]\nInclude = \/etc\/pacman.d\/cachyos-mirrorlist' /etc/pacman.conf
   fi
-  if [ $SupportLevel -ge 3 ]; then
-    sed -i --posix '/after the header/a\\n[cachyos-v3]\nInclude = \/etc\/pacman.d\/cachyos-v3-mirrorlist\n\n[cachyos-community-v3]\nInclude = \/etc\/pacman.d\/cachyos-v3-mirrorlist' /etc/pacman.conf
+  if [ $SupportLevel -eq 3 ]; then
+    sed -i --posix '/after the header/a\\n[cachyos-v3]\nInclude = \/etc\/pacman.d\/cachyos-v3-mirrorlist\n[cachyos-core-v3]\nInclude = \/etc\/pacman.d\/cachyos-v3-mirrorlist\n[cachyos-extra-v3]\nInclude = \/etc\/pacman.d\/cachyos-v3-mirrorlist' /etc/pacman.conf
   fi
-  if [ $SupportLevel -ge 4 ]; then
-    sed -i --posix '/after the header/a\\n[cachyos-v4]\nInclude = \/etc\/pacman.d\/cachyos-v4-mirrorlist' /etc/pacman.conf
+  if [ $SupportLevel -eq 4 ]; then
+    sed -i --posix '/after the header/a\\n[cachyos-v4]\nInclude = \/etc\/pacman.d\/cachyos-v4-mirrorlist\n[cachyos-core-v4]\nInclude = \/etc\/pacman.d\/cachyos-v4-mirrorlist\n[cachyos-extra-v4]\nInclude = \/etc\/pacman.d\/cachyos-v4-mirrorlist' /etc/pacman.conf
   fi
 }
 
