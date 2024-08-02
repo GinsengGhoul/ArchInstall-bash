@@ -357,7 +357,7 @@ run() {
     swapoff -a
     mount -l /mnt
     umount $disk*
-    wipefs -af $disk
+    wipefs -a -f $disk
     partition_drive
     format_drive
     mount_partitions
