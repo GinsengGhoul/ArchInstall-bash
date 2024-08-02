@@ -186,6 +186,7 @@ print_partitiontable() {
 
 # dynamic numbers to build partition table
 format_drive() {
+  wipefs --a -f $disk
   if [[ "$BiosBoot" == "true" ]]; then
     cp=2
   else
@@ -356,6 +357,7 @@ run() {
   if [ "$make_table_only" = false ]; then
     mount -l /mnt
     partition_drive
+    umount $disk*
     format_drive
     mount_partitions
   fi
