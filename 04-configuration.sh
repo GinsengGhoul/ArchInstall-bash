@@ -323,7 +323,7 @@ setup_mkinitcpio() {
   sed -i 's/^#\(MODULES_DECOMPRESS=\)"no"/\1"yes"/' /mnt/etc/mkinitcpio.conf
 
   # Add zram to MODULES array
-  sed -i '/^MODULES=(/ s/)/ zram)/' /mnt/etc/mkinitcpio.conf
+  sed -i '/^MODULES=(/ s/)/zram)/' /mnt/etc/mkinitcpio.conf
 
   arch-chroot /mnt mkinitcpio -P
 }
@@ -465,17 +465,14 @@ install_powerpill() {
 }
 
 enable_zram() {
-  if [[ -n "$zram" && "$(half_memory)" -gt 0 ]]; then
-    # enable zram
-    echo 'zram' >/mnt/etc/modules-load.d/zram.conf
-    echo 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
-    echo 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", ATTR{recomp_algorithm}="algo=lz4 priority=1", RUN="/usr/bin/mkswap -U clear /dev/%k", RUN+="/sbin/sh -c echo 'type=huge' > /sys/block/%k/recompress", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
+  # enable zram
+  echo 'zram' >/mnt/etc/modules-load.d/zram.conf
+  echo 'options zram num_devices=1' >/mnt/etc/modprobe.d/zram.conf
+  echo 'ACTION=="add", KERNEL=="zram0", ATTR{comp_algorithm}="zstd", ATTR{disksize}="'$(half_memory)'", ATTR{recomp_algorithm}="algo=lz4 priority=1", RUN="/usr/bin/mkswap -U clear /dev/%k", RUN+="/sbin/sh -c echo 'type=huge' > /sys/block/%k/recompress", TAG+="systemd"' >/mnt/etc/udev/rules.d/99-zram.rules
 
-    chmod 644 /mnt/etc/modules-load.d/zram.conf
-    chmod 644 /mnt/etc/modprobe.d/zram.conf
-    chmod 644 /mnt/etc/udev/rules.d/99-zram.rules
-
-  fi
+  chmod 644 /mnt/etc/modules-load.d/zram.conf
+  chmod 644 /mnt/etc/modprobe.d/zram.conf
+  chmod 644 /mnt/etc/udev/rules.d/99-zram.rules
 }
 
 blacklist_kernelmodules() {
