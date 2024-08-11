@@ -276,7 +276,7 @@ EOF
 
   sed -i 's/^kpkg=/#kpkg=/; s/^kver=/#kver=/' /mnt/etc/default/grub.d/40_kernel_hardening.cfg
   # reenable SMT, brother this is a laptop I cannot be losing up to* 30% of my performance
-  sed -i 's/,nosmt"//g' /etc/default/grub.d/40_cpu_mitigations.cfg
+  sed -i 's/,nosmt"/"/g' /mnt/etc/default/grub.d/40_cpu_mitigations.cfg
   sed -i '/^GRUB_CMDLINE_LINUX="\$GRUB_CMDLINE_LINUX nosmt=force"/ s/^/#/' /mnt/etc/default/grub.d/40_cpu_mitigations.cfg
 
   chmod 755 /mnt/etc/default/grub.d/*
