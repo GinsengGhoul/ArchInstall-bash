@@ -266,13 +266,20 @@ EOF
 }
 
 setup_grub() {
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >/mnt/etc/grub.d/40_cpu_mitigations
-  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_kernel_hardening.cfg >/mnt/etc/grub.d/40_kernel_hardening
-  sed -i 's/^kpkg=/#kpkg=/; s/^kver=/#kver=/' /mnt/etc/grub.d/40_kernel_hardening
+  mkdir -p /mnt/etc/default/grub.d
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_cpu_mitigations.cfg >/mnt/etc/default/grub.d/40_cpu_mitigations.cfg
+  curl https://raw.githubusercontent.com/Kicksecure/security-misc/master/etc/default/grub.d/40_kernel_hardening.cfg >/mnt/etc/default/grub.d/40_kernel_hardening.cfg
+
+  cat <<EOF >/mnt/etc/default/grub.d/41_quiet_boot.cfg
+GRUB_CMDLINE_LINUX_DEFAULT="\$(echo "\$GRUB_CMDLINE_LINUX_DEFAULT" | sed 's/quiet//g') loglevel=0 quiet"
+EOF
+
+  sed -i 's/^kpkg=/#kpkg=/; s/^kver=/#kver=/' /mnt/etc/default/grub.d/40_kernel_hardening.cfg
   # reenable SMT, brother this is a laptop I cannot be losing up to* 30% of my performance
-  sed -i 's/,nosmt//g' /mnt/etc/grub.d/40_cpu_mitigations
-  sed -i '/^GRUB_CMDLINE_LINUX="\$GRUB_CMDLINE_LINUX nosmt=force"/ s/^/#/' /mnt/etc/grub.d/40_cpu_mitigations
-  chmod 755 /mnt/etc/grub.d/*
+  sed -i 's/,nosmt"//g' /etc/default/grub.d/40_cpu_mitigations.cfg
+  sed -i '/^GRUB_CMDLINE_LINUX="\$GRUB_CMDLINE_LINUX nosmt=force"/ s/^/#/' /mnt/etc/default/grub.d/40_cpu_mitigations.cfg
+
+  chmod 755 /mnt/etc/default/grub.d/*
 
   echlog "setup faster grub timeout"
   sed -i "s/GRUB_TIMEOUT=5/GRUB_TIMEOUT=\"$grub_timeout\"/" /mnt/etc/default/grub
