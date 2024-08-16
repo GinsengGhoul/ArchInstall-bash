@@ -20,7 +20,7 @@ function runDmidecode () {
     if [[ -n "$DMIDUMP_FILE" ]]; then
         dmidecode --from-dump "$DMIDUMP_FILE" "$@"
     else
-        dmidecode "$@"
+        dmidecode --from-dump /tmp/dmi_dump.bin "$@"
     fi
 }
 
@@ -61,6 +61,8 @@ function printSmbType () {
     done
     echo "\"/>"
 }
+
+sudo dmidecode --dump-bin /tmp/dmi_dump.bin >> /dev/null
 
 addDmi 0 vendor bios-vendor
 addDmi 0 version bios-version
@@ -115,4 +117,4 @@ printSmbType 11
 printSmbType 17
 
 echo ''
-
+sudo rm /tmp/dmi_dump.bin
