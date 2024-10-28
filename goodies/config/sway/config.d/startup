@@ -1,0 +1,35 @@
+#
+# startup
+#
+# xfce bar
+#exec_always --no-startup-id xfce4-panel --disable-wm-check &
+#for_window [ class="Xfce4-panel" instance="xfce4-panel" ] floating enable
+
+# polkit
+#exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec_always --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK SSH_AUTH_SOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR
+exec hash dbus-update-activation-environment 2>/dev/null
+exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK SSH_AUTH_SOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR
+
+# notifications
+#exec_always --no-startup-id deadd-notification-center
+exec_always --no-startup-id mako
+# Network Manager applet
+exec --no-startup-id nm-applet --indicator
+# battery
+exec xfce4-power-manager --daemon
+# blueman
+exec blueman-applet
+# easyeffects
+exec_always easyeffects --gapplication-service
+
+# xdm
+exec java -jar /opt/xdman/xdman.jar -m
+# discord
+exec /bin/bash -c "/usr/bin/discord --start-minimized"
+# signal
+exec /bin/bash -c "signal-desktop --start-in-tray"
+# fxitx5
+exec /bin/bash -c "fcitx5 -d"

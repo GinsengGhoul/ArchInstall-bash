@@ -439,23 +439,48 @@ setup_nvim() {
   #arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
   # create vimrc
   cat <<EOF >/mnt/etc/vimrc
-highlight Normal guibg=none
-highlight NonText guibg=none
-highlight Normal ctermbg=none
-highlight NonText ctermbg=none
+" options
 set number
 set wrap
 syntax on
+set cursorline
 set mouse=
+set termguicolors
+set background=dark
+set signcolumn=yes
+
+" allow backspace on indent, end of line or insert mode start position
+set backspace=indent,eol,start
+
+" use system clipboard
+set clipboard=unnamedplus
+
+" tab
 set expandtab
 set shiftwidth=2
 set softtabstop=2
 set tabstop=2
 set autoindent
 set smartindent
-"set cc=80,90,100
+
+" ignore case when searching
+set ignorecase
+set smartcase
+
+" lines
 set cc=80
+
+" make background transparent
+highlight Normal guibg=none
+highlight NonText guibg=none
+highlight Normal ctermbg=none
+highlight NonText ctermbg=none
+
+" keybinds
 map <F4> :nohl<CR>
+inoremap jk <ESC>
+nnoremap ;; $
+nnoremap ff 0
 EOF
   # create a copy into nvim's config
   cat /mnt/etc/vimrc >>/mnt/etc/xdg/nvim/sysinit.vim
@@ -590,7 +615,7 @@ update_flags() {
   if [ -f "$file_path" ]; then
     # Update CFLAGS
     native="native="$(gcc -### -E - -march=native 2>&1 | sed -r '/cc1/!d;s/(")|(^.* - )//g' | sed 's/-dumpbase -$//' | sed 's/^/\"/;s/$/\"/')""
-    sudo sed -i '/CFLAGS=/i '"$native"'' "$file_path"
+    sed -i "/#-- Compiler and Linker Flags/a $native" "$file_path"
     sed -i 's/-march=x86-64 -mtune=generic -O2 -pipe/"$native" -O2 -ftree-vectorize -fasynchronous-unwind-tables -pipe/' "$file_path"
 
     # Update LDFLAGS

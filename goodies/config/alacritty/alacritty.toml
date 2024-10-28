@@ -1,55 +1,21 @@
-# linux standard colors
-[colors.primary]
-background = '#000000'  #'#000000'
-foreground = '#FFFFFF'  #'#FFFFFF'
-
-[colors.normal] #monokai  #linux
-black   = '#000000'  #'#000000'  #'#000000'
-red     = '#B05279'  #'#B3366A'  #'#AA0000'
-green   = '#B4D273'  #'#9CBE52'  #'#00AA00'
-yellow  = '#E5B567'  #'#C79A53'  #'#AAAA00'
-blue    = '#6C99BB'  #'#568EB9'  #'#0000AA'
-magenta = '#9E86C8'  #'#906DCD'  #'#AA00AA'
-cyan    = '#50B1C2'  #'#46A6B7'  #'#00AAAA'
-white   = '#D7D7D7'  #'#B7B7B7'  #'#AAAAAA'
-
-[colors.bright]
-black   = '#2E2E2E'  #'#070707'  #'#000000'
-red     = '#F76C7C'  #'#B05279'  #'#FF0000'
-green   = '#A2E57B'  #'#B4D273'  #'#00FF00'
-yellow  = '#E3D367'  #'#E5B567'  #'#FFFF00'
-blue    = '#78CEE9'  #'#6C99BB'  #'#0000FF'
-magenta = '#BAA0F8'  #'#9E86C8'  #'#FF00FF'
-cyan    = '#79E8E4'  #'#50B1C2'  #'#00FFFF'
-white   = '#FFFFFF'  #'#FFFFFF'  #'#FFFFFF'
-
-[env]
-TERM = "xterm-256color"
+general.import = [
+  "~/.config/alacritty/Monokai.toml",
+  "~/.config/alacritty/env.toml",
+]
 
 [font]
-size = 8.0
+size = 10.0
+normal = { family = "BlexMono Nerd Font", style = "SemiBold" }
 
-[font.bold]
-family = "IBM Plex Mono"
-style = "Bold"
-
-[font.bold_italic]
-family = "IBM Plex Mono"
-style = "Bold Italic"
-
-[font.italic]
-family = "IBM Plex Mono"
-style = "Italic"
-
-[font.normal]
-family = "IBM Plex Mono"
-style = "SemiBold"
+[cursor]
+style = { shape = "Underline", blinking = "Always" }
 
 [window]
 dynamic_title = true
 opacity = 0.7
+decorations_theme_variant = "Dark"
 title = "Alacritty"
-
+  
 [window.dimensions]
 columns = 80
 lines = 24

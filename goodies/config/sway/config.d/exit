@@ -1,0 +1,20 @@
+# Exit sway
+mode "Exit" {
+    bindsym l exec swaymsg exit
+    bindsym n mode "default"; exec pkill -15 nagbar; exec $lock; exec systemctl -i suspend
+    bindsym r exec systemctl -i reboot
+    bindsym s exec systemctl -i poweroff
+    bindsym h mode "default"; exec pkill -15 nagbar; exec $lock; exec systemctl -i hibernate
+    bindsym e mode "default"; exec pkill -15 nagbar
+    bindsym Escape mode "default"; exec pkill -15 nagbar
+}
+
+bindsym $mod+Shift+e mode "Exit"; exec swaynag \
+          -t warning \
+          -m 'SESSION EXIT OPTIONS' \
+          -B '[L]ogout' 	'swaymsg exit' \
+          -B '[N]ap' 	'$lock && systemctl suspend' \
+          -B '[R]estart'	'systemctl -i reboot' \
+          -B '[S]hutdown'	'systemctl -i poweroff' \
+          -B '[H]ibernate'	'$lock && systemctl hibernate' 
+

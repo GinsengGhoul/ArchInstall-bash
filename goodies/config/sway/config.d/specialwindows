@@ -1,0 +1,44 @@
+#
+# special settings for special programs
+# use swaymsg -t get_tree
+#
+for_window [ app_id="org.gnome.Calculator" ] floating enable
+for_window [ app_id="org.gnome.Calendar" ] floating enable
+for_window [ class="Firewall-config" ] floating enable
+for_window [ class="easyeffects" ] floating enable
+for_window [ app_id="nm-connection-editor" ] floating enable
+for_window [ class="scrcpy" ] floating enable
+for_window [ class="xdman-Main" ] floating enable
+for_window [ class="Lxappearance" ] floating enable
+for_window [ class="gnome-font-viewer" ] floating enable
+for_window [ class="fcitx5-config-qt" ] floating enable
+# games
+for_window [ class="gamescope" ] fullscreen enable
+for_window [ class="explorer.exe" ] floating enable
+for_window [ class="rf4_x64.exe" ] floating enable
+for_window [ class="content manager.exe" ] floating enable
+for_window [ class="content manager safe.exe" ] floating enable
+for_window [ class="Content Manager (Lite mode)" ] floating enable
+for_window [ class="steam_app_1623730" ] floating enable
+for_window [ class="steam_app_244210" ] floating enable
+for_window [ class="automation launcher steam.exe" ] floating enable
+
+for_window [ class="engine-crane.exe" ] floating enable
+for_window [ class="engine-crane.exe" ] move position center
+for_window [ class="engine-crane.exe" ] resize set 800 600
+
+for_window [ class="Blueman-manager" ] floating enable
+for_window [ class="Blueman-manager" ] move position center
+for_window [ class="Blueman-manager" ] resize set 800 450
+
+for_window [ class="Pavucontrol" ] floating enable
+for_window [ class="Pavucontrol" ] move position center
+for_window [ class="Pavucontrol" ] resize set 800 450
+
+for_window [ class="qt5ct" ] floating enable
+for_window [ class="qt5ct" ] move position center
+for_window [ class="qt5ct" ] resize set 800 450
+
+for_window [ class="qt6ct" ] floating enable
+for_window [ class="qt6ct" ] move position center
+for_window [ class="qt6ct" ] resize set 800 450

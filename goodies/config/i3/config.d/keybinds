@@ -1,0 +1,70 @@
+# reload the configuration file
+bindsym $mod+Shift+c reload
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r restart
+
+# terminal
+bindsym $mod+KP_Enter exec $terminal
+bindsym $mod+Return exec $terminal
+
+# kill focused window
+bindsym $mod+Shift+q kill
+
+# dmenu
+bindsym $mod+d exec $menu
+bindsym XF86Search exec $menu
+
+# use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+# move tiling windows via drag & drop by left-clicking into the title bar,
+# or left-clicking anywhere into the window while holding the floating modifier.
+tiling_drag modifier titlebar
+
+#Lock screen
+bindsym $mod+o exec $lock
+
+# thunar
+bindsym $mod+e exec $explorer
+
+# Swap between Mod1 and Mod4
+bindsym control+F1 exec $HOME/.config/i3/Scripts/SwitchMod4.sh
+bindsym control+F2 exec $HOME/.config/i3/Scripts/SwitchMod1.sh
+
+# quick power
+bindsym $mod+Control+r exec reboot
+bindsym $mod+Control+s exec poweroff
+bindsym $mod+Control+h exec $lock; exec systemctl -i hibernate
+bindsym $mod+Control+n exec $lock; exec systemctl -i suspend
+
+# Brightness
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
+bindsym $mod+XF86MonBrightnessDown exec xrandr --output eDP-1 --brightness 0.50
+bindsym $mod+XF86MonBrightnessUp exec xrandr --output eDP-1 --brightness 1
+
+# Volume Controls
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +2%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -2%
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
+
+# media controls
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym Pause exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+
+
+# emoji selector
+bindsym $mod+semicolon exec bash -c "rofi -modi emoji -show emoji -kb-custom-1 Ctrl+c"
+
+# clipboard manager
+bindsym $mod+Shift+v exec xfce4-clipman-history
+
+# screenshot
+# xev - 107 for print
+bindsym Print exec --no-startup-id "maim -u | xclip -selection clipboard -t image/png"
+bindsym Mod1+Sys_Req exec --no-startup-id "maim -ui $(xdotool getactivewindow) | xclip -selection clipboard -t image/png"
+bindsym $mod+Shift+s exec --no-startup-id "maim --select -u | xclip -selection clipboard -t image/png"
+

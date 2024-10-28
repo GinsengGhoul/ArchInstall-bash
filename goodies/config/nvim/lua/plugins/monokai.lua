@@ -1,0 +1,37 @@
+return {
+  'tanvirtin/monokai.nvim',
+  lazy = "true",
+  enabled = "true",
+  init = function()
+    require('monokai').setup{
+      italics = false,
+      palette = {
+        name = 'monokai',
+        base1 = '#000000',
+        base2 = '#26292C',
+        base3 = '#2E323C',
+        base4 = '#333842',
+        base5 = '#4d5154',
+        base6 = '#9ca0a4',
+        base7 = '#b1b1b1',
+        border = '#a1b5b1',
+        brown = '#504945',
+        white = '#f8f8f0',
+        grey = '#2E2E2E',
+        black = '#000000',
+        pink = '#F76C7C',
+        green = '#A2E57B',
+        aqua = '#78CEE9',
+        yellow = '#E3D367',
+        orange = '#fd971f',
+        purple = '#9E86C8',
+        red = '#F76C7C',
+        diff_add = '#3d5213',
+        diff_remove = '#4a0f23',
+        diff_change = '#27406b',
+        diff_text = '#23324d',
+      },
+      custom_hlgroups = {},
+    }
+  end,
+}

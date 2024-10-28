@@ -1,0 +1,4 @@
+#
+# Status Bar:
+#
+exec --no-startup-id waybar

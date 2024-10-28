@@ -1,0 +1,8 @@
+/* Set the background color of the Waybar to a 50% black tint */
+#waybar {
+    background-color: rgba(0, 0, 0, 0.5); /* 50% black */
+}
+#battery {
+    margin-right: 10px; /* Add margin to the right */
+}
+

@@ -207,6 +207,30 @@ ProtectControlGroups=yes
 MemoryDenyWriteExecute=yes
 SystemCallFilter=@default @file-system @basic-io @system-service
 EOF
+    echo "
+[Unit]
+Description=Discard unused blocks on filesystems from /etc/fstab
+Documentation=man:fstrim(8)
+ConditionVirtualization=!container
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/fstrim --listed-in /etc/fstab:/proc/self/mountinfo --verbose --quiet-unsupported
+PrivateDevices=no
+PrivateNetwork=yes
+PrivateUsers=no
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+MemoryDenyWriteExecute=yes
+SystemCallFilter=@default @file-system @basic-io @system-service
+StandardOutput=append:/tmp/fstrim.log
+StandardError=append:/tmp/fstrim.log
+
+[Install]
+WantedBy=multi-user.target
+" >/dev/null
+
     arch-chroot /mnt systemctl enable fstrim.service
   fi
 }

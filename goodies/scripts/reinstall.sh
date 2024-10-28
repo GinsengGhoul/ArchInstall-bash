@@ -23,5 +23,5 @@ done
 
 echo $packages > /tmp/reinstall-packages
 echo $exp > /tmp/explicit-packages
-#sudo sh -c "pacman -Syy && powerpill -S --noconfirm $pacmanpackages && pacman -D --asdeps $deps && pacman -D --asdep $packages && pacman -D --asexplicit $exp"
+sudo sh -c "rm -r /var/cache/pacman/pkg/* && pacman -Syy && powerpill -S --noconfirm $pacmanpackages && pacman -D --asdeps $deps && pacman -D --asdep $packages && pacman -D --asexplicit $exp"
 sudo pacman -D --asdep $packages && sudo pacman -D --asexplicit $exp
