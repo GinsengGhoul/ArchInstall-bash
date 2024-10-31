@@ -439,8 +439,7 @@ setup_nvim() {
   #arch-chroot /mnt ln -s /usr/bin/nvim /usr/bin/vi
   # create vimrc
   cat <<EOF >/mnt/etc/vimrc
-" options
-set number
+"set number
 set wrap
 syntax on
 set cursorline
@@ -601,11 +600,11 @@ EOF
 [Manager]
 DefaultLimitNOFILE=2048:2097152
 EOF
-  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/modprobe.d/amdgpu.conf >/mnt/etc/modprobe.d/amdgpu.conf
-  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/modprobe.d/blacklist.conf >/mnt/etc/modprobe.d/blacklist.conf
-  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/modprobe.d/nvidia.conf >/mnt/etc/modprobe.d/nvidia.conf
+  curl https://raw.githubusercontent.com/CachyOS/CachyOS-Settings/master/usr/lib/modprobe.d/amdgpu.conf >/mnt/etc/modprobe.d/amdgpu.conf
+  curl https://raw.githubusercontent.com/CachyOS/CachyOS-Settings/master/usr/lib/modprobe.d/blacklist.conf >/mnt/etc/modprobe.d/blacklist.conf
+  curl https://raw.githubusercontent.com/CachyOS/CachyOS-Settings/master/usr/lib/modprobe.d/nvidia.conf >/mnt/etc/modprobe.d/nvidia.conf
 
-  curl https://github.com/CachyOS/CachyOS-Settings/raw/master/usr/lib/udev/rules.d/99-ntsync.rules >/mnt/etc/udev/rules.d/99-ntsync.rules
+  curl https://raw.githubusercontent.com/CachyOS/CachyOS-Settings/master/usr/lib/udev/rules.d/99-ntsync.rules >/mnt/etc/udev/rules.d/99-ntsync.rules
   curl https://raw.githubusercontent.com/CachyOS/CachyOS-Settings/master/usr/lib/tmpfiles.d/thp.conf >/mnt/etc/tmpfiles.d/thp.conf
 }
 

@@ -25,7 +25,7 @@ install_DE() {
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "Mate")
-    powerpill_command xorg lightdm lightdm-gtk-greeter mate mate-extra pipewire pipewire-alsa pipewire-pulse wireplumber network-manager-applet gtk-engines gtk-engine-murrine
+    powerpill_command xorg lightdm lightdm-gtk-greeter mate mate-extra pipewire pipewire-alsa pipewire-pulse wireplumber network-manager-applet gtk-engines gtk-engine-murrine xdg-utils xclip xfce4-clipman-plugin
     arch-chroot /mnt systemctl enable lightdm.service
     ;;
   "XFCE")
