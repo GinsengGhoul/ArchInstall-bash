@@ -2,6 +2,8 @@
 
 cd /RECOVERY
 sudo wget -N "https://geo.mirror.pkgbuild.com/iso/latest/sha256sums.txt"
+#sudo wget -N "https://geo.mirror.pkgbuild.com/iso/latest/b2sums.txt"
+#sudo wget -N "https://geo.mirror.pkgbuild.com/iso/latest/archlinux-x86_64.iso.sig"
 
 # Function to check the checksum
 check_checksum() {
@@ -12,6 +14,7 @@ check_checksum() {
     printf "NONMATCHING SHA256SUMS\nExpected: $EXPECTED_SHA256\nActual: $SHA256_CHECKSUM\n"
     return 1  # Return 1 for mismatch
   else
+    printf "SHA256SUM MATCHED\nExpected:\t$EXPECTED_SHA256\nActual:\t\t$SHA256_CHECKSUM\n"
     return 0  # Return 0 for match
   fi
 }
