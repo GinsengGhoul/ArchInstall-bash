@@ -32,10 +32,10 @@ bindsym control+F1 exec $HOME/.config/i3/Scripts/SwitchMod4.sh
 bindsym control+F2 exec $HOME/.config/i3/Scripts/SwitchMod1.sh
 
 # quick power
-bindsym $mod+Control+r exec reboot
-bindsym $mod+Control+s exec poweroff
-bindsym $mod+Control+h exec $lock; exec systemctl -i hibernate
-bindsym $mod+Control+n exec $lock; exec systemctl -i suspend
+bindsym $mod+Control+r exec loginctl reboot
+bindsym $mod+Control+s exec loginctl poweroff
+bindsym $mod+Control+h exec $lock; exec --no-startup-id "mate-session-save --shutdown-dialog"
+bindsym $mod+Control+n exec $lock; exec --no-startup-id "mate-session-save --logout-dialog"
 
 # Brightness
 bindsym XF86MonBrightnessDown exec brightnessctl set 5%-

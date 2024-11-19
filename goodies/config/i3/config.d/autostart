@@ -3,28 +3,28 @@
 #
 
 # notifications
-exec_always --no-startup-id deadd-notification-center
+#exec_always --no-startup-id deadd-notification-center
 # Network Manager applet
-exec --no-startup-id nm-applet --indicator
+#exec --no-startup-id nm-applet --indicator
 # battery
-exec xfce4-power-manager --daemon
+#exec xfce4-power-manager --daemon
 # polkit
-exec --no-startup-id /usr/lib/mate-polkit/polkit-mate-authentication-agent-1
+#exec --no-startup-id /usr/lib/mate-polkit/polkit-mate-authentication-agent-1
 #exec_always --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # blueman
-exec blueman-applet
+#exec blueman-applet
 # easyeffects
-exec_always easyeffects --gapplication-service
+#exec_always easyeffects --gapplication-service
 
 # xdm
 exec java -jar /opt/xdman/xdman.jar -m
 # discord
-exec /bin/bash -c "/usr/bin/discord --start-minimized"
+#exec /bin/bash -c "/usr/bin/discord --start-minimized"
 # signal
-exec /bin/bash -c "signal-desktop --start-in-tray"
+#exec /bin/bash -c "signal-desktop --start-in-tray"
 # fcitx5
-exec /bin/bash -c "fcitx5 -d"
+#exec /bin/bash -c "fcitx5 -d"
 #
 
 # set background
@@ -32,5 +32,5 @@ exec --no-startup-id feh --bg-fill $background
 exec xsetroot -solid "#12121b"
 
 # compositor
-exec_always picom -b
+#exec_always picom -b
 

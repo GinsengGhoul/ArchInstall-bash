@@ -1,3 +1,3 @@
 # xfce bar
-exec_always --no-startup-id xfce4-panel --disable-wm-check &
-for_window [ class="Xfce4-panel" instance="xfce4-panel" ] floating enable
+#exec_always --no-startup-id xfce4-panel --disable-wm-check &
+#for_window [ class="Xfce4-panel" instance="xfce4-panel" ] floating enable
