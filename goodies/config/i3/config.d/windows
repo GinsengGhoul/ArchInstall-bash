@@ -45,3 +45,5 @@ bindsym $mod+space focus mode_toggle
 # move the currently focused window to the scratchpad
 bindsym $mod+Shift+minus move scratchpad
 
+# move the currently focused window to the scratchpad
+bindsym $mod+minus scratchpad show
