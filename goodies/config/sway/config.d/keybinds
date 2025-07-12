@@ -132,20 +132,26 @@ bindsym $mod+r mode "resize"
 # workspace movement
 #bindsym control+Mod1+Left workspace prev
 #bindsym control+Mod1+Right workspace next
-bindsym Control+Mod1+Left exec $HOME/.config/sway/Scripts/moveWorkspace.sh prev
-bindsym Control+Mod1+Right exec $HOME/.config/sway/Scripts/moveWorkspace.sh next
+bindsym Control+Mod1+Left exec $HOME/.config/sway/scripts/moveWorkspace.sh prev
+bindsym Control+Mod1+Right exec $HOME/.config/sway/scripts/moveWorkspace.sh next
 
 # window movement
 #bindsym $mod+control+Left move container to workspace prev; workspace prev
 #bindsym $mod+control+Right move container to workspace next; workspace next
 
 # disable for lack of Mod1 Key
-bindsym Control+$mod+Left exec $HOME/.config/sway/Scripts/movetoWorkspace.sh prev
-bindsym Control+$mod+Right exec $HOME/.config/sway/Scripts/movetoWorkspace.sh next
+bindsym Control+$mod+Left exec $HOME/.config/sway/scripts/movetoWorkspace.sh prev
+bindsym Control+$mod+Right exec $HOME/.config/sway/scripts/movetoWorkspace.sh next
 
 # Swap between Mod1 and Mod4
-bindsym control+F1 exec $HOME/.config/sway/Scripts/SwitchMod4.sh
-bindsym control+F2 exec $HOME/.config/sway/Scripts/SwitchMod1.sh
+bindsym control+F1 exec $HOME/.config/sway/scripts/SwitchMod4.sh
+bindsym control+F2 exec $HOME/.config/sway/scripts/SwitchMod1.sh
+
+# Display rotate
+bindsym $mod+Control+Shift+Down exec swaymsg -- output - transform 0
+bindsym $mod+Control+Shift+Right exec swaymsg -- output - transform 90
+bindsym $mod+Control+Shift+Up exec swaymsg -- output - transform 180
+bindsym $mod+Control+Shift+Left exec swaymsg -- output - transform 270
 
 # screenshot
 # capture all screens to clipboard
@@ -161,6 +167,9 @@ bindsym $mod+Control+r exec reboot
 bindsym $mod+Control+s exec poweroff
 bindsym $mod+Control+h exec $lock; exec systemctl -i hibernate
 bindsym $mod+Control+n exec $lock; exec systemctl -i suspend
+
+# clipboard manager
+bindsym $mod+Shift+v exec copyq show
 
 # Brightness
 bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
@@ -179,3 +188,7 @@ bindsym XF86AudioPlay exec playerctl play-pause
 bindsym Pause exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
+
+# misc XF86 keys
+bindsym XF86Calculator exec gnome-calculator
+bindsym XF86Calendar exec gnome-calendar

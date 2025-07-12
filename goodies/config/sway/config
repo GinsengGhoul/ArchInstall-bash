@@ -32,10 +32,15 @@
 # You can get the names of your inputs by running: swaymsg -t get_inputs
 # Read `man 5 sway-input` for more information about this section.
 
-input "2321:21128:HTIX5288:00_0911:5288_Touchpad" {
+input type:touchpad {
   tap enabled
   middle_emulation enabled
   }
+
+input "2:7:SynPS/2_Synaptics_TouchPad" {
+  tap enabled
+  scroll_method edge
+}
 
 ### Variables
 #
@@ -53,7 +58,7 @@ set $menu "wofi -modi drun,run --show drun"
 set $lock "maim -u -m 1 ~/.lock/snap.png && magick ~/.lock/snap.png -resize 10% ~/.lock/snap.png && magick ~/.lock/snap.png -gaussian-blur 10 ~/.lock/snap.png && magick ~/.lock/snap.png -resize 1000% ~/.lock/snap.png && i3lock --image ~/.lock/snap.png"
 
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/280z.png fill
+output * bg /usr/share/backgrounds/OneStandsOut.jpg fill
 
 # import configs
 include /etc/sway/config.d/*

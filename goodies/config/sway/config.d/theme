@@ -1,0 +1,10 @@
+seat * xcursor_theme BreezeX-Black 24
+
+set $gnome-schema org.gnome.desktop.interface
+exec_always {
+    gsettings set $gnome-schema gtk-theme 'Adwaita-dark'
+    gsettings set $gnome-schema icon-theme 'Papirus-Dark'
+    gsettings set $gnome-schema cursor-theme 'BreezeX-Black'
+    gsettings set $gnome-schema font-name 'SF Pro Display 10'
+}
+
