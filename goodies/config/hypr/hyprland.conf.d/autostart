@@ -1,0 +1,31 @@
+#################
+### AUTOSTART ###
+#################
+
+# Autostart necessary processes (like notifications daemons, status bars, etc.)
+# Or execute your favorite apps at launch like this:
+
+# exec-once = $terminal
+# exec-once = nm-applet &
+# exec-once = waybar & hyprpaper & firefox
+exec-once = /usr/libexec/hyprpolkitagent
+exec-once = ~/.config/hypr/xdg-portal-hyprland
+exec-once = gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
+
+exec-once = pipewire
+exec-once = mako
+exec-once = wl-clip-persist --clipboard regular
+
+exec-once = nm-applet --indicator
+exec-once = blueman-applet
+exec-once = copyq --start-server
+
+# finalize
+exec-once = hyprpaper
+exec-once = waybar
+
+exec-once = brightnessctl s 50%
+
+# now start userapps
+exec-once = signal-desktop --start-in-tray
+exec-once = xdman -m

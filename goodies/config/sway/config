@@ -1,4 +1,4 @@
-#
+
 # Example configuration:
 #
 #   output HDMI-A-1 resolution 1920x1080 position 1920,0
@@ -42,6 +42,10 @@ input "2:7:SynPS/2_Synaptics_TouchPad" {
   scroll_method edge
 }
 
+input "0:0:Ideapad_extra_buttons" {
+  xkb_file  "~/.local/xkb/thinkbook.xkb"
+}
+
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
@@ -58,7 +62,7 @@ set $menu "wofi -modi drun,run --show drun"
 set $lock "maim -u -m 1 ~/.lock/snap.png && magick ~/.lock/snap.png -resize 10% ~/.lock/snap.png && magick ~/.lock/snap.png -gaussian-blur 10 ~/.lock/snap.png && magick ~/.lock/snap.png -resize 1000% ~/.lock/snap.png && i3lock --image ~/.lock/snap.png"
 
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/OneStandsOut.jpg fill
+#output * bg /usr/share/backgrounds/OneStandsOut.jpg fill
 
 # import configs
 include /etc/sway/config.d/*

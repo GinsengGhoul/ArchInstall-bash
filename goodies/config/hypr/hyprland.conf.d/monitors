@@ -1,0 +1,10 @@
+################
+### MONITORS ###
+################
+# See https://wiki.hyprland.org/Configuring/Monitors/
+
+# decrease padding on sides of monitor
+# top, bottom, left, right
+#monitor=,addreserved, -20, -20 , -20 , -20
+
+monitor = eDP-1, 1920x1080@60.00000, 0x0, 1

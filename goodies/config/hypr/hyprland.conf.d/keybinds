@@ -1,0 +1,128 @@
+###################
+### KEYBINDINGS ###
+###################
+
+# power
+bind = $mod Control, R, exec, $reboot
+bind = $mod Control, S, exec, $poweroff
+
+# Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
+binde = $mod, Return, exec, $term
+binde = $mod Shift, Q, killactive,
+bind = $mod Shift, E, exit,
+bind = $mod, E, exec, $fileManager
+bind = $mod Shift, Space, togglefloating,
+bind = $mod, D, exec, $menu
+bind = $mod, b, pseudo, # dwindle
+bind = $mod, x, togglesplit, # dwindle
+
+# Move focus with mod + arrow keys
+binde = $mod, left, movefocus, l
+binde = $mod, right, movefocus, r
+binde = $mod, up, movefocus, u
+binde = $mod, down, movefocus, d
+binde = $mod, $left, movefocus, l
+binde = $mod, $right, movefocus, r
+binde = $mod, $up, movefocus, u
+binde = $mod, $down, movefocus, d
+
+# move windows around
+binde = $mod Shift, left, hy3:movewindow, l
+binde = $mod Shift, right, hy3:movewindow, r
+binde = $mod Shift, up, hy3:movewindow, u
+binde = $mod Shift, down, hy3:movewindow, d
+binde = $mod Shift, $left, hy3:movewindow, l
+binde = $mod Shift, $right, hy3:movewindow, r
+binde = $mod Shift, $up, hy3:movewindow, u
+binde = $mod Shift, $down, hy3:movewindow, d
+
+# Switch workspaces with mod + [0-9]
+bind = $mod, 1, workspace, 1
+bind = $mod, 2, workspace, 2
+bind = $mod, 3, workspace, 3
+bind = $mod, 4, workspace, 4
+bind = $mod, 5, workspace, 5
+bind = $mod, 6, workspace, 6
+bind = $mod, 7, workspace, 7
+bind = $mod, 8, workspace, 8
+bind = $mod, 9, workspace, 9
+bind = $mod, 0, workspace, 10
+
+# Move active window to a workspace with mod + Shift + [0-9]
+bind = $mod Shift, 1, movetoworkspace, 1
+bind = $mod Shift, 2, movetoworkspace, 2
+bind = $mod Shift, 3, movetoworkspace, 3
+bind = $mod Shift, 4, movetoworkspace, 4
+bind = $mod Shift, 5, movetoworkspace, 5
+bind = $mod Shift, 6, movetoworkspace, 6
+bind = $mod Shift, 7, movetoworkspace, 7
+bind = $mod Shift, 8, movetoworkspace, 8
+bind = $mod Shift, 9, movetoworkspace, 9
+bind = $mod Shift, 0, movetoworkspace, 10
+
+# Move active window to next or previous workspace with ctrl +mod + left/right
+binde = $mod Control, left, exec, $HOME/.config/hypr/scripts/movetoWorkspace.sh prev
+binde = $mod Control, right, exec, $HOME/.config/hypr/scripts/movetoWorkspace.sh next
+
+# switch to next or previous workspace
+binde = Control Mod1, left, exec, $HOME/.config/hypr/scripts/moveWorkspace.sh prev
+binde = Control Mod1, right, exec, $HOME/.config/hypr/scripts/moveWorkspace.sh next
+
+# fullscreen
+bind = $mod, F, fullscreen
+
+# Example special workspace (scratchpad)
+bind = $mod, minus, togglespecialworkspace, magic
+bind = $mod Control, minus, movetoworkspace, e+0
+bind = $mod Shift, minus, movetoworkspace, special:magic
+
+# Scroll through existing workspaces with mod + scroll
+bind = $mod, mouse_down, workspace, e+1
+bind = $mod, mouse_up, workspace, e-1
+
+# Move/resize windows with mod + LMB/RMB and dragging
+bindm = $mod, mouse:272, movewindow
+bindm = $mod, mouse:273, resizewindow
+
+bind=SUPER,R,submap,resize
+submap=resize
+  binde = , right, resizeactive,  10 0
+  binde = , left,  resizeactive, -10 0
+  binde = , down,  resizeactive,  0 10
+  binde = , up,    resizeactive,  0 -10
+  binde = , $right, resizeactive,  10 0
+  binde = , $left,  resizeactive, -10 0
+  binde = , $down,  resizeactive,  0 10
+  binde = , $up,    resizeactive,  0 -10
+  bind = , escape,submap,reset 
+submap=reset
+
+# Laptop multimedia keys for volume and LCD brightness
+bindel = ,XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +2%
+bindel = ,XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -2%
+bindel = ,XF86AudioMute, exec, pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindel = ,XF86AudioMicMute, exec, pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindel = ,XF86MonBrightnessUp, exec, ~/.config/hypr/scripts/brightnessctl.sh up 25
+bindel = ,XF86MonBrightnessDown, exec, ~/.config/hypr/scripts/brightnessctl.sh down 25
+
+# Requires playerctl
+bindl = , XF86AudioNext, exec, playerctl next
+bindl = , XF86AudioPause, exec, playerctl play-pause
+bindl = , XF86AudioPlay, exec, playerctl play-pause
+bindl = , XF86AudioPrev, exec, playerctl previous
+
+# clipboard manager(cliphist)
+bind = $mod Shift, v, exec, copyq toggle
+
+##################
+### Screenshot ###
+##################
+# Screenshot a window
+bind = mod1, PRINT, exec, hyprshot -m window -m active --clipboard-only
+# Screenshot a monitor
+bind = , PRINT, exec, hyprshot -m output -m active --clipboard-only
+# Screenshot a region
+bind = $mod Shift, S, exec, hyprshot -z -m region --clipboard-only
+# Screenshot a region
+#bind = $mod Shift, S, exec, grim -g "$(slurp)" - | wl-copy
+

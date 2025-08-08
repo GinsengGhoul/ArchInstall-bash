@@ -14,7 +14,7 @@ bindsym $mod+Shift+e mode "Exit"; exec swaynag \
           -m 'SESSION EXIT OPTIONS' \
           -B '[L]ogout' 	'swaymsg exit' \
           -B '[N]ap' 	'$lock && systemctl suspend' \
-          -B '[R]estart'	'loginctl reboot' \
-          -B '[S]hutdown'	'loginctl poweroff' \
+          -B '[R]estart'	'reboot' \
+          -B '[S]hutdown'	'poweroff' \
           -B '[H]ibernate'	'$lock && systemctl hibernate' 
 
