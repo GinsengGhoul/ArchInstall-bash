@@ -3,12 +3,16 @@
 # use swaymsg -t get_tree
 #
 for_window [ title="(?:Open|Save) (?:File|Folder|As)" ] floating enable, resize set 1024 768
+for_window [ title="Enter name of file to save to…" ] floating enable, rseize set 1024 768
+for_window [ app_id="thunar" title="Rename" ] floating enable
+for_window [ app_id="brasero" title="Creating" ] floating enable
 for_window [ app_id="Alacritty" ] border pixel 1
 for_window [ instance="mojosetup" ] floating enable, resize set 800 600
 
 for_window [ app_id="virt-manager" ] floating enable; move position center, resize set 800 600
 for_window [ class="Avalonia86" ] floating enable; move position center, resize set 800 600
 for_window [ app_id="net.86box.86Box" ] floating enable
+for_window [ class="86Box" ] floating enable
 
 #for_window [ app_id=".*" ] border pixel 1
 for_window [ title="About Firefox Developer Edition"] floating enable
@@ -53,6 +57,8 @@ for_window [ class="^steam_app_.*" ] fullscreen enable
 for_window [ class="gamescope" ] fullscreen enable
 for_window [ class="explorer.exe" ] floating enable
 
+# 18: floating_con "(null)" (xwayland, pid: 9491, instance: "steam_app_244210", class: "steam_app_244210", X11 window: 0x2A00002)
+for_window [ instance="steam_app_244210" title="(null)" ]; floating enable; move position 
 for_window [ class="steam_app_244210" ] floating enable; move position center, resize set 800 600 
 for_window [ title="Automation Launcher" ] floating enable; move position center, resize set 800 600
 

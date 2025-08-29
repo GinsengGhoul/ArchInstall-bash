@@ -7,9 +7,11 @@ exec /usr/bin/dbus-update-activation-environment --all
 exec /usr/libexec/polkit-gnome-authentication-agent-1
 exec ${HOME}/.config/sway/scripts/startXDG.sh
 exec /usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh
+exec_always "killall -q wl-clip-persist; wl-clip-persist --clipboard regular"
 exec pipewire
 exec mako
-exec wl-clip-persist --clipboard regular
+exec_always 'killall -q waybar; waybar'
+exec copyq --start-server
 exec brightnessctl s 50%
 
 # Network Manager applet
@@ -20,9 +22,6 @@ exec --no-startup-id nm-applet --indicator
 exec blueman-applet
 # easyeffects
 exec_always easyeffects --gapplication-service
-# copyq
-exec copyq --start-server
-
 # xdm
 #exec java -jar /opt/xdman/xdman.jar -m
 # discord
