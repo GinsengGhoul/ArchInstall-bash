@@ -13,6 +13,7 @@ source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
+TIMEFMT=$'\nreal\t%E\nuser\t%U\nsys\t%S'
 bindkey -e
 bindkey "^[[H" beginning-of-line
 bindkey "^[[F" end-of-line
