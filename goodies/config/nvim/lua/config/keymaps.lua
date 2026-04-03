@@ -1,15 +1,24 @@
 vim.g.mapleader = " "
-
 local keymap = vim.keymap -- for conciseness
 
-keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+-- local functions
+local function try_conform_async()
+	local ok, conform = pcall(require, "conform")
+	if not ok or type(conform.format) ~= "function" then
+		return false
+	end
+	pcall(conform.format, { async = true })
+	return true
+end
+
+-- keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 
 -- make dd actually delete xx will cut instead
-keymap.set('n', 'dd', '"_dd', { noremap = true })
-keymap.set('n', 'xx', 'dd', { noremap = true })
+keymap.set("n", "dd", '"_dd', { noremap = true })
+keymap.set("n", "xx", "dd", { noremap = true })
 -- go to end of line using ff and ;;
-keymap.set('n', ';;', '$', { noremap = true })
-keymap.set('n', 'ff', '0', { noremap = true })
+keymap.set("n", ";;", "$", { noremap = true })
+keymap.set("n", "ff", "0", { noremap = true })
 
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 keymap.set("n", "<F4>", ":nohl<CR>", { desc = "Clear search highlights" })
@@ -17,10 +26,16 @@ keymap.set("n", "<leader>e", ":CHADopen<CR>", { desc = "Clear search highlights"
 
 -- format
 keymap.set("n", "<leader>f", function()
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  vim.cmd("keepjumps normal! gg=G")
-  vim.api.nvim_win_set_cursor(0, cursor)
+	require("conform").format({ async = true })
 end, { desc = "format file" })
+
+-- Map the sequence gg=G in normal mode
+keymap.set("n", "=G", function()
+	-- If conform available, run async format
+	try_conform_async()
+	-- move to bottom like a plain G would
+	vim.cmd("normal! G")
+end, { desc = "gg=G then conform.format async" })
 
 -- increment/decrement numbers
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
@@ -32,10 +47,10 @@ keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" }) 
 keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }) -- close current split window
 
-keymap.set("n", "<leader>h", ":wincmd h<CR>", { desc="move to window on left" })
-keymap.set("n", "<leader>j", ":wincmd j<CR>", { desc="move to window on down" })
-keymap.set("n", "<leader>k", ":wincmd k<CR>", { desc="move to window on up" })
-keymap.set("n", "<leader>l", ":wincmd l<CR>", { desc="move to window on right" })
+keymap.set("n", "<leader>h", ":wincmd h<CR>", { desc = "move to window on left" })
+keymap.set("n", "<leader>j", ":wincmd j<CR>", { desc = "move to window on down" })
+keymap.set("n", "<leader>k", ":wincmd k<CR>", { desc = "move to window on up" })
+keymap.set("n", "<leader>l", ":wincmd l<CR>", { desc = "move to window on right" })
 
 keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
 keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab

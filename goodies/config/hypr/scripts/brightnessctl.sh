@@ -1,20 +1,28 @@
 #!/bin/sh
-steps=${2}
 current=$(brightnessctl g)
+steps=${2}
+lastBrightness="${HOME}/.cache/brightness"
 max=$(brightnessctl m)
 min="1"
 one=$(( $(( ${max} * 1 )) / 100 ))
 
-if [ -z steps ]; then
+quit(){
   echo "use 'up' or 'down' and a step count"
+  echo "or 'restore' to restore to last known brightness value"
   exit 1
-fi
+}
 
-steppercent=$(( 100 / ${steps} ))
-stepsize=$( echo "${max} * ${steppercent} / 100" | bc )
+chechSteps(){
+  if [ -z steps ]; then
+    quit
+  fi
+  steppercent=$(( 100 / ${steps} ))
+  stepsize=$( echo "${max} * ${steppercent} / 100" | bc )
+}
 
 case $1 in
   up)
+    chechSteps
     if [ ${current} -eq 1 ]; then
       newBrightness="${one}"
     else
@@ -28,6 +36,7 @@ case $1 in
     fi
     ;;
   down)
+    chechSteps
     if [ ${current} -eq ${stepsize} ]; then
       newBrightness="${one}"
     else
@@ -37,10 +46,13 @@ case $1 in
       fi
     fi
     ;;
+  restore)
+    newBrightness=$(cat ${lastBrightness})
+    ;;
   *)
-    echo "use 'up' or 'down' and a step count"
-    exit 1
+    quit
     ;;
 esac
 
 brightnessctl s ${newBrightness}
+brightnessctl g > ${lastBrightness}

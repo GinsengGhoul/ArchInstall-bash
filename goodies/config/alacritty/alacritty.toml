@@ -5,7 +5,7 @@ general.import = [
 
 [font]
 size = 10.0
-normal = { family = "BlexMono Nerd Font", style = "SemiBold" }
+normal = { family = "monospace", style = "SemiBold" }
 
 [cursor]
 style = { shape = "Underline", blinking = "Always" }
@@ -19,3 +19,7 @@ title = "Alacritty"
 [window.dimensions]
 columns = 80
 lines = 24
+
+[window.padding]
+x = 5
+y = 5

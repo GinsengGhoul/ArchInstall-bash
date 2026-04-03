@@ -6,16 +6,22 @@
     "spacing": 10, // Gaps between modules (4px)
                    // Choose the order of the modules
     "modules-left": [
-      "sway/workspaces",
-    "sway/mode",
-    "sway/scratchpad",
+      "hyprland/workspaces",
+    "hyprland/submap",
     ],
     "modules-right": [
-      "pulseaudio",
+    "custom/keyboard",
+    "pulseaudio",
     "battery",
     "tray",
     "clock",
     ],
+
+    "custom/keyboard": {
+      "format": "{icon}",
+      "format-icons": "󰌌",
+      "on-click": "~/.config/waybar/keyb.sh"
+    },
 
     "keyboard-state": {
       "numlock": true,
@@ -26,16 +32,14 @@
         "unlocked": ""
       }
     },
-    "sway/mode": {
-      "format": "<span style=\"italic\">{}</span>"
-    },
-    "sway/scratchpad": {
-      "format": "{icon} {count}",
-      "show-empty": false,
-      "format-icons": ["", ""],
-      "tooltip": true,
-      "tooltip-format": "{app}: {title}"
-    },
+    "hyprland/workspaces": {
+     "format": "{icon}",
+     "on-scroll-up": "hyprctl dispatch workspace e-1",
+     "on-scroll-down": "hyprctl dispatch workspace e+1"
+	},
+    "hyprland/submap": {
+      "format": "<span style=\"italic\">{}</span>",
+      },
     "idle_inhibitor": {
       "format": "{icon}",
       "format-icons": {
@@ -62,25 +66,27 @@
       },
       "format": "{capacity}% {icon}",
       "format-full": "{capacity}% {icon}",
-      "format-charging": "{capacity}% ",
+      "format-charging": "{capacity}% 󰂄",
       "format-plugged": "{capacity}% ",
       "format-alt": "{time} {icon}",
       // "format-good": "", // An empty format will hide the module
       // "format-full": "",
-      "format-icons": ["", "", "", "", ""]
+      "format-icons": ["󰁺", "󰁼", "󰁾", "󰂁", "󰁹"],
+      "on-scroll-up": "${HOME}/.config/hypr/scripts/brightnessctl.sh up 28",
+      "on-scroll-down": "${HOME}/.config/hypr/scripts/brightnessctl.sh down 25",
     },
     "pulseaudio": {
-      // "scroll-step": 1, // %, can be a float
+      "scroll-step": 2, // %, can be a float
       "format": "{volume}% {icon} {format_source}",
       "format-bluetooth": "{volume}% {icon} {format_source}",
-      "format-bluetooth-muted": " {icon} {format_source}",
-      "format-muted": " {format_source}",
+      "format-bluetooth-muted": "󰂲 {icon} {format_source}",
+      "format-muted": "󰝟 {format_source}",
       "format-source": "{volume}% ",
       "format-source-muted": "",
       "format-icons": {
         "headphone": "",
-        "hands-free": "",
-        "headset": "",
+        "hands-free": "󰏳",
+        "headset": "󰋎",
         "phone": "",
         "portable": "",
         "car": "",
